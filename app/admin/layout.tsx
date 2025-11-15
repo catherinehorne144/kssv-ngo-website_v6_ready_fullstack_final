@@ -1,6 +1,6 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { Sidebar } from "@/components/admin/Sidebar"
+import { Sidebar } from "@/components/admin/sidebar"
 
 export const metadata: Metadata = {
   title: "KSSV Admin - Content Management System",
