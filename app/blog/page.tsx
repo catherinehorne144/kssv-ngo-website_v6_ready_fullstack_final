@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import BlogClientPage from "./page.client"
+import { createServerClientInstance } from "@/lib/supabase/server"
 
 export const metadata: Metadata = {
   title: "Blog & News | KSSV - Karungu Survivors of Sexual Violence",
@@ -41,6 +42,21 @@ export const metadata: Metadata = {
   },
 }
 
-export default function BlogPage() {
-  return <BlogClientPage />
+export default async function BlogPage() {
+  // Fetch blog posts on the server
+  const supabase = createServerClientInstance()
+  
+  const { data: posts, error } = await supabase
+    .from('blog')
+    .select('*')
+    .eq('status', 'published')
+    .order('date', { ascending: false })
+
+  if (error) {
+    console.error('Error fetching blog posts:', error)
+    // Return empty array on error
+    return <BlogClientPage initialPosts={[]} />
+  }
+
+  return <BlogClientPage initialPosts={posts || []} />
 }

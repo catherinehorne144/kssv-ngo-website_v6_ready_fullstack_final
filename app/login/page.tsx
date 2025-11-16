@@ -1,8 +1,9 @@
 "use client"
-
+// ADD AT TOP with other imports
+import { createClient } from "@/lib/supabase/client"
 import React, { useState } from "react"
 import { useRouter } from "next/navigation"
-import { createClient } from "@/lib/supabase/client"
+import { createServerClientInstance } from "@/lib/supabase/server"
 import { createBrowserClient } from "@/lib/supabase/client" // ✅ FIXED import
 import { Button } from "@/components/ui/button"
 import {

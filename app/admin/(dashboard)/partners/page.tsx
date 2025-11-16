@@ -1,5 +1,6 @@
 "use client"
-
+// ADD AT TOP with other imports
+import { createClient } from "@/lib/supabase/client"
 import { useEffect, useState } from "react"
 import { AdminHeader } from "@/components/admin/header"
 import { DataTable } from "@/components/admin/data-table"
@@ -10,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { Mail } from "lucide-react"
-import { createClient } from "@/lib/supabase/client"
+import { createServerClientInstance } from "@/lib/supabase/server"
 import type { Partner } from "@/lib/types/database"
 import { format } from "date-fns"
 import { PartnershipForm } from "@/components/forms/partnership-form"

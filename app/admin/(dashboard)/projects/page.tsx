@@ -1,6 +1,7 @@
 // app/admin/projects/page.tsx
 "use client"
-
+// ADD AT TOP with other imports
+import { createClient } from "@/lib/supabase/client"
 import { useEffect, useState } from "react"
 import { AdminHeader } from "@/components/admin/header"
 import { DataTable } from "@/components/admin/data-table"
@@ -11,7 +12,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { createClient } from "@/lib/supabase/client"
+import { createServerClientInstance } from "@/lib/supabase/server"
 import type { Project } from "@/lib/types/database"
 import { Plus, Upload, X, Image as ImageIcon } from "lucide-react"
 import { format } from "date-fns"

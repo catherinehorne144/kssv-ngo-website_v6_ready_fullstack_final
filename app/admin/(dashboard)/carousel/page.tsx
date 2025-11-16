@@ -1,5 +1,6 @@
 "use client"
-
+// ADD AT TOP with other imports
+import { createClient } from "@/lib/supabase/client"
 import { useEffect, useState } from "react"
 import { AdminHeader } from "@/components/admin/header"
 import { DataTable } from "@/components/admin/data-table"
@@ -8,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Plus } from "lucide-react"
-import { createClient } from "@/lib/supabase/client"
+import { createServerClientInstance } from "@/lib/supabase/server"
 import type { CarouselImage } from "@/lib/types/database"
 
 export default function CarouselPage() {

@@ -1,9 +1,9 @@
-import { createClient } from "@/lib/supabase/server"
+import { createServerClientInstance } from "@/lib/supabase/server"
 import { type NextRequest, NextResponse } from "next/server"
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient()
+    const supabase = createServerClientInstance() // Remove 'await'
     const { searchParams } = new URL(request.url)
     const status = searchParams.get("status") || "published"
 
@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient()
+    const supabase = createServerClientInstance() // Remove 'await'
     const body = await request.json()
 
     const { data, error } = await supabase.from("blog").insert([body]).select()

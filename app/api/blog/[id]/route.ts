@@ -1,9 +1,9 @@
-import { createClient } from "@/lib/supabase/server"
+import { createServerClientInstance } from "@/lib/supabase/server"
 import { type NextRequest, NextResponse } from "next/server"
 
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const supabase = await createClient()
+    const supabase = createServerClientInstance() // Remove 'await'
 
     // Increment views
     await supabase.rpc("increment_views", { table_name: "blog", row_id: params.id })
@@ -19,7 +19,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const supabase = await createClient()
+    const supabase = createServerClientInstance() // Remove 'await'
     const body = await request.json()
 
     const { data, error } = await supabase.from("blog").update(body).eq("id", params.id).select().single()
@@ -33,7 +33,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
 export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const supabase = await createClient()
+    const supabase = createServerClientInstance() // Remove 'await'
     const { error } = await supabase.from("blog").delete().eq("id", params.id)
 
     if (error) throw error

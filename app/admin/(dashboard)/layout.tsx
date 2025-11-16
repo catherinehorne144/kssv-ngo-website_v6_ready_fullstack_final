@@ -1,12 +1,12 @@
 import { redirect } from "next/navigation"
-import { createClient } from "@/lib/supabase/server"
+import { createServerClientInstance } from "@/lib/supabase/server"
 
 export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const supabase = await createClient()
+  const supabase = await createServerClientInstance()
   const {
     data: { user },
   } = await supabase.auth.getUser()

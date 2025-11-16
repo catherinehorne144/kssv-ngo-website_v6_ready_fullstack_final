@@ -1,5 +1,6 @@
 "use client"
-
+// ADD AT TOP with other imports
+import { createClient } from "@/lib/supabase/client"
 import { useEffect, useState } from "react"
 import { AdminHeader } from "@/components/admin/header"
 import { DataTable } from "@/components/admin/data-table"
@@ -9,7 +10,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { createClient } from "@/lib/supabase/client"
+import { createServerClientInstance } from "@/lib/supabase/server"
 import type { Volunteer } from "@/lib/types/database"
 import { format } from "date-fns"
 import { Download, Mail, Search } from "lucide-react"

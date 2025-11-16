@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server"
+import { createServerClientInstance } from "@/lib/supabase/server"
 import { type NextRequest, NextResponse } from "next/server"
 
 // GET all members

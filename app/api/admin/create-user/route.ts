@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
-import { createClient as createServerClient } from "@/lib/supabase/server"
+import { createServerClientInstance } from "@/lib/supabase/server"
 
 export async function POST(request: Request) {
   try {
-    const supabase = createServerClient()
+    const supabase = createServerClientInstance()
 
     // Get the logged-in user
     const {

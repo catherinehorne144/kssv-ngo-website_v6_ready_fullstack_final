@@ -1,11 +1,15 @@
-import { createServerClient } from '@/lib/supabase/server'
+import { createClient } from '@supabase/supabase-js'
 import type { BlogPost } from '@/lib/types/database'
+
+// Create a direct Supabase client for static generation
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
 
 // Server-side function to get all blog posts
 export async function getBlogPosts(status: string = 'published'): Promise<BlogPost[]> {
-  try {
-    const supabase = await createClient()
-    
+  try {    
     let query = supabase
       .from('blog')
       .select('*')
@@ -30,9 +34,7 @@ export async function getBlogPosts(status: string = 'published'): Promise<BlogPo
 
 // Server-side function to get a single blog post
 export async function getBlogPost(id: string): Promise<BlogPost | null> {
-  try {
-    const supabase = await createClient()
-    
+  try {    
     const { data, error } = await supabase
       .from('blog')
       .select('*')

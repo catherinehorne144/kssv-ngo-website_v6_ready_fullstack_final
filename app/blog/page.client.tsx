@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { Navigation } from "@/components/navigation"
 import { Footer } from "@/components/footer"
 import { Card } from "@/components/ui/card"
@@ -9,42 +9,18 @@ import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Calendar, Clock, Tag, ArrowRight, Search, Sparkles } from "lucide-react"
 import Link from "next/link"
-import { createClient } from "@/lib/supabase/client"
 import type { BlogPost } from "@/lib/types/database"
 
-export default function BlogClientPage() {
+interface BlogClientPageProps {
+  initialPosts: BlogPost[]
+}
+
+export default function BlogClientPage({ initialPosts }: BlogClientPageProps) {
   const [selectedCategory, setSelectedCategory] = useState<string>("all")
   const [searchQuery, setSearchQuery] = useState("")
-  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const [blogPosts] = useState<BlogPost[]>(initialPosts)
 
   const categories = ["all", "Community Impact", "Success Stories", "Legal Aid", "Awareness", "News", "Programs"]
-  const supabase = createClient()
-
-  useEffect(() => {
-    fetchBlogPosts()
-  }, [])
-
-  const fetchBlogPosts = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('blog')
-        .select('*')
-        .eq('status', 'published')
-        .order('date', { ascending: false })
-
-      if (error) {
-        console.error('Error fetching posts:', error)
-        return
-      }
-
-      setBlogPosts(data || [])
-    } catch (error) {
-      console.error('Error:', error)
-    } finally {
-      setIsLoading(false)
-    }
-  }
 
   const filteredPosts = blogPosts.filter((post) => {
     const matchesCategory = selectedCategory === "all" || post.category === selectedCategory
@@ -59,20 +35,6 @@ export default function BlogClientPage() {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
     return date.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })
-  }
-
-  if (isLoading) {
-    return (
-      <main className="min-h-screen">
-        <Navigation />
-        <section className="pt-32 pb-16">
-          <div className="container mx-auto px-4 lg:px-8">
-            <div className="text-center">Loading blog posts...</div>
-          </div>
-        </section>
-        <Footer />
-      </main>
-    )
   }
 
   return (

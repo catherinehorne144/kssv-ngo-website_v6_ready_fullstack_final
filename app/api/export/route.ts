@@ -1,6 +1,6 @@
 // [file name]: app/api/export/route.ts
 // [file content begin - FIXED WITHOUT EXTERNAL DEPENDENCIES]
-import { createClient } from "@/lib/supabase/server"
+import { createServerClientInstance } from "@/lib/supabase/server"
 import { type NextRequest, NextResponse } from "next/server"
 
 // Simple CSV generator without external dependencies

@@ -1,5 +1,7 @@
-import { notFound } from "next/navigation"
+// ADD AT TOP with other imports
 import { createClient } from "@/lib/supabase/client"
+import { notFound } from "next/navigation"
+import { createServerClientInstance } from "@/lib/supabase/server"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Calendar, Users, MapPin, ArrowLeft, Eye, Target, Award } from "lucide-react"

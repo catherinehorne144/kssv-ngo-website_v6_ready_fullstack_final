@@ -1,5 +1,6 @@
 "use client"
-
+// ADD AT TOP with other imports
+import { createClient } from "@/lib/supabase/client"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
@@ -22,7 +23,7 @@ import {
   Target, // ← ADD THIS IMPORT
 } from "lucide-react"
 import { useEffect, useState } from "react"
-import { createClient } from "@/lib/supabase/client"
+import { createServerClientInstance } from "@/lib/supabase/server"
 import { motion, AnimatePresence } from "framer-motion"
 
 const navigation = [

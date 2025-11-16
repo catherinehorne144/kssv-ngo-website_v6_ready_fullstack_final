@@ -1,7 +1,8 @@
 "use client"
-
-import { useEffect, useState } from "react"
+// ADD AT TOP with other imports
 import { createClient } from "@/lib/supabase/client"
+import { useEffect, useState } from "react"
+import { createServerClientInstance } from "@/lib/supabase/server"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"

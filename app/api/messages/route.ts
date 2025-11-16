@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server"
+import { createServerClientInstance } from "@/lib/supabase/server"
 import { NextRequest, NextResponse } from "next/server"
 
 // ✅ GET — Fetch all messages (Admin Panel)

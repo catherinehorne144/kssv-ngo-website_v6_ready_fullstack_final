@@ -1,10 +1,10 @@
 import { AdminHeader } from "@/components/admin/header"
 import { Card } from "@/components/ui/card"
-import { createClient } from "@/lib/supabase/server"
+import { createServerClientInstance } from "@/lib/supabase/server"
 import { Users, Handshake, MessageSquare, Quote, FileText, FolderKanban, DollarSign, ImageIcon, Target } from "lucide-react" // ← ADD TARGET IMPORT
 
 export default async function AdminDashboardPage() {
-  const supabase = await createClient()
+  const supabase = await createServerClientInstance()
 
   const [
     { count: volunteersCount },
