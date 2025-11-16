@@ -8,7 +8,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     console.log("📦 Received task data:", body)
 
-    const supabase = await createClient()
+    const supabase = createServerClientInstance()
 
     const newTask = {
       activity_id: body.activity_id,
@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient()
+    const supabase = createServerClientInstance()
     const { searchParams } = new URL(request.url)
     const activityId = searchParams.get('activityId')
 

@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
     const focusArea = searchParams.get('focusArea')
     const year = searchParams.get('year')
 
-    const supabase = await createClient()
+    const supabase = createServerClientInstance()
 
     // Build query based on filters
     let programsQuery = supabase

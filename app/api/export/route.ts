@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
       programId 
     } = body
 
-    const supabase = await createClient()
+    const supabase = createServerClientInstance()
 
     // Build query based on scope
     let programsQuery = supabase

@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from "next/server"
 // ✅ GET — Fetch all messages (Admin Panel)
 export async function GET() {
   try {
-    const supabase = await createClient()
+    const supabase = createServerClientInstance()
 
     const { data, error } = await supabase
       .from("messages")
@@ -26,7 +26,7 @@ export async function GET() {
 // ✅ POST — Submit new message (Contact Form)
 export async function POST(req: NextRequest) {
   try {
-    const supabase = await createClient()
+    const supabase = createServerClientInstance()
     const body = await req.json()
 
     const { firstName, lastName, email, phone, message } = body

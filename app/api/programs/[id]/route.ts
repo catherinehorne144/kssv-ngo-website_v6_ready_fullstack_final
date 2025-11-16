@@ -5,7 +5,7 @@ import { type NextRequest, NextResponse } from "next/server"
 
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const supabase = await createClient()
+    const supabase = createServerClientInstance()
     const { data, error } = await supabase
       .from("programs")
       .select(`
@@ -50,7 +50,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const supabase = await createClient()
+    const supabase = createServerClientInstance()
     const body = await request.json()
 
     const updateData = {
@@ -107,7 +107,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
 export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const supabase = await createClient()
+    const supabase = createServerClientInstance()
     const { error } = await supabase.from("programs").delete().eq("id", params.id)
 
     if (error) throw error

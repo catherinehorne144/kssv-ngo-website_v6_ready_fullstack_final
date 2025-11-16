@@ -3,7 +3,7 @@ import { type NextRequest, NextResponse } from "next/server"
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient()
+    const supabase = createServerClientInstance()
     const { searchParams } = new URL(request.url)
     const approved = searchParams.get("approved") === "true"
 
@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient()
+    const supabase = createServerClientInstance()
     const body = await request.json()
 
     const { data, error } = await supabase.from("testimonials").insert([body]).select()

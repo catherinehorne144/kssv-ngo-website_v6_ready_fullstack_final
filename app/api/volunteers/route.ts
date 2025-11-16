@@ -6,7 +6,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     console.log("📦 Received volunteer data:", body)
 
-    const supabase = await createClient()
+    const supabase = createServerClientInstance()
 
     const newVolunteer = {
       name: body.name,
@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient()
+    const supabase = createServerClientInstance()
     const { data, error } = await supabase
       .from("volunteers")
       .select("*")
@@ -65,7 +65,7 @@ export async function GET(request: NextRequest) {
 
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const supabase = await createClient()
+    const supabase = createServerClientInstance()
     const body = await request.json()
 
     const updateData = {
@@ -95,7 +95,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
 export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const supabase = await createClient()
+    const supabase = createServerClientInstance()
     const { error } = await supabase.from("volunteers").delete().eq("id", params.id)
 
     if (error) throw error

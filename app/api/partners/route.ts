@@ -4,7 +4,7 @@ import { type NextRequest, NextResponse } from "next/server"
 // GET all partnerships
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient()
+    const supabase = createServerClientInstance()
     const { data, error } = await supabase
       .from("partners")
       .select("*")
@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     console.log("📦 Received partnership data:", body)
 
-    const supabase = await createClient()
+    const supabase = createServerClientInstance()
 
     const newPartner = {
       organization_name: body.organizationName,

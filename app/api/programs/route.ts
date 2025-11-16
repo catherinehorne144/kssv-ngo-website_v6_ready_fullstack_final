@@ -8,7 +8,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     console.log("📦 Received program data:", body)
 
-    const supabase = await createClient()
+    const supabase = createServerClientInstance()
 
     const newProgram = {
       name: body.name,
@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient()
+    const supabase = createServerClientInstance()
     const { searchParams } = new URL(request.url)
     const status = searchParams.get('status')
     const year = searchParams.get('year')

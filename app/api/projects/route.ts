@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
     const category = searchParams.get('category')
     const search = searchParams.get('search')
     
-    const supabase = await createClient()
+    const supabase = createServerClientInstance()
     
     let query = supabase
       .from('projects')
@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: Request) {
   try {
-    const supabase = await createClient()
+    const supabase = createServerClientInstance()
     const body = await request.json()
 
     // Validate required fields

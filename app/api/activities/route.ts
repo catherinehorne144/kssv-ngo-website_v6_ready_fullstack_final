@@ -8,7 +8,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     console.log("📦 Received activity data:", body)
 
-    const supabase = await createClient()
+    const supabase = createServerClientInstance()
 
     const newActivity = {
       program_id: body.program_id,
@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const programId = searchParams.get('programId')
 
-    const supabase = await createClient()
+    const supabase = createServerClientInstance()
 
     let query = supabase
       .from("activities")

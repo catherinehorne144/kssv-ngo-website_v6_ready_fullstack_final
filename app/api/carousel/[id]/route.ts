@@ -3,7 +3,7 @@ import { type NextRequest, NextResponse } from "next/server"
 
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const supabase = await createClient()
+    const supabase = createServerClientInstance()
     const body = await request.json()
 
     const { data, error } = await supabase.from("carousel_images").update(body).eq("id", params.id).select().single()
@@ -17,7 +17,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
 export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const supabase = await createClient()
+    const supabase = createServerClientInstance()
     const { error } = await supabase.from("carousel_images").delete().eq("id", params.id)
 
     if (error) throw error

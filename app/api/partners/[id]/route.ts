@@ -4,7 +4,7 @@ import { type NextRequest, NextResponse } from "next/server"
 // GET single partner by ID
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const supabase = await createClient()
+    const supabase = createServerClientInstance()
     const { data, error } = await supabase
       .from("partners")
       .select("*")
@@ -22,7 +22,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 // UPDATE partner by ID
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const supabase = await createClient()
+    const supabase = createServerClientInstance()
     const body = await request.json()
 
     const { data, error } = await supabase
@@ -43,7 +43,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 // DELETE partner by ID
 export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const supabase = await createClient()
+    const supabase = createServerClientInstance()
     const { error } = await supabase.from("partners").delete().eq("id", params.id)
 
     if (error) throw error

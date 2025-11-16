@@ -6,7 +6,7 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const supabase = await createClient()
+    const supabase = createServerClientInstance()
 
     // Increment views
     await supabase.rpc("increment_views", { 
@@ -35,7 +35,7 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    const supabase = await createClient()
+    const supabase = createServerClientInstance()
     const body = await request.json()
 
     const { data, error } = await supabase
@@ -63,7 +63,7 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const supabase = await createClient()
+    const supabase = createServerClientInstance()
     const { error } = await supabase
       .from("projects")
       .delete()

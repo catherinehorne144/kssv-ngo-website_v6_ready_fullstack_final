@@ -4,7 +4,7 @@ import { type NextRequest, NextResponse } from "next/server"
 // ✅ Update a volunteer
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const supabase = await createClient()
+    const supabase = createServerClientInstance()
     const body = await request.json()
 
     // Ensure only valid columns are updated
@@ -36,7 +36,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 // ✅ Delete a volunteer
 export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const supabase = await createClient()
+    const supabase = createServerClientInstance()
     const { error } = await supabase.from("volunteers").delete().eq("id", params.id)
 
     if (error) throw error

@@ -9,7 +9,7 @@ export async function POST(
 ) {
   try {
     const body = await request.json()
-    const supabase = await createClient()
+    const supabase = createServerClientInstance()
 
     const evaluationData = {
       task_id: params.id,
@@ -46,7 +46,7 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const supabase = await createClient()
+    const supabase = createServerClientInstance()
 
     const { data, error } = await supabase
       .from("task_evaluations")
