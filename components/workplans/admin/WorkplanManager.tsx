@@ -11,6 +11,7 @@ import { WorkplanForm } from './WorkplanForm'
 import { WorkplanWizard } from './WorkplanWizard'
 import { WorkplanAnalytics } from './WorkplanAnalytics'
 import { ExportManager } from './ExportManager'
+import CSVImport from './CSVImport'
 import type { Workplan } from '@/lib/types/workplan'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -395,13 +396,16 @@ export function WorkplanManager() {
                   </div>
                 </div>
 
-                <WorkplanTable 
-                  workplans={filteredWorkplans}
-                  onDeleteWorkplan={handleDeleteWorkplan}
-                  onEditWorkplan={handleEditWorkplan}
-                  onViewWorkplan={handleViewWorkplan}
-                  onBulkDelete={handleBulkDeleteWorkplans}
-                />
+                {/* ADDED: Horizontal scroll wrapper */}
+                <div className="w-full overflow-x-auto">
+                  <WorkplanTable 
+                    workplans={filteredWorkplans}
+                    onDeleteWorkplan={handleDeleteWorkplan}
+                    onEditWorkplan={handleEditWorkplan}
+                    onViewWorkplan={handleViewWorkplan}
+                    onBulkDelete={handleBulkDeleteWorkplans}
+                  />
+                </div>
               </CardContent>
             </Card>
           )}

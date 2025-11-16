@@ -206,7 +206,8 @@ export function WorkplanTable({
   )
 
   return (
-    <div className="border rounded-lg overflow-hidden shadow-sm">
+    // CHANGED: Added min-width for horizontal scrolling
+    <div className="border rounded-lg overflow-hidden shadow-sm min-w-[1200px]">
       {/* Bulk Actions Bar */}
       {selectedWorkplans.size > 0 && (
         <div className="bg-blue-50 border-b border-blue-200 p-3 flex items-center justify-between">
@@ -280,7 +281,7 @@ export function WorkplanTable({
             <SortableHeader field="status">
               Status
             </SortableHeader>
-            <th className="text-left p-4 font-medium">Actions</th>
+            <th className="text-left p-4 font-medium w-32">Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -391,157 +392,4 @@ export function WorkplanTable({
                           }}
                           className={`text-xs px-1 rounded ${
                             workplan.status === 'in-progress' 
-                              ? 'bg-yellow-100 text-yellow-700' 
-                              : 'text-yellow-500 hover:bg-yellow-50'
-                          }`}
-                        >
-                          Start
-                        </button>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            handleQuickStatusChange(workplan, 'completed')
-                          }}
-                          className={`text-xs px-1 rounded ${
-                            workplan.status === 'completed' 
-                              ? 'bg-green-100 text-green-700' 
-                              : 'text-green-500 hover:bg-green-50'
-                          }`}
-                        >
-                          Complete
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </td>
-                <td className="p-4" onClick={(e) => e.stopPropagation()}>
-                  <div className="flex gap-1">
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      onClick={() => handleView(workplan)}
-                      className="h-8 w-8"
-                      title="View Workplan"
-                    >
-                      <Eye className="h-3.5 w-3.5" />
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      onClick={() => handleEdit(workplan)}
-                      className="h-8 w-8"
-                      title="Edit Workplan"
-                    >
-                      <Edit className="h-3.5 w-3.5" />
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      onClick={() => handleDelete(workplan)}
-                      className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
-                      title="Delete Workplan"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
-                  </div>
-                </td>
-              </tr>
-              
-              {/* Expanded Details Row */}
-              {expandedWorkplan === workplan.id && (
-                <tr className="bg-muted/10 border-b">
-                  <td colSpan={9} className="p-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 text-sm">
-                      {/* MERL Data */}
-                      <div className="space-y-3">
-                        <h4 className="font-semibold text-foreground flex items-center gap-2">
-                          <Target className="h-4 w-4" />
-                          MERL Framework
-                        </h4>
-                        {workplan.output && (
-                          <div>
-                            <label className="text-xs font-medium text-muted-foreground">Output</label>
-                            <p className="text-sm">{workplan.output}</p>
-                          </div>
-                        )}
-                        {workplan.outcome && (
-                          <div>
-                            <label className="text-xs font-medium text-muted-foreground">Outcome</label>
-                            <p className="text-sm">{workplan.outcome}</p>
-                          </div>
-                        )}
-                        {workplan.kpi && (
-                          <div>
-                            <label className="text-xs font-medium text-muted-foreground">KPI</label>
-                            <p className="text-sm">{workplan.kpi}</p>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Risk & Learning */}
-                      <div className="space-y-3">
-                        <h4 className="font-semibold text-foreground flex items-center gap-2">
-                          <Users className="h-4 w-4" />
-                          Risk & Learning
-                        </h4>
-                        {workplan.risks && (
-                          <div>
-                            <label className="text-xs font-medium text-muted-foreground">Risks</label>
-                            <p className="text-sm">{workplan.risks}</p>
-                          </div>
-                        )}
-                        {workplan.learning_development && (
-                          <div>
-                            <label className="text-xs font-medium text-muted-foreground">Learning & Development</label>
-                            <p className="text-sm">{workplan.learning_development}</p>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Additional Info */}
-                      <div className="space-y-3">
-                        <h4 className="font-semibold text-foreground flex items-center gap-2">
-                          <Calendar className="h-4 w-4" />
-                          Additional Information
-                        </h4>
-                        {workplan.resource_person && (
-                          <div>
-                            <label className="text-xs font-medium text-muted-foreground">Resource Person</label>
-                            <p className="text-sm">{workplan.resource_person}</p>
-                          </div>
-                        )}
-                        {workplan.notes && (
-                          <div>
-                            <label className="text-xs font-medium text-muted-foreground">Notes</label>
-                            <p className="text-sm">{workplan.notes}</p>
-                          </div>
-                        )}
-                        <div>
-                          <label className="text-xs font-medium text-muted-foreground">Visibility</label>
-                          <p className="text-sm">
-                            {workplan.public_visible ? 'Public' : 'Private'}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-              )}
-            </>
-          ))}
-        </tbody>
-      </table>
-      
-      {/* Empty state */}
-      {workplans.length === 0 && (
-        <div className="text-center py-12">
-          <div className="w-16 h-16 mx-auto mb-4 bg-muted/50 rounded-full flex items-center justify-center">
-            <Target className="w-6 h-6 text-muted-foreground" />
-          </div>
-          <h3 className="text-lg font-semibold text-foreground mb-2">No workplans found</h3>
-          <p className="text-muted-foreground">Create your first workplan to get started</p>
-        </div>
-      )}
-    </div>
-  )
-}
+                             
