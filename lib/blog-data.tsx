@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createServerClient } from '@/lib/supabase/server'
 import type { BlogPost } from '@/lib/types/database'
 
 // Server-side function to get all blog posts
