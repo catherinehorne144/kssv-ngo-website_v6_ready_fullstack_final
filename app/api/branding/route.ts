@@ -1,16 +1,30 @@
-import { NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabaseClient'
+// /app/api/branding/route.ts
+import { NextResponse } from "next/server"
+import { createServerClientInstance } from "@/lib/supabase/server"
 
 export async function GET() {
-  const { data, error } = await supabase.from('branding').select('*').order('updated_at', { ascending: false }).limit(1)
+  const supabase = createServerClientInstance()
+  if (!supabase) return NextResponse.json({ error: "Supabase not ready" }, { status: 500 })
+
+  const { data, error } = await supabase
+    .from("branding")
+    .select("*")
+    .order("updated_at", { ascending: false })
+    .limit(1)
+
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json(data?.[0] ?? {})
 }
 
 export async function POST(request: Request) {
+  const supabase = createServerClientInstance()
+  if (!supabase) return NextResponse.json({ error: "Supabase not ready" }, { status: 500 })
+
   const body = await request.json()
-  // Upsert branding (single row)
-  const { data, error } = await supabase.from('branding').upsert(body).select()
+
+  const { data, error } = await supabase.from("branding").upsert(body).select()
+
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
   return NextResponse.json(data, { status: 201 })
 }

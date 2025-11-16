@@ -5,11 +5,13 @@ import { cookies } from "next/headers"
 export function createServerClientInstance() {
   const cookieStore = cookies()
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  const supabaseUrl = process.env.SUPABASE_URL
+  const supabaseAnonKey = process.env.SUPABASE_ANON_KEY
 
+  // Never throw during build – return dummy minimal client instead
   if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error("Missing Supabase environment variables")
+    console.warn("⚠ Supabase env variables missing at build time.")
+    return null
   }
 
   return createServerClient(supabaseUrl, supabaseAnonKey, {

@@ -1,14 +1,15 @@
+// /lib/supabase/middleware.ts
+export const runtime = "nodejs"
+
 import { createServerClient } from "@supabase/ssr"
 import { NextResponse, type NextRequest } from "next/server"
 
 export async function updateSession(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({
-    request,
-  })
+  let supabaseResponse = NextResponse.next({ request })
 
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    process.env.SUPABASE_URL!,
+    process.env.SUPABASE_ANON_KEY!,
     {
       cookies: {
         getAll() {
@@ -16,10 +17,10 @@ export async function updateSession(request: NextRequest) {
         },
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
-          supabaseResponse = NextResponse.next({
-            request,
-          })
-          cookiesToSet.forEach(({ name, value, options }) => supabaseResponse.cookies.set(name, value, options))
+          supabaseResponse = NextResponse.next({ request })
+          cookiesToSet.forEach(({ name, value, options }) =>
+            supabaseResponse.cookies.set(name, value, options),
+          )
         },
       },
     },
@@ -30,7 +31,9 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser()
 
   const publicAdminRoutes = ["/admin/login"]
-  const isPublicAdminRoute = publicAdminRoutes.some((route) => request.nextUrl.pathname.startsWith(route))
+  const isPublicAdminRoute = publicAdminRoutes.some((route) =>
+    request.nextUrl.pathname.startsWith(route),
+  )
 
   if (request.nextUrl.pathname.startsWith("/admin/setup")) {
     if (!user) {
@@ -39,8 +42,11 @@ export async function updateSession(request: NextRequest) {
       return NextResponse.redirect(url)
     }
 
-    // Check if user is super admin
-    const { data: adminUser } = await supabase.from("admins").select("role").eq("email", user.email).single()
+    const { data: adminUser } = await supabase
+      .from("admins")
+      .select("role")
+      .eq("email", user.email)
+      .single()
 
     if (adminUser?.role !== "superadmin") {
       const url = request.nextUrl.clone()
@@ -49,14 +55,12 @@ export async function updateSession(request: NextRequest) {
     }
   }
 
-  // Protect admin routes except public routes
   if (request.nextUrl.pathname.startsWith("/admin") && !isPublicAdminRoute && !user) {
     const url = request.nextUrl.clone()
     url.pathname = "/admin/login"
     return NextResponse.redirect(url)
   }
 
-  // Redirect logged-in users away from login page
   if (request.nextUrl.pathname === "/admin/login" && user) {
     const url = request.nextUrl.clone()
     url.pathname = "/admin"
