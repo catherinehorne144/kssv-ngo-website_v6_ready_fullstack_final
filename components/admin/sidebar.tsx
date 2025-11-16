@@ -20,7 +20,7 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
-  Target, // ← ADD THIS IMPORT
+  Calendar, // ← REPLACED Target with Calendar for Workplans
 } from "lucide-react"
 import { useEffect, useState } from "react"
 import { createServerClientInstance } from "@/lib/supabase/server"
@@ -35,7 +35,7 @@ const navigation = [
   { name: "Testimonials", href: "/admin/testimonials", icon: Quote },
   { name: "Blog Posts", href: "/admin/blog", icon: FileText },
   { name: "Projects", href: "/admin/projects", icon: FolderKanban },
-  { name: "Programs", href: "/admin/programs", icon: Target }, // ← ADD THIS LINE
+  { name: "Workplans", href: "/admin/workplans", icon: Calendar }, // ← REPLACED Programs with Workplans
   { name: "Donations", href: "/admin/donations", icon: DollarSign },
   { name: "Analytics", href: "/admin/analytics", icon: BarChart3 },
 ]
