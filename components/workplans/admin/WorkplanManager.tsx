@@ -1,23 +1,23 @@
 // [file name]: components/workplans/admin/WorkplanManager.tsx
-// [file content begin]
 'use client'
 
 import { useState, useMemo, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Plus, BarChart3, Users, Calendar, Target, Download, Filter, Search, ArrowLeft, Loader2 } from 'lucide-react'
+import { Plus, BarChart3, Users, Calendar, Target, Download, Filter, Search, ArrowLeft, Loader2, Upload } from 'lucide-react'
 import { WorkplanTable } from './WorkplanTable'
 import { WorkplanForm } from './WorkplanForm'
 import { WorkplanWizard } from './WorkplanWizard'
 import { WorkplanAnalytics } from './WorkplanAnalytics'
 import { ExportManager } from './ExportManager'
+import { CSVImport } from './CSVImport'
 import type { Workplan } from '@/lib/types/workplan'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 
-type ViewMode = 'workplans' | 'create-workplan' | 'edit-workplan' | 'analytics' | 'export'
+type ViewMode = 'workplans' | 'create-workplan' | 'edit-workplan' | 'analytics' | 'export' | 'import'
 
 export function WorkplanManager() {
   const [activeView, setActiveView] = useState<ViewMode>('workplans')
@@ -29,14 +29,6 @@ export function WorkplanManager() {
   const [focusAreaFilter, setFocusAreaFilter] = useState<string>('all')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-
-  // Focus areas from your workplan outline
-  const focusAreas = [
-    { id: 'gbv', name: 'Comprehensive GBV Management' },
-    { id: 'survivor', name: 'Survivors Livelihood Support Services' },
-    { id: 'institutional', name: 'Institutional Development and Growth' },
-    { id: 'other', name: 'Other Focus Area' }
-  ]
 
   // Load workplans from API
   const loadWorkplans = async () => {
@@ -59,9 +51,9 @@ export function WorkplanManager() {
     }
   }
 
-  // Load workplans on component mount
+  // Load workplans on component mount and when returning to workplans view
   useEffect(() => {
-    if (activeView === 'workplans') {
+    if (activeView === 'workplans' || activeView === 'analytics' || activeView === 'export') {
       loadWorkplans()
     }
   }, [activeView])
@@ -69,9 +61,12 @@ export function WorkplanManager() {
   // Filter workplans based on search and filters
   const filteredWorkplans = useMemo(() => {
     return workplans.filter(workplan => {
-      const matchesSearch = workplan.activity_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           workplan.tasks_description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           workplan.focus_area.toLowerCase().includes(searchTerm.toLowerCase())
+      const matchesSearch = !searchTerm || 
+        workplan.activity_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        workplan.tasks_description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        workplan.focus_area?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        workplan.resource_person?.toLowerCase().includes(searchTerm.toLowerCase())
+      
       const matchesStatus = statusFilter === 'all' || workplan.status === statusFilter
       const matchesQuarter = quarterFilter === 'all' || workplan.quarter === quarterFilter
       const matchesFocusArea = focusAreaFilter === 'all' || workplan.focus_area === focusAreaFilter
@@ -86,6 +81,8 @@ export function WorkplanManager() {
     const completedWorkplans = workplans.filter(w => w.status === 'completed').length
     const inProgressWorkplans = workplans.filter(w => w.status === 'in-progress').length
     const plannedWorkplans = workplans.filter(w => w.status === 'planned').length
+    const totalProgress = workplans.reduce((sum, w) => sum + (w.progress || 0), 0)
+    const avgProgress = workplans.length > 0 ? Math.round(totalProgress / workplans.length) : 0
     
     return {
       totalWorkplans: workplans.length,
@@ -93,19 +90,20 @@ export function WorkplanManager() {
       inProgressWorkplans,
       plannedWorkplans,
       completionRate: workplans.length > 0 ? Math.round((completedWorkplans / workplans.length) * 100) : 0,
-      totalBudget: totalBudget.toLocaleString()
+      totalBudget: totalBudget.toLocaleString(),
+      avgProgress
     }
   }, [workplans])
 
   // Get unique quarters for filter
   const availableQuarters = useMemo(() => {
-    const quarters = [...new Set(workplans.map(w => w.quarter).filter(Boolean))]
+    const quarters = [...new Set(workplans.map(w => w.quarter).filter(Boolean))] as string[]
     return quarters.sort()
   }, [workplans])
 
   // Get focus areas for filter
   const availableFocusAreas = useMemo(() => {
-    const areas = [...new Set(workplans.map(w => w.focus_area))]
+    const areas = [...new Set(workplans.map(w => w.focus_area).filter(Boolean))] as string[]
     return areas.sort()
   }, [workplans])
 
@@ -179,6 +177,19 @@ export function WorkplanManager() {
     setActiveView('edit-workplan')
   }
 
+  // Handle view workplan
+  const handleViewWorkplan = (workplan: Workplan) => {
+    // You can implement a detailed view modal or page here
+    alert(`Viewing: ${workplan.activity_name}\nStatus: ${workplan.status}\nProgress: ${workplan.progress}%`)
+  }
+
+  // Handle CSV import completion
+  const handleImportComplete = async () => {
+    await loadWorkplans()
+    setActiveView('workplans')
+    alert('Workplans imported successfully!')
+  }
+
   const clearAllFilters = () => {
     setSearchTerm('')
     setStatusFilter('all')
@@ -189,7 +200,7 @@ export function WorkplanManager() {
   const hasActiveFilters = searchTerm || statusFilter !== 'all' || quarterFilter !== 'all' || focusAreaFilter !== 'all'
 
   // Loading state
-  if (loading && workplans.length === 0) {
+  if (loading && workplans.length === 0 && activeView === 'workplans') {
     return (
       <div className="p-6 flex justify-center items-center min-h-96">
         <div className="text-center">
@@ -201,7 +212,7 @@ export function WorkplanManager() {
   }
 
   // Error state
-  if (error && workplans.length === 0) {
+  if (error && workplans.length === 0 && activeView === 'workplans') {
     return (
       <div className="p-6 flex justify-center items-center min-h-96">
         <div className="text-center">
@@ -258,13 +269,13 @@ export function WorkplanManager() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Status</CardTitle>
+            <CardTitle className="text-sm font-medium">Avg Progress</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.plannedWorkplans}</div>
+            <div className="text-2xl font-bold">{stats.avgProgress}%</div>
             <p className="text-xs text-muted-foreground">
-              Planned workplans
+              Average across all workplans
             </p>
           </CardContent>
         </Card>
@@ -272,10 +283,11 @@ export function WorkplanManager() {
 
       {/* Navigation Tabs */}
       <Tabs value={activeView} onValueChange={(value: any) => setActiveView(value)} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="workplans">Workplans</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
           <TabsTrigger value="export">Export</TabsTrigger>
+          <TabsTrigger value="import">Import</TabsTrigger>
         </TabsList>
 
         <TabsContent value={activeView} className="space-y-6">
@@ -289,9 +301,19 @@ export function WorkplanManager() {
                   </p>
                 </div>
                 <div className="flex gap-2">
-                  <Button variant="outline">
+                  <Button 
+                    variant="outline"
+                    onClick={() => setActiveView('export')}
+                  >
                     <Download className="mr-2 h-4 w-4" />
                     Export
+                  </Button>
+                  <Button 
+                    variant="outline"
+                    onClick={() => setActiveView('import')}
+                  >
+                    <Upload className="mr-2 h-4 w-4" />
+                    Import CSV
                   </Button>
                   <Button onClick={() => setActiveView('create-workplan')}>
                     <Plus className="mr-2 h-4 w-4" />
@@ -306,7 +328,7 @@ export function WorkplanManager() {
                     <div className="relative">
                       <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                       <Input
-                        placeholder="Search activities, tasks, focus areas..."
+                        placeholder="Search activities, tasks, focus areas, responsible persons..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="pl-8"
@@ -378,6 +400,7 @@ export function WorkplanManager() {
                   workplans={filteredWorkplans}
                   onDeleteWorkplan={handleDeleteWorkplan}
                   onEditWorkplan={handleEditWorkplan}
+                  onViewWorkplan={handleViewWorkplan}
                   onBulkDelete={handleBulkDeleteWorkplans}
                 />
               </CardContent>
@@ -466,9 +489,30 @@ export function WorkplanManager() {
               </CardContent>
             </Card>
           )}
+
+          {/* Import View */}
+          {activeView === 'import' && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Import Workplans</CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  Bulk import workplans from CSV data
+                </p>
+              </CardHeader>
+              <CardContent>
+                <CSVImport onImportComplete={handleImportComplete} />
+                <Button 
+                  variant="outline" 
+                  onClick={() => setActiveView('workplans')}
+                  className="mt-4"
+                >
+                  Back to Workplans
+                </Button>
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
       </Tabs>
     </div>
   )
 }
-// [file content end]

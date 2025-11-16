@@ -1,12 +1,24 @@
 // [file name]: components/workplans/admin/WorkplanTable.tsx
-// [file content begin]
 'use client'
 
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Edit, Trash2, Eye, MoreHorizontal, MapPin, Target, Calendar, DollarSign, Users } from 'lucide-react'
+import { 
+  Edit, 
+  Trash2, 
+  Eye, 
+  MoreHorizontal, 
+  Target, 
+  Calendar, 
+  DollarSign, 
+  Users,
+  ChevronDown,
+  ChevronUp,
+  Filter,
+  Download
+} from 'lucide-react'
 import type { Workplan } from '@/lib/types/workplan'
 
 interface WorkplanTableProps {
@@ -15,17 +27,55 @@ interface WorkplanTableProps {
   onEditWorkplan?: (workplan: Workplan) => void
   onViewWorkplan?: (workplan: Workplan) => void
   onBulkDelete?: (workplanIds: string[]) => void
+  onBulkExport?: (workplanIds: string[]) => void
+  onStatusChange?: (workplanId: string, status: Workplan['status']) => void
 }
+
+type SortField = 'activity_name' | 'focus_area' | 'quarter' | 'budget_allocated' | 'progress' | 'status' | 'timeline_text'
+type SortDirection = 'asc' | 'desc'
 
 export function WorkplanTable({ 
   workplans, 
   onDeleteWorkplan, 
   onEditWorkplan, 
   onViewWorkplan,
-  onBulkDelete 
+  onBulkDelete,
+  onBulkExport,
+  onStatusChange
 }: WorkplanTableProps) {
   const [selectedWorkplans, setSelectedWorkplans] = useState<Set<string>>(new Set())
   const [isAllSelected, setIsAllSelected] = useState(false)
+  const [sortField, setSortField] = useState<SortField>('activity_name')
+  const [sortDirection, setSortDirection] = useState<SortDirection>('asc')
+  const [expandedWorkplan, setExpandedWorkplan] = useState<string | null>(null)
+
+  // Sort workplans
+  const sortedWorkplans = [...workplans].sort((a, b) => {
+    let aValue = a[sortField]
+    let bValue = b[sortField]
+    
+    // Handle different data types for sorting
+    if (sortField === 'budget_allocated' || sortField === 'progress') {
+      aValue = aValue || 0
+      bValue = bValue || 0
+    } else {
+      aValue = String(aValue || '').toLowerCase()
+      bValue = String(bValue || '').toLowerCase()
+    }
+    
+    if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1
+    if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1
+    return 0
+  })
+
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
+    } else {
+      setSortField(field)
+      setSortDirection('asc')
+    }
+  }
 
   const getStatusVariant = (status: string | null) => {
     switch (status) {
@@ -38,11 +88,11 @@ export function WorkplanTable({
 
   const getFocusAreaColor = (focusArea: string) => {
     switch (focusArea) {
-      case 'Comprehensive GBV Management': return 'bg-red-100 text-red-800 border-red-200'
-      case 'Survivors Livelihood Support Services': return 'bg-green-100 text-green-800 border-green-200'
-      case 'Institutional Development and Growth': return 'bg-blue-100 text-blue-800 border-blue-200'
-      case 'Other Focus Area': return 'bg-purple-100 text-purple-800 border-purple-200'
-      default: return 'bg-gray-100 text-gray-800 border-gray-200'
+      case 'Comprehensive GBV Management': return 'bg-red-100 text-red-800 border-red-200 hover:bg-red-200'
+      case 'Survivors Livelihood Support Services': return 'bg-green-100 text-green-800 border-green-200 hover:bg-green-200'
+      case 'Institutional Development and Growth': return 'bg-blue-100 text-blue-800 border-blue-200 hover:bg-blue-200'
+      case 'Other Focus Area': return 'bg-purple-100 text-purple-800 border-purple-200 hover:bg-purple-200'
+      default: return 'bg-gray-100 text-gray-800 border-gray-200 hover:bg-gray-200'
     }
   }
 
@@ -51,6 +101,15 @@ export function WorkplanTable({
     if (progress >= 80) return 'bg-green-500'
     if (progress >= 50) return 'bg-yellow-500'
     return 'bg-red-500'
+  }
+
+  const getStatusColor = (status: string | null) => {
+    switch (status) {
+      case 'completed': return 'text-green-600 bg-green-50 border-green-200'
+      case 'in-progress': return 'text-yellow-600 bg-yellow-50 border-yellow-200'
+      case 'planned': return 'text-blue-600 bg-blue-50 border-blue-200'
+      default: return 'text-gray-600 bg-gray-50 border-gray-200'
+    }
   }
 
   // Handle individual checkbox selection
@@ -97,8 +156,14 @@ export function WorkplanTable({
     }
   }
 
+  // Handle bulk export
+  const handleBulkExport = () => {
+    if (selectedWorkplans.size === 0) return
+    onBulkExport?.(Array.from(selectedWorkplans))
+  }
+
   const handleView = (workplan: Workplan) => {
-    alert(`Viewing: ${workplan.activity_name}\nFocus Area: ${workplan.focus_area}\nStatus: ${workplan.status}`)
+    onViewWorkplan?.(workplan)
   }
 
   const handleEdit = (workplan: Workplan) => {
@@ -111,29 +176,64 @@ export function WorkplanTable({
     }
   }
 
+  const handleQuickStatusChange = (workplan: Workplan, newStatus: Workplan['status']) => {
+    if (onStatusChange) {
+      onStatusChange(workplan.id, newStatus)
+    }
+  }
+
+  const toggleExpand = (workplanId: string) => {
+    setExpandedWorkplan(expandedWorkplan === workplanId ? null : workplanId)
+  }
+
   const truncateText = (text: string | null, maxLength: number = 50) => {
     if (!text) return 'N/A'
     return text.length > maxLength ? `${text.substring(0, maxLength)}...` : text
   }
 
+  const SortableHeader = ({ field, children }: { field: SortField; children: React.ReactNode }) => (
+    <th 
+      className="text-left p-4 font-medium cursor-pointer hover:bg-muted/30 transition-colors"
+      onClick={() => handleSort(field)}
+    >
+      <div className="flex items-center gap-1">
+        {children}
+        {sortField === field && (
+          sortDirection === 'asc' ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />
+        )}
+      </div>
+    </th>
+  )
+
   return (
-    <div className="border rounded-lg overflow-hidden">
+    <div className="border rounded-lg overflow-hidden shadow-sm">
       {/* Bulk Actions Bar */}
       {selectedWorkplans.size > 0 && (
-        <div className="bg-primary/10 border-b p-3 flex items-center justify-between">
+        <div className="bg-blue-50 border-b border-blue-200 p-3 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <span className="text-sm font-medium">
+            <span className="text-sm font-medium text-blue-800">
               {selectedWorkplans.size} workplan(s) selected
             </span>
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={handleBulkDelete}
-              className="h-8"
-            >
-              <Trash2 className="h-3.5 w-3.5 mr-1" />
-              Delete Selected
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="default"
+                size="sm"
+                onClick={handleBulkExport}
+                className="h-8 bg-green-600 hover:bg-green-700"
+              >
+                <Download className="h-3.5 w-3.5 mr-1" />
+                Export Selected
+              </Button>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={handleBulkDelete}
+                className="h-8"
+              >
+                <Trash2 className="h-3.5 w-3.5 mr-1" />
+                Delete Selected
+              </Button>
+            </div>
           </div>
           <Button
             variant="ghost"
@@ -142,7 +242,7 @@ export function WorkplanTable({
               setSelectedWorkplans(new Set())
               setIsAllSelected(false)
             }}
-            className="h-8"
+            className="h-8 text-blue-800 hover:text-blue-900 hover:bg-blue-100"
           >
             Clear Selection
           </Button>
@@ -151,7 +251,7 @@ export function WorkplanTable({
 
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b bg-muted/50">
+          <tr className="border-b bg-muted/40">
             <th className="text-left p-4 font-medium w-12">
               <Checkbox
                 checked={isAllSelected}
@@ -159,142 +259,275 @@ export function WorkplanTable({
                 aria-label="Select all workplans"
               />
             </th>
-            <th className="text-left p-4 font-medium">Activity Details</th>
-            <th className="text-left p-4 font-medium">Focus Area</th>
-            <th className="text-left p-4 font-medium">Timeline</th>
-            <th className="text-left p-4 font-medium">Budget</th>
-            <th className="text-left p-4 font-medium">Progress</th>
-            <th className="text-left p-4 font-medium">Status</th>
-            <th className="text-left p-4 font-medium">MERL Data</th>
+            <SortableHeader field="activity_name">
+              Activity Details
+            </SortableHeader>
+            <SortableHeader field="focus_area">
+              Focus Area
+            </SortableHeader>
+            <SortableHeader field="quarter">
+              Quarter
+            </SortableHeader>
+            <SortableHeader field="timeline_text">
+              Timeline
+            </SortableHeader>
+            <SortableHeader field="budget_allocated">
+              Budget
+            </SortableHeader>
+            <SortableHeader field="progress">
+              Progress
+            </SortableHeader>
+            <SortableHeader field="status">
+              Status
+            </SortableHeader>
             <th className="text-left p-4 font-medium">Actions</th>
           </tr>
         </thead>
         <tbody>
-          {workplans.map((workplan) => (
-            <tr 
-              key={workplan.id} 
-              className={`border-b hover:bg-muted/30 transition-colors ${
-                isWorkplanSelected(workplan.id) ? 'bg-primary/5' : ''
-              }`}
-            >
-              <td className="p-4">
-                <Checkbox
-                  checked={isWorkplanSelected(workplan.id)}
-                  onCheckedChange={(checked) => 
-                    handleWorkplanSelect(workplan.id, checked as boolean)
-                  }
-                  aria-label={`Select ${workplan.activity_name}`}
-                />
-              </td>
-              <td className="p-4">
-                <div>
-                  <div className="font-medium text-foreground mb-1">{workplan.activity_name}</div>
-                  <div className="text-xs text-muted-foreground mb-2">
-                    {truncateText(workplan.tasks_description, 60)}
-                  </div>
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <Target className="w-3 h-3" />
-                    <span>{truncateText(workplan.target, 30)}</span>
-                  </div>
-                </div>
-              </td>
-              <td className="p-4">
-                <Badge 
-                  variant="outline" 
-                  className={`text-xs font-medium ${getFocusAreaColor(workplan.focus_area)}`}
-                >
-                  {workplan.focus_area}
-                </Badge>
-                {workplan.quarter && (
-                  <div className="text-xs text-muted-foreground mt-1">
-                    {workplan.quarter}
-                  </div>
-                )}
-              </td>
-              <td className="p-4">
-                <div className="flex items-center gap-2 text-xs">
-                  <Calendar className="w-3 h-3 text-muted-foreground" />
-                  <span>{workplan.timeline_text}</span>
-                </div>
-              </td>
-              <td className="p-4">
-                <div className="space-y-1">
-                  <div className="font-medium">KES {workplan.budget_allocated.toLocaleString()}</div>
-                </div>
-              </td>
-              <td className="p-4">
-                <div className="space-y-1">
-                  <div className="w-full bg-secondary rounded-full h-2">
-                    <div 
-                      className={`h-2 rounded-full transition-all ${getProgressColor(workplan.progress)}`} 
-                      style={{ width: `${workplan.progress || 0}%` }}
-                    />
-                  </div>
-                  <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>Progress</span>
-                    <span>{workplan.progress || 0}%</span>
-                  </div>
-                </div>
-              </td>
-              <td className="p-4">
-                <Badge variant={getStatusVariant(workplan.status)}>
-                  {workplan.status || 'planned'}
-                </Badge>
-              </td>
-              <td className="p-4">
-                <div className="space-y-1 text-xs">
-                  {workplan.output && (
-                    <div className="flex items-center gap-1">
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      <span>Output: {truncateText(workplan.output, 20)}</span>
+          {sortedWorkplans.map((workplan) => (
+            <>
+              <tr 
+                key={workplan.id} 
+                className={`border-b hover:bg-muted/20 transition-colors cursor-pointer ${
+                  isWorkplanSelected(workplan.id) ? 'bg-blue-50' : ''
+                } ${expandedWorkplan === workplan.id ? 'bg-muted/30' : ''}`}
+                onClick={() => toggleExpand(workplan.id)}
+              >
+                <td className="p-4" onClick={(e) => e.stopPropagation()}>
+                  <Checkbox
+                    checked={isWorkplanSelected(workplan.id)}
+                    onCheckedChange={(checked) => 
+                      handleWorkplanSelect(workplan.id, checked as boolean)
+                    }
+                    aria-label={`Select ${workplan.activity_name}`}
+                  />
+                </td>
+                <td className="p-4">
+                  <div>
+                    <div className="font-medium text-foreground mb-1 flex items-center gap-2">
+                      {workplan.activity_name}
+                      {expandedWorkplan === workplan.id ? 
+                        <ChevronUp className="h-3 w-3 text-muted-foreground" /> : 
+                        <ChevronDown className="h-3 w-3 text-muted-foreground" />
+                      }
                     </div>
-                  )}
-                  {workplan.outcome && (
-                    <div className="flex items-center gap-1">
-                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                      <span>Outcome: {truncateText(workplan.outcome, 20)}</span>
+                    <div className="text-xs text-muted-foreground">
+                      {truncateText(workplan.tasks_description, 60)}
                     </div>
-                  )}
-                  {workplan.kpi && (
-                    <div className="flex items-center gap-1">
-                      <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                      <span>KPI: {truncateText(workplan.kpi, 20)}</span>
+                    {workplan.target && (
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
+                        <Target className="w-3 h-3" />
+                        <span>{truncateText(workplan.target, 30)}</span>
+                      </div>
+                    )}
+                  </div>
+                </td>
+                <td className="p-4">
+                  <Badge 
+                    variant="outline" 
+                    className={`text-xs font-medium ${getFocusAreaColor(workplan.focus_area)}`}
+                  >
+                    {workplan.focus_area}
+                  </Badge>
+                </td>
+                <td className="p-4">
+                  <span className="text-sm font-medium">{workplan.quarter || 'N/A'}</span>
+                </td>
+                <td className="p-4">
+                  <div className="flex items-center gap-2 text-sm">
+                    <Calendar className="w-3 h-3 text-muted-foreground" />
+                    <span>{workplan.timeline_text}</span>
+                  </div>
+                </td>
+                <td className="p-4">
+                  <div className="space-y-1">
+                    <div className="font-medium flex items-center gap-1">
+                      <DollarSign className="h-3 w-3 text-green-600" />
+                      KES {workplan.budget_allocated?.toLocaleString() || '0'}
                     </div>
-                  )}
-                </div>
-              </td>
-              <td className="p-4">
-                <div className="flex gap-1">
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    onClick={() => handleView(workplan)}
-                    className="h-8 w-8"
-                    title="View Workplan"
-                  >
-                    <Eye className="h-3.5 w-3.5" />
-                  </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    onClick={() => handleEdit(workplan)}
-                    className="h-8 w-8"
-                    title="Edit Workplan"
-                  >
-                    <Edit className="h-3.5 w-3.5" />
-                  </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    onClick={() => handleDelete(workplan)}
-                    className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
-                    title="Delete Workplan"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </Button>
-                </div>
-              </td>
-            </tr>
+                  </div>
+                </td>
+                <td className="p-4">
+                  <div className="space-y-1">
+                    <div className="w-full bg-secondary rounded-full h-2">
+                      <div 
+                        className={`h-2 rounded-full transition-all ${getProgressColor(workplan.progress)}`} 
+                        style={{ width: `${workplan.progress || 0}%` }}
+                      />
+                    </div>
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                      <span>Progress</span>
+                      <span>{workplan.progress || 0}%</span>
+                    </div>
+                  </div>
+                </td>
+                <td className="p-4">
+                  <div className="space-y-1">
+                    <Badge 
+                      variant={getStatusVariant(workplan.status)} 
+                      className={getStatusColor(workplan.status)}
+                    >
+                      {workplan.status || 'planned'}
+                    </Badge>
+                    {onStatusChange && (
+                      <div className="flex gap-1 mt-1">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleQuickStatusChange(workplan, 'planned')
+                          }}
+                          className={`text-xs px-1 rounded ${
+                            workplan.status === 'planned' 
+                              ? 'bg-blue-100 text-blue-700' 
+                              : 'text-blue-500 hover:bg-blue-50'
+                          }`}
+                        >
+                          Plan
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleQuickStatusChange(workplan, 'in-progress')
+                          }}
+                          className={`text-xs px-1 rounded ${
+                            workplan.status === 'in-progress' 
+                              ? 'bg-yellow-100 text-yellow-700' 
+                              : 'text-yellow-500 hover:bg-yellow-50'
+                          }`}
+                        >
+                          Start
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleQuickStatusChange(workplan, 'completed')
+                          }}
+                          className={`text-xs px-1 rounded ${
+                            workplan.status === 'completed' 
+                              ? 'bg-green-100 text-green-700' 
+                              : 'text-green-500 hover:bg-green-50'
+                          }`}
+                        >
+                          Complete
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </td>
+                <td className="p-4" onClick={(e) => e.stopPropagation()}>
+                  <div className="flex gap-1">
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      onClick={() => handleView(workplan)}
+                      className="h-8 w-8"
+                      title="View Workplan"
+                    >
+                      <Eye className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      onClick={() => handleEdit(workplan)}
+                      className="h-8 w-8"
+                      title="Edit Workplan"
+                    >
+                      <Edit className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      onClick={() => handleDelete(workplan)}
+                      className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
+                      title="Delete Workplan"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                </td>
+              </tr>
+              
+              {/* Expanded Details Row */}
+              {expandedWorkplan === workplan.id && (
+                <tr className="bg-muted/10 border-b">
+                  <td colSpan={9} className="p-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 text-sm">
+                      {/* MERL Data */}
+                      <div className="space-y-3">
+                        <h4 className="font-semibold text-foreground flex items-center gap-2">
+                          <Target className="h-4 w-4" />
+                          MERL Framework
+                        </h4>
+                        {workplan.output && (
+                          <div>
+                            <label className="text-xs font-medium text-muted-foreground">Output</label>
+                            <p className="text-sm">{workplan.output}</p>
+                          </div>
+                        )}
+                        {workplan.outcome && (
+                          <div>
+                            <label className="text-xs font-medium text-muted-foreground">Outcome</label>
+                            <p className="text-sm">{workplan.outcome}</p>
+                          </div>
+                        )}
+                        {workplan.kpi && (
+                          <div>
+                            <label className="text-xs font-medium text-muted-foreground">KPI</label>
+                            <p className="text-sm">{workplan.kpi}</p>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Risk & Learning */}
+                      <div className="space-y-3">
+                        <h4 className="font-semibold text-foreground flex items-center gap-2">
+                          <Users className="h-4 w-4" />
+                          Risk & Learning
+                        </h4>
+                        {workplan.risks && (
+                          <div>
+                            <label className="text-xs font-medium text-muted-foreground">Risks</label>
+                            <p className="text-sm">{workplan.risks}</p>
+                          </div>
+                        )}
+                        {workplan.learning_development && (
+                          <div>
+                            <label className="text-xs font-medium text-muted-foreground">Learning & Development</label>
+                            <p className="text-sm">{workplan.learning_development}</p>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Additional Info */}
+                      <div className="space-y-3">
+                        <h4 className="font-semibold text-foreground flex items-center gap-2">
+                          <Calendar className="h-4 w-4" />
+                          Additional Information
+                        </h4>
+                        {workplan.resource_person && (
+                          <div>
+                            <label className="text-xs font-medium text-muted-foreground">Resource Person</label>
+                            <p className="text-sm">{workplan.resource_person}</p>
+                          </div>
+                        )}
+                        {workplan.notes && (
+                          <div>
+                            <label className="text-xs font-medium text-muted-foreground">Notes</label>
+                            <p className="text-sm">{workplan.notes}</p>
+                          </div>
+                        )}
+                        <div>
+                          <label className="text-xs font-medium text-muted-foreground">Visibility</label>
+                          <p className="text-sm">
+                            {workplan.public_visible ? 'Public' : 'Private'}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              )}
+            </>
           ))}
         </tbody>
       </table>
@@ -312,4 +545,3 @@ export function WorkplanTable({
     </div>
   )
 }
-// [file content end]
