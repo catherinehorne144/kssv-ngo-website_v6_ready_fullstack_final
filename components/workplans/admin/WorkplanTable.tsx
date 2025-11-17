@@ -9,7 +9,6 @@ import {
   Edit, 
   Trash2, 
   Eye, 
-  MoreHorizontal, 
   Target, 
   Calendar, 
   DollarSign, 
@@ -30,7 +29,8 @@ interface WorkplanTableProps {
   onBulkDelete?: (workplanIds: string[]) => void
   onBulkExport?: (workplanIds: string[]) => void
   onStatusChange?: (workplanId: string, status: Workplan['status']) => void
-  onOpenMERL?: (workplan: Workplan) => void  // NEW: MERL callback
+  onOpenMERL?: (workplan: Workplan) => void
+  onFocusAreaSelect?: (focusArea: string) => void
 }
 
 type SortField = 'activity_name' | 'focus_area' | 'quarter' | 'budget_allocated' | 'progress' | 'status' | 'timeline_text'
@@ -44,7 +44,8 @@ export function WorkplanTable({
   onBulkDelete,
   onBulkExport,
   onStatusChange,
-  onOpenMERL  // NEW: MERL prop
+  onOpenMERL,
+  onFocusAreaSelect
 }: WorkplanTableProps) {
   const [selectedWorkplans, setSelectedWorkplans] = useState<Set<string>>(new Set())
   const [isAllSelected, setIsAllSelected] = useState(false)
@@ -179,7 +180,7 @@ export function WorkplanTable({
     }
   }
 
-  // NEW: Handle MERL button click
+  // Handle MERL button click
   const handleOpenMERL = (workplan: Workplan) => {
     onOpenMERL?.(workplan)
   }
@@ -214,7 +215,6 @@ export function WorkplanTable({
   )
 
   return (
-    // CHANGED: Added min-width for horizontal scrolling
     <div className="border rounded-lg overflow-hidden shadow-sm min-w-[1200px]">
       {/* Bulk Actions Bar */}
       {selectedWorkplans.size > 0 && (
@@ -289,7 +289,7 @@ export function WorkplanTable({
             <SortableHeader field="status">
               Status
             </SortableHeader>
-            <th className="text-left p-4 font-medium w-40">Actions</th> {/* Increased width for MERL button */}
+            <th className="text-left p-4 font-medium w-40">Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -334,7 +334,11 @@ export function WorkplanTable({
                 <td className="p-4">
                   <Badge 
                     variant="outline" 
-                    className={`text-xs font-medium ${getFocusAreaColor(workplan.focus_area)}`}
+                    className={`text-xs font-medium ${getFocusAreaColor(workplan.focus_area)} cursor-pointer hover:opacity-80 transition-opacity`}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      onFocusAreaSelect?.(workplan.focus_area)
+                    }}
                   >
                     {workplan.focus_area}
                   </Badge>
@@ -441,7 +445,6 @@ export function WorkplanTable({
                     >
                       <Edit className="h-3.5 w-3.5" />
                     </Button>
-                    {/* NEW: MERL Button */}
                     <Button
                       variant="ghost"
                       size="sm"

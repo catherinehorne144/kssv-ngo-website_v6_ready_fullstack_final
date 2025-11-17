@@ -11,8 +11,9 @@ import { WorkplanForm } from './WorkplanForm'
 import { WorkplanAnalytics } from './WorkplanAnalytics'
 import { ExportManager } from './ExportManager'
 import { CSVImport } from './CSVImport'
-import { MERLCard } from '@/components/merl/MERLCard' // NEW: Import MERL Card
-import type { Workplan, MerlEntry } from '@/lib/types/workplan' // NEW: Import MerlEntry
+import { MERLCard } from '@/components/merl/MERLCard'
+import { FocusAreaDetail } from './FocusAreaDetail'
+import type { Workplan, MerlEntry } from '@/lib/types/workplan'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
@@ -22,6 +23,7 @@ type ViewMode = 'workplans' | 'create-workplan' | 'edit-workplan' | 'analytics' 
 export function WorkplanManager() {
   const [activeView, setActiveView] = useState<ViewMode>('workplans')
   const [selectedWorkplan, setSelectedWorkplan] = useState<Workplan | null>(null)
+  const [selectedFocusArea, setSelectedFocusArea] = useState<string | null>(null)
   const [workplans, setWorkplans] = useState<Workplan[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
@@ -30,7 +32,7 @@ export function WorkplanManager() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   
-  // NEW: MERL State Management
+  // MERL State Management
   const [merlWorkplan, setMerlWorkplan] = useState<Workplan | null>(null)
   const [isMerlCardOpen, setIsMerlCardOpen] = useState(false)
 
@@ -79,31 +81,39 @@ export function WorkplanManager() {
     })
   }, [workplans, searchTerm, statusFilter, quarterFilter, focusAreaFilter])
 
+  // Get workplans for selected focus area
+  const focusAreaWorkplans = useMemo(() => {
+    if (!selectedFocusArea) return []
+    return workplans.filter(workplan => workplan.focus_area === selectedFocusArea)
+  }, [workplans, selectedFocusArea])
+
   // Calculate stats from real data
   const stats = useMemo(() => {
-    const totalBudget = workplans.reduce((sum, workplan) => sum + (workplan.budget_allocated || 0), 0)
-    const completedWorkplans = workplans.filter(w => w.status === 'completed').length
-    const inProgressWorkplans = workplans.filter(w => w.status === 'in-progress').length
-    const plannedWorkplans = workplans.filter(w => w.status === 'planned').length
-    const totalProgress = workplans.reduce((sum, w) => sum + (w.progress || 0), 0)
-    const avgProgress = workplans.length > 0 ? Math.round(totalProgress / workplans.length) : 0
+    const workplansToUse = selectedFocusArea ? focusAreaWorkplans : workplans
+    const totalBudget = workplansToUse.reduce((sum, workplan) => sum + (workplan.budget_allocated || 0), 0)
+    const completedWorkplans = workplansToUse.filter(w => w.status === 'completed').length
+    const inProgressWorkplans = workplansToUse.filter(w => w.status === 'in-progress').length
+    const plannedWorkplans = workplansToUse.filter(w => w.status === 'planned').length
+    const totalProgress = workplansToUse.reduce((sum, w) => sum + (w.progress || 0), 0)
+    const avgProgress = workplansToUse.length > 0 ? Math.round(totalProgress / workplansToUse.length) : 0
     
     return {
-      totalWorkplans: workplans.length,
+      totalWorkplans: workplansToUse.length,
       completedWorkplans,
       inProgressWorkplans,
       plannedWorkplans,
-      completionRate: workplans.length > 0 ? Math.round((completedWorkplans / workplans.length) * 100) : 0,
+      completionRate: workplansToUse.length > 0 ? Math.round((completedWorkplans / workplansToUse.length) * 100) : 0,
       totalBudget: totalBudget.toLocaleString(),
       avgProgress
     }
-  }, [workplans])
+  }, [workplans, selectedFocusArea, focusAreaWorkplans])
 
   // Get unique quarters for filter
   const availableQuarters = useMemo(() => {
-    const quarters = [...new Set(workplans.map(w => w.quarter).filter(Boolean))] as string[]
+    const workplansToUse = selectedFocusArea ? focusAreaWorkplans : workplans
+    const quarters = [...new Set(workplansToUse.map(w => w.quarter).filter(Boolean))] as string[]
     return quarters.sort()
-  }, [workplans])
+  }, [workplans, selectedFocusArea, focusAreaWorkplans])
 
   // Get focus areas for filter
   const availableFocusAreas = useMemo(() => {
@@ -183,24 +193,38 @@ export function WorkplanManager() {
 
   // Handle view workplan
   const handleViewWorkplan = (workplan: Workplan) => {
-    // You can implement a detailed view modal or page here
     alert(`Viewing: ${workplan.activity_name}\nStatus: ${workplan.status}\nProgress: ${workplan.progress}%`)
   }
 
-  // NEW: Handle MERL button click
+  // Handle focus area selection
+  const handleFocusAreaSelect = (focusArea: string) => {
+    setSelectedFocusArea(focusArea)
+  }
+
+  // Handle back from focus area view
+  const handleBackFromFocusArea = () => {
+    setSelectedFocusArea(null)
+    // Reset filters when going back to main view
+    setSearchTerm('')
+    setStatusFilter('all')
+    setQuarterFilter('all')
+    setFocusAreaFilter('all')
+  }
+
+  // Handle MERL button click
   const handleOpenMERL = (workplan: Workplan) => {
     setMerlWorkplan(workplan)
     setIsMerlCardOpen(true)
   }
 
-  // NEW: Handle MERL save
+  // Handle MERL save
   const handleMerlSave = (merlData: MerlEntry) => {
     alert(`MERL data saved successfully for "${merlWorkplan?.activity_name}"!`)
     setIsMerlCardOpen(false)
     setMerlWorkplan(null)
   }
 
-  // NEW: Handle MERL card close
+  // Handle MERL card close
   const handleMerlClose = () => {
     setIsMerlCardOpen(false)
     setMerlWorkplan(null)
@@ -211,6 +235,41 @@ export function WorkplanManager() {
     await loadWorkplans()
     setActiveView('workplans')
     alert('Workplans imported successfully!')
+  }
+
+  // Handle focus area export
+  const handleExportFocusArea = async (focusArea: string, workplanIds: string[]) => {
+    try {
+      const response = await fetch('/api/workplans/export', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          workplanIds,
+          format: 'csv',
+          focusArea
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to export focus area')
+      }
+
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.style.display = 'none'
+      a.href = url
+      a.download = `${focusArea.replace(/\s+/g, '_')}_workplans.csv`
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      alert(`Focus area "${focusArea}" exported successfully!`)
+    } catch (error) {
+      console.error('Error exporting focus area:', error)
+      alert('Failed to export focus area')
+    }
   }
 
   const clearAllFilters = () => {
@@ -253,7 +312,9 @@ export function WorkplanManager() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Workplans</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              {selectedFocusArea ? 'Focus Area Activities' : 'Total Workplans'}
+            </CardTitle>
             <Target className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -279,13 +340,15 @@ export function WorkplanManager() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Budget</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              {selectedFocusArea ? 'Focus Area Budget' : 'Total Budget'}
+            </CardTitle>
             <Download className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">KES {stats.totalBudget}</div>
             <p className="text-xs text-muted-foreground">
-              Allocated across all workplans
+              Allocated across {selectedFocusArea ? 'focus area' : 'all workplans'}
             </p>
           </CardContent>
         </Card>
@@ -298,250 +361,266 @@ export function WorkplanManager() {
           <CardContent>
             <div className="text-2xl font-bold">{stats.avgProgress}%</div>
             <p className="text-xs text-muted-foreground">
-              Average across all workplans
+              Average across {selectedFocusArea ? 'focus area' : 'all workplans'}
             </p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Navigation Tabs */}
-      <Tabs value={activeView} onValueChange={(value: any) => setActiveView(value)} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="workplans">Workplans</TabsTrigger>
-          <TabsTrigger value="analytics">Analytics</TabsTrigger>
-          <TabsTrigger value="export">Export</TabsTrigger>
-          <TabsTrigger value="import">Import</TabsTrigger>
-        </TabsList>
+      {/* Navigation Tabs - Only show when not in focus area detail view */}
+      {!selectedFocusArea && (
+        <Tabs value={activeView} onValueChange={(value: any) => setActiveView(value)} className="space-y-6">
+          <TabsList className="grid w-full grid-cols-5">
+            <TabsTrigger value="workplans">Workplans</TabsTrigger>
+            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            <TabsTrigger value="export">Export</TabsTrigger>
+            <TabsTrigger value="import">Import</TabsTrigger>
+          </TabsList>
 
-        <TabsContent value={activeView} className="space-y-6">
-          {activeView === 'workplans' && (
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <div>
-                  <CardTitle>Workplans & Activities</CardTitle>
-                  <p className="text-sm text-muted-foreground">
-                    Manage all workplans and track MERL framework across {availableFocusAreas.length} focus areas
-                  </p>
-                </div>
-                <div className="flex gap-2">
-                  <Button 
-                    variant="outline"
-                    onClick={() => setActiveView('export')}
-                  >
-                    <Download className="mr-2 h-4 w-4" />
-                    Export
-                  </Button>
-                  <Button 
-                    variant="outline"
-                    onClick={() => setActiveView('import')}
-                  >
-                    <Upload className="mr-2 h-4 w-4" />
-                    Import CSV
-                  </Button>
-                  <Button onClick={() => setActiveView('create-workplan')}>
-                    <Plus className="mr-2 h-4 w-4" />
-                    Add Workplan
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent>
-                {/* Enhanced Filters */}
-                <div className="flex flex-col sm:flex-row gap-4 mb-6 p-4 bg-muted/30 rounded-lg">
-                  <div className="flex-1">
-                    <div className="relative">
-                      <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        placeholder="Search activities, tasks, focus areas, responsible persons..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-8"
-                      />
-                    </div>
-                  </div>
-                  <Select value={statusFilter} onValueChange={setStatusFilter}>
-                    <SelectTrigger className="w-[140px]">
-                      <Filter className="h-4 w-4 mr-2" />
-                      <SelectValue placeholder="Status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Status</SelectItem>
-                      <SelectItem value="planned">Planned</SelectItem>
-                      <SelectItem value="in-progress">In Progress</SelectItem>
-                      <SelectItem value="completed">Completed</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Select value={quarterFilter} onValueChange={setQuarterFilter}>
-                    <SelectTrigger className="w-[120px]">
-                      <SelectValue placeholder="Quarter" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Quarters</SelectItem>
-                      {availableQuarters.map(quarter => (
-                        <SelectItem key={quarter} value={quarter}>{quarter}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <Select value={focusAreaFilter} onValueChange={setFocusAreaFilter}>
-                    <SelectTrigger className="w-[160px]">
-                      <SelectValue placeholder="Focus Area" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Focus Areas</SelectItem>
-                      {availableFocusAreas.map(area => (
-                        <SelectItem key={area} value={area}>{area}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Results count and filter actions */}
-                <div className="flex justify-between items-center mb-4">
-                  <div className="flex items-center gap-4">
-                    <span className="text-sm text-muted-foreground">
-                      Showing {filteredWorkplans.length} of {workplans.length} workplans
-                    </span>
-                    {hasActiveFilters && (
-                      <Badge variant="secondary" className="text-xs">
-                        Filters Active
-                      </Badge>
-                    )}
-                  </div>
-                  <div className="flex gap-2">
-                    {hasActiveFilters && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={clearAllFilters}
-                      >
-                        Clear All
-                      </Button>
-                    )}
-                  </div>
-                </div>
-
-                {/* ADDED: Horizontal scroll wrapper */}
-                <div className="w-full overflow-x-auto">
-                  <WorkplanTable 
-                    workplans={filteredWorkplans}
-                    onDeleteWorkplan={handleDeleteWorkplan}
-                    onEditWorkplan={handleEditWorkplan}
-                    onViewWorkplan={handleViewWorkplan}
-                    onBulkDelete={handleBulkDeleteWorkplans}
-                    onOpenMERL={handleOpenMERL} // NEW: MERL callback
-                  />
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {activeView === 'create-workplan' && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Create New Workplan</CardTitle>
-                <p className="text-sm text-muted-foreground">
-                  Use the comprehensive form to create a workplan
-                </p>
-              </CardHeader>
-              <CardContent>
-                <WorkplanForm 
-                  onSuccess={handleWorkplanCreated}
-                  onCancel={() => setActiveView('workplans')}
-                />
-              </CardContent>
-            </Card>
-          )}
-
-          {activeView === 'edit-workplan' && selectedWorkplan && (
-            <Card>
-              <CardHeader>
-                <div className="flex items-center gap-3 mb-2">
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    onClick={() => setActiveView('workplans')}
-                    className="h-8 w-8"
-                  >
-                    <ArrowLeft className="h-4 w-4" />
-                  </Button>
+          <TabsContent value={activeView} className="space-y-6">
+            {activeView === 'workplans' && (
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
                   <div>
-                    <CardTitle>Edit Workplan</CardTitle>
+                    <CardTitle>Workplans & Activities</CardTitle>
                     <p className="text-sm text-muted-foreground">
-                      {selectedWorkplan.activity_name}
+                      Manage all workplans and track MERL framework across {availableFocusAreas.length} focus areas
                     </p>
                   </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <WorkplanForm 
-                  workplan={selectedWorkplan}
-                  onSuccess={handleWorkplanCreated}
-                  onCancel={() => setActiveView('workplans')}
-                />
-              </CardContent>
-            </Card>
-          )}
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="outline"
+                      onClick={() => setActiveView('export')}
+                    >
+                      <Download className="mr-2 h-4 w-4" />
+                      Export
+                    </Button>
+                    <Button 
+                      variant="outline"
+                      onClick={() => setActiveView('import')}
+                    >
+                      <Upload className="mr-2 h-4 w-4" />
+                      Import CSV
+                    </Button>
+                    <Button onClick={() => setActiveView('create-workplan')}>
+                      <Plus className="mr-2 h-4 w-4" />
+                      Add Workplan
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {/* Enhanced Filters */}
+                  <div className="flex flex-col sm:flex-row gap-4 mb-6 p-4 bg-muted/30 rounded-lg">
+                    <div className="flex-1">
+                      <div className="relative">
+                        <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          placeholder="Search activities, tasks, focus areas, responsible persons..."
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                          className="pl-8"
+                        />
+                      </div>
+                    </div>
+                    <Select value={statusFilter} onValueChange={setStatusFilter}>
+                      <SelectTrigger className="w-[140px]">
+                        <Filter className="h-4 w-4 mr-2" />
+                        <SelectValue placeholder="Status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Status</SelectItem>
+                        <SelectItem value="planned">Planned</SelectItem>
+                        <SelectItem value="in-progress">In Progress</SelectItem>
+                        <SelectItem value="completed">Completed</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Select value={quarterFilter} onValueChange={setQuarterFilter}>
+                      <SelectTrigger className="w-[120px]">
+                        <SelectValue placeholder="Quarter" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Quarters</SelectItem>
+                        {availableQuarters.map(quarter => (
+                          <SelectItem key={quarter} value={quarter}>{quarter}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Select value={focusAreaFilter} onValueChange={setFocusAreaFilter}>
+                      <SelectTrigger className="w-[160px]">
+                        <SelectValue placeholder="Focus Area" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Focus Areas</SelectItem>
+                        {availableFocusAreas.map(area => (
+                          <SelectItem key={area} value={area}>{area}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-          {/* Analytics View */}
-          {activeView === 'analytics' && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Workplan Analytics</CardTitle>
-                <p className="text-sm text-muted-foreground">
-                  Comprehensive analytics and reporting across all workplans
-                </p>
-              </CardHeader>
-              <CardContent>
-                <WorkplanAnalytics 
-                  workplans={workplans}
-                  selectedWorkplanId={selectedWorkplan?.id}
-                />
-              </CardContent>
-            </Card>
-          )}
+                  {/* Results count and filter actions */}
+                  <div className="flex justify-between items-center mb-4">
+                    <div className="flex items-center gap-4">
+                      <span className="text-sm text-muted-foreground">
+                        Showing {filteredWorkplans.length} of {workplans.length} workplans
+                      </span>
+                      {hasActiveFilters && (
+                        <Badge variant="secondary" className="text-xs">
+                          Filters Active
+                        </Badge>
+                      )}
+                    </div>
+                    <div className="flex gap-2">
+                      {hasActiveFilters && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={clearAllFilters}
+                        >
+                          Clear All
+                        </Button>
+                      )}
+                    </div>
+                  </div>
 
-          {/* Export View */}
-          {activeView === 'export' && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Data Export</CardTitle>
-                <p className="text-sm text-muted-foreground">
-                  Export workplan data in various formats for reporting and analysis
-                </p>
-              </CardHeader>
-              <CardContent>
-                <ExportManager 
-                  workplans={workplans}
-                  selectedWorkplanId={selectedWorkplan?.id}
-                />
-              </CardContent>
-            </Card>
-          )}
+                  {/* Workplan Table */}
+                  <div className="w-full overflow-x-auto">
+                    <WorkplanTable 
+                      workplans={filteredWorkplans}
+                      onDeleteWorkplan={handleDeleteWorkplan}
+                      onEditWorkplan={handleEditWorkplan}
+                      onViewWorkplan={handleViewWorkplan}
+                      onBulkDelete={handleBulkDeleteWorkplans}
+                      onOpenMERL={handleOpenMERL}
+                      onFocusAreaSelect={handleFocusAreaSelect}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
-          {/* Import View */}
-          {activeView === 'import' && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Import Workplans</CardTitle>
-                <p className="text-sm text-muted-foreground">
-                  Bulk import workplans from CSV data
-                </p>
-              </CardHeader>
-              <CardContent>
-                <CSVImport onImportComplete={handleImportComplete} />
-                <Button 
-                  variant="outline" 
-                  onClick={() => setActiveView('workplans')}
-                  className="mt-4"
-                >
-                  Back to Workplans
-                </Button>
-              </CardContent>
-            </Card>
-          )}
-        </TabsContent>
-      </Tabs>
+            {activeView === 'create-workplan' && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Create New Workplan</CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    Use the comprehensive form to create a workplan
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <WorkplanForm 
+                    onSuccess={handleWorkplanCreated}
+                    onCancel={() => setActiveView('workplans')}
+                  />
+                </CardContent>
+              </Card>
+            )}
 
-      {/* NEW: MERL Card Popup */}
+            {activeView === 'edit-workplan' && selectedWorkplan && (
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center gap-3 mb-2">
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      onClick={() => setActiveView('workplans')}
+                      className="h-8 w-8"
+                    >
+                      <ArrowLeft className="h-4 w-4" />
+                    </Button>
+                    <div>
+                      <CardTitle>Edit Workplan</CardTitle>
+                      <p className="text-sm text-muted-foreground">
+                        {selectedWorkplan.activity_name}
+                      </p>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <WorkplanForm 
+                    workplan={selectedWorkplan}
+                    onSuccess={handleWorkplanCreated}
+                    onCancel={() => setActiveView('workplans')}
+                  />
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Analytics View */}
+            {activeView === 'analytics' && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Workplan Analytics</CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    Comprehensive analytics and reporting across all workplans
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <WorkplanAnalytics 
+                    workplans={workplans}
+                    selectedWorkplanId={selectedWorkplan?.id}
+                  />
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Export View */}
+            {activeView === 'export' && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Data Export</CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    Export workplan data in various formats for reporting and analysis
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <ExportManager 
+                    workplans={workplans}
+                    selectedWorkplanId={selectedWorkplan?.id}
+                  />
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Import View */}
+            {activeView === 'import' && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Import Workplans</CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    Bulk import workplans from CSV data
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <CSVImport onImportComplete={handleImportComplete} />
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setActiveView('workplans')}
+                    className="mt-4"
+                  >
+                    Back to Workplans
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+        </Tabs>
+      )}
+
+      {/* Focus Area Detail View */}
+      {selectedFocusArea && (
+        <FocusAreaDetail
+          focusArea={selectedFocusArea}
+          workplans={focusAreaWorkplans}
+          onBack={handleBackFromFocusArea}
+          onEditWorkplan={handleEditWorkplan}
+          onDeleteWorkplan={handleDeleteWorkplan}
+          onOpenMERL={handleOpenMERL}
+          onExportFocusArea={handleExportFocusArea}
+        />
+      )}
+
+      {/* MERL Card Popup */}
       {merlWorkplan && (
         <MERLCard 
           workplan={merlWorkplan}
