@@ -35,7 +35,7 @@ import {
   HeartHandshake,
   Building2
 } from 'lucide-react'
-import { WorkplanForm } from './WorkplanForm'
+import { WorkplanWizard } from './WorkplanWizard'
 import { WorkplanAnalytics } from './WorkplanAnalytics'
 import { ExportManager } from './ExportManager'
 import { CSVImport } from './CSVImport'
@@ -292,7 +292,6 @@ export function WorkplanManager() {
   }
 
   const handleViewWorkplan = (workplan: Workplan) => {
-    // Enhanced view with beautiful modal (would be implemented)
     alert(`Viewing: ${workplan.activity_name}\nStatus: ${workplan.status}\nProgress: ${workplan.progress}%`)
   }
 
@@ -356,7 +355,7 @@ export function WorkplanManager() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-6">
       <div className="max-w-7xl mx-auto space-y-8">
         
-        {/* Enhanced Stats Overview */}
+        {/* Enhanced Stats Overview - Only show when in workplans view */}
         {activeView === 'workplans' && activeFocusAreaTab && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <Card className="bg-gradient-to-br from-white to-blue-50 border-blue-100 shadow-lg hover:shadow-xl transition-all duration-300">
@@ -445,7 +444,7 @@ export function WorkplanManager() {
         {/* Beautiful Navigation Tabs */}
         <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl rounded-3xl">
           <CardContent className="p-0">
-            <Tabs value={activeView} onValueChange={(value: any) => setActiveView(value)}>
+            <Tabs value={activeView} onValueChange={(value: any) => setActiveView(value)} className="space-y-6">
               <div className="px-8 pt-6">
                 <TabsList className="grid w-full grid-cols-5 bg-gradient-to-r from-blue-50 to-purple-50 p-1 rounded-2xl">
                   {[
@@ -469,11 +468,11 @@ export function WorkplanManager() {
                 </TabsList>
               </div>
 
-              <TabsContent value={activeView} className="m-0">
-                {/* WORKPLANS TAB - BEAUTIFUL REDESIGN */}
+              {/* WORKPLANS TAB CONTENT */}
+              <TabsContent value="workplans" className="m-0 p-8">
                 {activeView === 'workplans' && (
-                  <div className="p-8 space-y-8">
-                    {/* Focus Area Tabs Navigation - Enhanced */}
+                  <div className="space-y-8">
+                    {/* Focus Area Tabs Navigation */}
                     {focusAreaTabs.length > 0 && (
                       <>
                         <div className="space-y-4">
@@ -513,7 +512,7 @@ export function WorkplanManager() {
                             </Button>
                           </div>
 
-                          {/* Program Context Header - Enhanced */}
+                          {/* Program Context Header */}
                           {activeFocusAreaTab && (
                             <div className={`p-6 rounded-2xl bg-gradient-to-r ${getStatsGradient(activeFocusAreaTab.color)} text-white shadow-lg`}>
                               <div className="flex items-center justify-between">
@@ -539,7 +538,7 @@ export function WorkplanManager() {
                           )}
                         </div>
 
-                        {/* Search and Filters - Enhanced */}
+                        {/* Search and Filters */}
                         <Card className="bg-white/60 backdrop-blur-sm border-0 shadow-lg rounded-2xl overflow-hidden">
                           <CardContent className="p-6">
                             <div className="flex flex-col lg:flex-row gap-4 items-center">
@@ -594,7 +593,7 @@ export function WorkplanManager() {
                           </CardContent>
                         </Card>
 
-                        {/* Activity Cards - Beautiful Design */}
+                        {/* Activity Cards */}
                         <div className="space-y-4">
                           {filteredWorkplans.map((workplan) => {
                             const statusInfo = getStatusInfo(workplan.status)
@@ -849,8 +848,107 @@ export function WorkplanManager() {
                     )}
                   </div>
                 )}
+              </TabsContent>
 
-                {/* Other tabs would follow with similar beautiful design */}
+              {/* ANALYTICS TAB CONTENT */}
+              <TabsContent value="analytics" className="m-0 p-8">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Workplan Analytics</CardTitle>
+                    <p className="text-sm text-muted-foreground">
+                      Comprehensive analytics and reporting across all workplans
+                    </p>
+                  </CardHeader>
+                  <CardContent>
+                    <WorkplanAnalytics 
+                      workplans={workplans}
+                      selectedWorkplanId={selectedWorkplan?.id}
+                    />
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              {/* EXPORT TAB CONTENT */}
+              <TabsContent value="export" className="m-0 p-8">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Data Export</CardTitle>
+                    <p className="text-sm text-muted-foreground">
+                      Export workplan data in various formats for reporting and analysis
+                    </p>
+                  </CardHeader>
+                  <CardContent>
+                    <ExportManager 
+                      workplans={workplans}
+                      selectedWorkplanId={selectedWorkplan?.id}
+                    />
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              {/* IMPORT TAB CONTENT */}
+              <TabsContent value="import" className="m-0 p-8">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Import Workplans</CardTitle>
+                    <p className="text-sm text-muted-foreground">
+                      Bulk import workplans from CSV data
+                    </p>
+                  </CardHeader>
+                  <CardContent>
+                    <CSVImport onImportComplete={handleImportComplete} />
+                    <Button 
+                      variant="outline" 
+                      onClick={() => setActiveView('workplans')}
+                      className="mt-4"
+                    >
+                      Back to Workplans
+                    </Button>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              {/* CREATE WORKPLAN VIEW */}
+              <TabsContent value="create-workplan" className="m-0 p-0">
+                <WorkplanWizard 
+                  onSuccess={handleWorkplanCreated}
+                  onCancel={() => setActiveView('workplans')}
+                />
+              </TabsContent>
+
+              {/* EDIT WORKPLAN VIEW */}
+              <TabsContent value="edit-workplan" className="m-0 p-0">
+                {selectedWorkplan && (
+                  <div className="p-8">
+                    <Card>
+                      <CardHeader>
+                        <div className="flex items-center gap-3 mb-2">
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            onClick={() => setActiveView('workplans')}
+                            className="h-8 w-8"
+                          >
+                            <ArrowLeft className="h-4 w-4" />
+                          </Button>
+                          <div>
+                            <CardTitle>Edit Workplan</CardTitle>
+                            <p className="text-sm text-muted-foreground">
+                              {selectedWorkplan.activity_name}
+                            </p>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <WorkplanForm 
+                          workplan={selectedWorkplan}
+                          onSuccess={handleWorkplanCreated}
+                          onCancel={() => setActiveView('workplans')}
+                        />
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
               </TabsContent>
             </Tabs>
           </CardContent>
