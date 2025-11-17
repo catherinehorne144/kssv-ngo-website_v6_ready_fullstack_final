@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
 import { Badge } from '@/components/ui/badge'
-import { AlertCircle, CheckCircle, Target, Calendar, DollarSign, Users, FileText, Shield, BookOpen, Lightbulb } from 'lucide-react'
+import { AlertCircle, CheckCircle, Target, Calendar, DollarSign, Users, Loader2 } from 'lucide-react'
 import type { Workplan, WorkplanFormData } from '@/lib/types/workplan'
 
 interface WorkplanFormProps {
@@ -24,35 +24,15 @@ const activityTemplates = {
   // GBV Management Activities
   'Referrals & linkages': {
     tasks_description: 'Identify survivor needs, Schedule appointments with service providers, Contact referral partners, Arrange safe transport, Record case details, Conduct follow-up visits',
-    kpi: 'Number of survivors referred, Satisfaction rate percentage, Average processing time in days, Follow-up completion rate',
-    risks: 'Breach of confidentiality, Re-traumatization during process, Service provider unavailable, Transportation challenges',
-    mitigation_measures: 'Safety planning with survivors, Data protection protocols, Backup provider network, Secure transportation arrangements',
-    output: 'Safe access to essential services, Informed consent documentation, Improved psychosocial wellbeing, Timely healthcare access',
-    outcome: 'Survivors expressing satisfaction with support services, Increased collaboration among stakeholders, More survivors seeking support, Developed SOPs for referrals'
   },
   'Chief barazas': {
     tasks_description: 'Community consultation on available dates, Develop discussion topics, Arrange qualified facilitation, Mobilize community participants, Document proceedings and outcomes',
-    kpi: 'Number of participants reached, Knowledge increase percentage, Community groups formed, Cases reported after awareness',
-    risks: 'Low community attendance, Sensitive topics mishandled, Security concerns during events, Cultural resistance',
-    mitigation_measures: 'Community engagement strategies, Trained facilitators on GBV issues, Safety protocols implementation, Cultural sensitivity training',
-    output: 'Increased community knowledge and awareness, Formation of community support networks, Identification of GBV risks and gaps',
-    outcome: 'Enhanced community awareness on GBV issues, Strengthened referral pathways, Increased reporting of GBV cases'
   },
   'Psychological counselling': {
     tasks_description: 'Schedule counselling sessions, Obtain informed consent from survivors, Conduct psychological assessments, Provide therapeutic recommendations, Document session notes, Conduct follow-up assessments',
-    kpi: 'Number of clients served, Improved psychosocial functioning percentage, Client satisfaction rate, Referral completion rate',
-    risks: 'Re-traumatization during sessions, Provider burnout and compassion fatigue, Confidentiality breaches, Stigma concerns',
-    mitigation_measures: 'Trauma-informed care approaches, Staff support and debriefing systems, Data protection protocols, Community sensitization',
-    output: 'Psychological assessment reports, Counseling session documentation, Progress monitoring reports',
-    outcome: 'Improved mental health outcomes, Better coping mechanisms, Enhanced psychosocial wellbeing'
   },
   'Monthly group saving and GSL meeting': {
     tasks_description: 'Schedule monthly meetings, Prepare previous minutes, Set meeting agendas, Facilitate table banking activities, Document financial transactions, Record member participation',
-    kpi: 'Meeting attendance rate, Savings amount increment, Loan repayment rate, Member satisfaction score',
-    risks: 'Financial mismanagement, Group conflicts, Security during cash handling, Member dropout',
-    mitigation_measures: 'Transparent financial systems, Conflict resolution mechanisms, Safe cash handling procedures, Member retention strategies',
-    output: 'Monthly meeting minutes, Financial transaction records, Member attendance records',
-    outcome: 'Improved economic resilience, Enhanced group governance, Reduced financial vulnerability'
   }
 }
 
@@ -122,7 +102,6 @@ const resourcePersons = [
 export function WorkplanForm({ workplan, onSuccess, onCancel }: WorkplanFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [selectedFocusArea, setSelectedFocusArea] = useState(workplan?.focus_area || '')
-  const [showTemplateSuggestions, setShowTemplateSuggestions] = useState(true)
   
   const [formData, setFormData] = useState<WorkplanFormData>({
     focus_area: workplan?.focus_area || '',
@@ -132,20 +111,10 @@ export function WorkplanForm({ workplan, onSuccess, onCancel }: WorkplanFormProp
     tasks_description: workplan?.tasks_description || '',
     target: workplan?.target || '',
     budget_allocated: workplan?.budget_allocated?.toString() || '',
-    output: workplan?.output || '',
-    outcome: workplan?.outcome || '',
-    kpi: workplan?.kpi || '',
-    means_of_verification: workplan?.means_of_verification || '',
-    risks: workplan?.risks || '',
-    mitigation_measures: workplan?.mitigation_measures || '',
     resource_person: workplan?.resource_person || '',
     status: workplan?.status || 'planned',
     progress: workplan?.progress?.toString() || '0',
-    learning_development: workplan?.learning_development || '',
-    self_evaluation: workplan?.self_evaluation || '',
-    notes: workplan?.notes || '',
     public_visible: workplan?.public_visible !== undefined ? workplan.public_visible : true,
-    program_image: workplan?.program_image || ''
   })
 
   const handleChange = (field: keyof WorkplanFormData, value: string | boolean) => {
@@ -161,15 +130,10 @@ export function WorkplanForm({ workplan, onSuccess, onCancel }: WorkplanFormProp
     
     // Apply template if available
     const template = activityTemplates[activityName as keyof typeof activityTemplates]
-    if (template && showTemplateSuggestions) {
+    if (template) {
       setFormData(prev => ({
         ...prev,
         tasks_description: template.tasks_description,
-        kpi: template.kpi,
-        risks: template.risks,
-        mitigation_measures: template.mitigation_measures,
-        output: template.output || prev.output,
-        outcome: template.outcome || prev.outcome
       }))
     }
   }
@@ -258,40 +222,10 @@ export function WorkplanForm({ workplan, onSuccess, onCancel }: WorkplanFormProp
 
   const currentActivities = selectedFocusArea ? activityTypes[selectedFocusArea as keyof typeof activityTypes] || [] : []
 
-  // Check if current activity has a template
-  const hasTemplate = useMemo(() => {
-    return activityTemplates.hasOwnProperty(formData.activity_name)
-  }, [formData.activity_name])
-
   const selectedFocusAreaColor = focusAreas.find(area => area.name === formData.focus_area)?.color || 'gray'
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Template Suggestions Toggle */}
-      <Card>
-        <CardContent className="pt-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <Lightbulb className="h-5 w-5 text-yellow-500" />
-              <Label htmlFor="template-suggestions" className="text-base">
-                Smart Template Suggestions
-              </Label>
-            </div>
-            <Switch 
-              id="template-suggestions" 
-              checked={showTemplateSuggestions}
-              onCheckedChange={setShowTemplateSuggestions}
-            />
-          </div>
-          <p className="text-sm text-muted-foreground mt-2">
-            {showTemplateSuggestions 
-              ? 'Templates will auto-fill when you select activities' 
-              : 'Templates disabled - fill all fields manually'
-            }
-          </p>
-        </CardContent>
-      </Card>
-
       {/* Foundation Section */}
       <Card>
         <CardHeader>
@@ -346,11 +280,6 @@ export function WorkplanForm({ workplan, onSuccess, onCancel }: WorkplanFormProp
               <Label htmlFor="activity_name" className="flex items-center gap-2">
                 Activity Name *
                 {!formData.activity_name && <AlertCircle className="h-4 w-4 text-red-500" />}
-                {hasTemplate && showTemplateSuggestions && (
-                  <Badge variant="secondary" className="text-xs">
-                    Template Available
-                  </Badge>
-                )}
               </Label>
               <Select 
                 value={formData.activity_name} 
@@ -365,9 +294,6 @@ export function WorkplanForm({ workplan, onSuccess, onCancel }: WorkplanFormProp
                     <SelectItem key={activity} value={activity}>
                       <div className="flex items-center justify-between">
                         <span>{activity}</span>
-                        {activityTemplates.hasOwnProperty(activity) && showTemplateSuggestions && (
-                          <Lightbulb className="h-3 w-3 text-yellow-500" />
-                        )}
                       </div>
                     </SelectItem>
                   ))}
@@ -425,7 +351,7 @@ export function WorkplanForm({ workplan, onSuccess, onCancel }: WorkplanFormProp
             </Label>
             <Textarea
               id="tasks_description"
-              placeholder="Breakdown of activity into actionable steps... (This field will auto-fill when you select an activity with a template)"
+              placeholder="Breakdown of activity into actionable steps..."
               rows={4}
               value={formData.tasks_description}
               onChange={(e) => handleChange('tasks_description', e.target.value)}
@@ -555,174 +481,6 @@ export function WorkplanForm({ workplan, onSuccess, onCancel }: WorkplanFormProp
                 )}
               </div>
             </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* MERL Core Framework Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5" />
-            MERL Core Framework (Columns 7-11)
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Output */}
-          <div className="space-y-2">
-            <Label htmlFor="output">Output</Label>
-            <Textarea
-              id="output"
-              placeholder="Immediate deliverables and direct results of the activity..."
-              rows={3}
-              value={formData.output}
-              onChange={(e) => handleChange('output', e.target.value)}
-            />
-            <p className="text-xs text-muted-foreground">
-              What are the direct, tangible products or services delivered?
-            </p>
-          </div>
-
-          {/* Outcome */}
-          <div className="space-y-2">
-            <Label htmlFor="outcome">Outcome</Label>
-            <Textarea
-              id="outcome"
-              placeholder="Short-term and medium-term changes, effects, or benefits resulting from the activity..."
-              rows={3}
-              value={formData.outcome}
-              onChange={(e) => handleChange('outcome', e.target.value)}
-            />
-            <p className="text-xs text-muted-foreground">
-              What changes do you expect to see as a result of these outputs?
-            </p>
-          </div>
-
-          {/* KPI */}
-          <div className="space-y-2">
-            <Label htmlFor="kpi">Key Performance Indicators (KPIs)</Label>
-            <Textarea
-              id="kpi"
-              placeholder="Specific, measurable indicators to track progress and success..."
-              rows={3}
-              value={formData.kpi}
-              onChange={(e) => handleChange('kpi', e.target.value)}
-            />
-            <p className="text-xs text-muted-foreground">
-              How will you measure success? Include specific metrics and targets.
-            </p>
-          </div>
-
-          {/* Means of Verification */}
-          <div className="space-y-2">
-            <Label htmlFor="means_of_verification">Means of Verification</Label>
-            <Textarea
-              id="means_of_verification"
-              placeholder="Sources of information and methods to verify the reported results..."
-              rows={3}
-              value={formData.means_of_verification}
-              onChange={(e) => handleChange('means_of_verification', e.target.value)}
-            />
-            <p className="text-xs text-muted-foreground">
-              How will you prove the results? (e.g., reports, surveys, attendance records, photos)
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Risk & Responsibility Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Shield className="h-5 w-5" />
-            Risk & Responsibility (Columns 12-14)
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Risks */}
-          <div className="space-y-2">
-            <Label htmlFor="risks">Risks</Label>
-            <Textarea
-              id="risks"
-              placeholder="Potential challenges, obstacles, or negative impacts that could affect the activity..."
-              rows={3}
-              value={formData.risks}
-              onChange={(e) => handleChange('risks', e.target.value)}
-            />
-            <p className="text-xs text-muted-foreground">
-              Identify potential risks to implementation, beneficiaries, or staff
-            </p>
-          </div>
-
-          {/* Mitigation Measures */}
-          <div className="space-y-2">
-            <Label htmlFor="mitigation_measures">Mitigation Measures</Label>
-            <Textarea
-              id="mitigation_measures"
-              placeholder="Strategies and actions to prevent or minimize the identified risks..."
-              rows={3}
-              value={formData.mitigation_measures}
-              onChange={(e) => handleChange('mitigation_measures', e.target.value)}
-            />
-            <p className="text-xs text-muted-foreground">
-              What steps will you take to address each identified risk?
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Learning & Adaptation Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <BookOpen className="h-5 w-5" />
-            Learning & Adaptation (Columns 15-17)
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Learning & Development */}
-          <div className="space-y-2">
-            <Label htmlFor="learning_development">Learning & Development</Label>
-            <Textarea
-              id="learning_development"
-              placeholder="Skills, knowledge, or capacities gained through implementing this activity..."
-              rows={3}
-              value={formData.learning_development}
-              onChange={(e) => handleChange('learning_development', e.target.value)}
-            />
-            <p className="text-xs text-muted-foreground">
-              What did the team or organization learn from this activity?
-            </p>
-          </div>
-
-          {/* Self Evaluation */}
-          <div className="space-y-2">
-            <Label htmlFor="self_evaluation">Self Evaluation</Label>
-            <Textarea
-              id="self_evaluation"
-              placeholder="Team reflection on successes, challenges, and areas for improvement..."
-              rows={3}
-              value={formData.self_evaluation}
-              onChange={(e) => handleChange('self_evaluation', e.target.value)}
-            />
-            <p className="text-xs text-muted-foreground">
-              How would you rate the implementation and outcomes of this activity?
-            </p>
-          </div>
-
-          {/* Notes */}
-          <div className="space-y-2">
-            <Label htmlFor="notes">Notes</Label>
-            <Textarea
-              id="notes"
-              placeholder="Additional observations, contextual information, or special considerations..."
-              rows={3}
-              value={formData.notes}
-              onChange={(e) => handleChange('notes', e.target.value)}
-            />
-            <p className="text-xs text-muted-foreground">
-              Any other relevant information about this activity
-            </p>
           </div>
         </CardContent>
       </Card>

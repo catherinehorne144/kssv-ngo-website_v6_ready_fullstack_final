@@ -1,42 +1,35 @@
-// app/api/workplans/[id]/route.ts
-import { NextRequest, NextResponse } from 'next/server'
-import { createServerClientInstance } from "@/lib/supabase/server"
+import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
 
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    const supabase = createServerClientInstance()
-    
-    const { data: workplan, error } = await supabase
-      .from("work_plans")
-      .select("*")
-      .eq("id", params.id)
-      .single()
+    const { data, error } = await supabase
+      .from('workplans')
+      .select('*')
+      .eq('id', params.id)
+      .single();
 
     if (error) {
-      console.error("❌ Supabase error fetching workplan:", error)
-      return NextResponse.json(
-        { error: "Workplan not found", details: error.message },
-        { status: 404 }
-      )
+      console.error('Error fetching workplan:', error);
+      return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
-    if (!workplan) {
-      return NextResponse.json(
-        { error: "Workplan not found" },
-        { status: 404 }
-      )
+    if (!data) {
+      return NextResponse.json({ error: 'Workplan not found' }, { status: 404 });
     }
 
-    return NextResponse.json(workplan)
+    return NextResponse.json(data);
   } catch (error) {
-    console.error("❌ Server error fetching workplan:", error)
-    return NextResponse.json(
-      { error: "Failed to fetch workplan", details: error instanceof Error ? error.message : "Unknown error" },
-      { status: 500 }
-    )
+    console.error('Error in workplan GET:', error);
+    return NextResponse.json({ error: 'Failed to fetch workplan' }, { status: 500 });
   }
 }
 
@@ -45,60 +38,54 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    const body = await request.json()
-    console.log("📝 Updating workplan:", params.id, body)
+    const updates = await request.json();
 
-    const supabase = createServerClientInstance()
-
-    const updatedWorkplan = {
-      focus_area: body.focus_area,
-      activity_name: body.activity_name,
-      timeline_text: body.timeline_text,
-      quarter: body.quarter,
-      tasks_description: body.tasks_description,
-      target: body.target,
-      budget_allocated: parseInt(body.budget_allocated) || 0,
-      output: body.output,
-      outcome: body.outcome,
-      kpi: body.kpi,
-      means_of_verification: body.means_of_verification,
-      risks: body.risks,
-      mitigation_measures: body.mitigation_measures,
-      resource_person: body.resource_person,
-      status: body.status || 'planned',
-      progress: parseInt(body.progress) || 0,
-      learning_development: body.learning_development,
-      self_evaluation: body.self_evaluation,
-      notes: body.notes,
-      public_visible: body.public_visible !== undefined ? body.public_visible : true,
-      program_image: body.program_image || null,
-      updated_at: new Date().toISOString()
+    // Validate required fields if they are being updated
+    const requiredFields = ['focus_area', 'activity_name', 'timeline_text', 'tasks_description'];
+    const missingFields = requiredFields.filter(field => updates[field] === '');
+    
+    if (missingFields.length > 0) {
+      return NextResponse.json(
+        { error: `Required fields cannot be empty: ${missingFields.join(', ')}` },
+        { status: 400 }
+      );
     }
+
+    // Prepare update data (only include fields that exist in our schema)
+    const updateData: any = {};
+    
+    if (updates.focus_area !== undefined) updateData.focus_area = updates.focus_area;
+    if (updates.activity_name !== undefined) updateData.activity_name = updates.activity_name;
+    if (updates.timeline_text !== undefined) updateData.timeline_text = updates.timeline_text;
+    if (updates.quarter !== undefined) updateData.quarter = updates.quarter;
+    if (updates.tasks_description !== undefined) updateData.tasks_description = updates.tasks_description;
+    if (updates.target !== undefined) updateData.target = updates.target;
+    if (updates.budget_allocated !== undefined) updateData.budget_allocated = updates.budget_allocated;
+    if (updates.resource_person !== undefined) updateData.resource_person = updates.resource_person;
+    if (updates.status !== undefined) updateData.status = updates.status;
+    if (updates.progress !== undefined) updateData.progress = updates.progress;
+    if (updates.public_visible !== undefined) updateData.public_visible = updates.public_visible;
 
     const { data, error } = await supabase
-      .from("work_plans")
-      .update(updatedWorkplan)
-      .eq("id", params.id)
+      .from('workplans')
+      .update(updateData)
+      .eq('id', params.id)
       .select()
-      .single()
+      .single();
 
     if (error) {
-      console.error("❌ Supabase update error:", error)
-      return NextResponse.json(
-        { error: "Failed to update workplan", details: error.message },
-        { status: 500 }
-      )
+      console.error('Error updating workplan:', error);
+      return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
-    console.log("✅ Workplan updated successfully:", data)
-    return NextResponse.json(data)
+    if (!data) {
+      return NextResponse.json({ error: 'Workplan not found' }, { status: 404 });
+    }
 
+    return NextResponse.json(data);
   } catch (error) {
-    console.error("❌ Server error updating workplan:", error)
-    return NextResponse.json(
-      { error: "Failed to update workplan", details: error instanceof Error ? error.message : "Unknown error" },
-      { status: 500 }
-    )
+    console.error('Error in workplan PUT:', error);
+    return NextResponse.json({ error: 'Failed to update workplan' }, { status: 500 });
   }
 }
 
@@ -107,46 +94,19 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const supabase = createServerClientInstance()
-
-    // First, check if workplan exists
-    const { data: existingWorkplan, error: fetchError } = await supabase
-      .from("work_plans")
-      .select("id, activity_name")
-      .eq("id", params.id)
-      .single()
-
-    if (fetchError || !existingWorkplan) {
-      return NextResponse.json(
-        { error: "Workplan not found" },
-        { status: 404 }
-      )
-    }
-
     const { error } = await supabase
-      .from("work_plans")
+      .from('workplans')
       .delete()
-      .eq("id", params.id)
+      .eq('id', params.id);
 
     if (error) {
-      console.error("❌ Supabase delete error:", error)
-      return NextResponse.json(
-        { error: "Failed to delete workplan", details: error.message },
-        { status: 500 }
-      )
+      console.error('Error deleting workplan:', error);
+      return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
-    console.log("✅ Workplan deleted successfully:", params.id)
-    return NextResponse.json({ 
-      success: true, 
-      message: `Workplan "${existingWorkplan.activity_name}" deleted successfully` 
-    })
-
+    return NextResponse.json({ message: 'Workplan deleted successfully' });
   } catch (error) {
-    console.error("❌ Server error deleting workplan:", error)
-    return NextResponse.json(
-      { error: "Failed to delete workplan", details: error instanceof Error ? error.message : "Unknown error" },
-      { status: 500 }
-    )
+    console.error('Error in workplan DELETE:', error);
+    return NextResponse.json({ error: 'Failed to delete workplan' }, { status: 500 });
   }
 }

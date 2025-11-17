@@ -16,10 +16,7 @@ import {
   ArrowLeft, 
   Check, 
   Target, 
-  Calendar, 
-  FileText, 
-  Shield, 
-  BookOpen,
+  Calendar,
   DollarSign,
   Users,
   AlertCircle,
@@ -32,7 +29,7 @@ interface WorkplanWizardProps {
   onCancel?: () => void
 }
 
-type WizardStep = 'foundation' | 'planning' | 'merl' | 'risk' | 'learning' | 'review'
+type WizardStep = 'foundation' | 'planning' | 'review'
 
 interface WorkplanFormData {
   focus_area: string
@@ -42,18 +39,9 @@ interface WorkplanFormData {
   tasks_description: string
   target: string
   budget_allocated: string
-  output: string
-  outcome: string
-  kpi: string
-  means_of_verification: string
-  risks: string
-  mitigation_measures: string
   resource_person: string
   status: string
   progress: string
-  learning_development: string
-  self_evaluation: string
-  notes: string
   public_visible: boolean
 }
 
@@ -67,35 +55,15 @@ const focusAreas = [
 const activityTemplates = {
   'Referrals & linkages': {
     tasks_description: 'Identify survivor needs and consent, Schedule appointments with service providers, Contact referral partners, Arrange safe transportation, Record case details and documentation, Conduct follow-up visits and assessments',
-    kpi: 'Number of survivors referred monthly, Satisfaction rate percentage (target: 85%), Average processing time in days, Follow-up completion rate, Service provider responsiveness',
-    risks: 'Breach of confidentiality and data privacy, Re-traumatization during referral process, Service provider unavailable or overloaded, Transportation challenges and safety concerns, Cultural and language barriers',
-    mitigation_measures: 'Safety planning with survivors before referrals, Strict data protection and confidentiality protocols, Establish backup provider network, Secure and vetted transportation arrangements, Cultural sensitivity training for staff',
-    output: 'Safe access to essential services (health, legal, shelter), Informed consent documentation completed, Improved psychosocial wellbeing assessments, Timely healthcare access reports, Referral pathway documentation',
-    outcome: 'Survivors expressing satisfaction with support services (target: 90%), Increased collaboration among stakeholders, More survivors seeking support from the organization, Developed SOPs for referrals and follow-ups, Strengthened community support networks'
   },
   'Chief barazas': {
     tasks_description: 'Community consultation on available dates and venues, Develop culturally appropriate discussion topics, Arrange qualified facilitation and translation, Mobilize community participants through local leaders, Document proceedings and community feedback, Develop action plans from discussions',
-    kpi: 'Number of participants reached per session, Knowledge increase percentage (pre/post assessment), Community support groups formed, GBV cases reported after awareness, Community action plans developed',
-    risks: 'Low community attendance and participation, Sensitive topics mishandled or misunderstood, Security concerns during community events, Cultural resistance or traditional practices, Weather and logistical challenges',
-    mitigation_measures: 'Community engagement through trusted local leaders, Trained facilitators on GBV and cultural sensitivity, Safety protocols and venue security, Collaboration with local authorities, Contingency plans for weather and logistics',
-    output: 'Increased community knowledge and awareness reports, Formation of community support networks, Identification of GBV risks and protection gaps, Community feedback and suggestion reports, Documentation of traditional protection mechanisms',
-    outcome: 'Enhanced community awareness on GBV issues (target: 80% increase), Strengthened referral pathways and reporting mechanisms, Increased reporting of GBV cases to authorities, Community-led protection initiatives established, Improved trust between community and service providers'
   },
   'Psychological counselling': {
     tasks_description: 'Schedule confidential counselling sessions, Obtain informed consent and explain process, Conduct psychological assessments and screening, Provide trauma-informed therapeutic interventions, Document session notes and progress, Conduct follow-up assessments and support',
-    kpi: 'Number of clients served monthly, Improved psychosocial functioning scores, Client satisfaction rate (target: 90%), Referral completion rate for additional services, Reduction in trauma symptoms',
-    risks: 'Re-traumatization during therapeutic process, Provider burnout and compassion fatigue, Confidentiality breaches and privacy concerns, Stigma affecting service access, Limited follow-up capacity',
-    mitigation_measures: 'Trauma-informed care approaches and techniques, Regular staff support and debriefing sessions, Robust data protection and privacy protocols, Community sensitization to reduce stigma, Structured follow-up and referral systems',
-    output: 'Psychological assessment and screening reports, Individual and group counseling session documentation, Progress monitoring and evaluation reports, Client feedback and satisfaction surveys, Referral and follow-up tracking',
-    outcome: 'Improved mental health and psychosocial wellbeing, Better coping mechanisms and resilience, Enhanced daily functioning and social integration, Reduced psychological distress symptoms, Increased help-seeking behavior for mental health'
   },
   'Monthly group saving and GSL meeting': {
     tasks_description: 'Schedule regular monthly meeting dates, Prepare and review previous meeting minutes, Set and communicate meeting agendas, Facilitate table banking and savings activities, Document financial transactions and decisions, Record member participation and contributions',
-    kpi: 'Monthly meeting attendance rate (target: 85%), Total savings amount and growth, Loan repayment and recovery rate, Member satisfaction and feedback scores, New membership applications',
-    risks: 'Financial mismanagement or misappropriation, Group conflicts and relationship issues, Security during cash handling and transport, Member dropout and participation decline, External economic pressures',
-    mitigation_measures: 'Transparent financial systems and record-keeping, Conflict resolution mechanisms and facilitation, Safe cash handling and banking procedures, Member retention and engagement strategies, Economic resilience training and planning',
-    output: 'Monthly meeting minutes and attendance records, Financial transaction and savings ledgers, Member participation and contribution reports, Group governance and decision documentation, Training and capacity building records',
-    outcome: 'Improved economic resilience and security, Enhanced group governance and leadership, Reduced financial vulnerability among members, Increased social cohesion and support, Sustainable savings and loan systems'
   }
 }
 
@@ -115,18 +83,9 @@ export function WorkplanWizard({ onSuccess, onCancel }: WorkplanWizardProps) {
     tasks_description: '',
     target: '',
     budget_allocated: '',
-    output: '',
-    outcome: '',
-    kpi: '',
-    means_of_verification: '',
-    risks: '',
-    mitigation_measures: '',
     resource_person: '',
     status: 'planned',
     progress: '0',
-    learning_development: '',
-    self_evaluation: '',
-    notes: '',
     public_visible: true
   })
 
@@ -152,11 +111,6 @@ export function WorkplanWizard({ onSuccess, onCancel }: WorkplanWizardProps) {
       setFormData(prev => ({
         ...prev,
         tasks_description: template.tasks_description,
-        kpi: template.kpi,
-        risks: template.risks,
-        mitigation_measures: template.mitigation_measures,
-        output: template.output,
-        outcome: template.outcome
       }))
     }
   }
@@ -204,7 +158,7 @@ export function WorkplanWizard({ onSuccess, onCancel }: WorkplanWizardProps) {
 
   // Navigation
   const nextStep = () => {
-    const steps: WizardStep[] = ['foundation', 'planning', 'merl', 'risk', 'learning', 'review']
+    const steps: WizardStep[] = ['foundation', 'planning', 'review']
     const currentIndex = steps.indexOf(currentStep)
     if (currentIndex < steps.length - 1) {
       setCurrentStep(steps[currentIndex + 1])
@@ -212,7 +166,7 @@ export function WorkplanWizard({ onSuccess, onCancel }: WorkplanWizardProps) {
   }
 
   const prevStep = () => {
-    const steps: WizardStep[] = ['foundation', 'planning', 'merl', 'risk', 'learning', 'review']
+    const steps: WizardStep[] = ['foundation', 'planning', 'review']
     const currentIndex = steps.indexOf(currentStep)
     if (currentIndex > 0) {
       setCurrentStep(steps[currentIndex - 1])
@@ -221,7 +175,7 @@ export function WorkplanWizard({ onSuccess, onCancel }: WorkplanWizardProps) {
 
   // Calculate progress percentage
   const progressPercentage = useMemo(() => {
-    const steps: WizardStep[] = ['foundation', 'planning', 'merl', 'risk', 'learning', 'review']
+    const steps: WizardStep[] = ['foundation', 'planning', 'review']
     const currentIndex = steps.indexOf(currentStep)
     return Math.round((currentIndex / (steps.length - 1)) * 100)
   }, [currentStep])
@@ -271,9 +225,6 @@ export function WorkplanWizard({ onSuccess, onCancel }: WorkplanWizardProps) {
   const steps = [
     { id: 'foundation' as const, title: 'Foundation', icon: Target, description: 'Basic activity information' },
     { id: 'planning' as const, title: 'Planning', icon: Calendar, description: 'Resources and timeline' },
-    { id: 'merl' as const, title: 'MERL Core', icon: FileText, description: 'Monitoring framework' },
-    { id: 'risk' as const, title: 'Risk', icon: Shield, description: 'Risk management' },
-    { id: 'learning' as const, title: 'Learning', icon: BookOpen, description: 'Evaluation and learning' },
     { id: 'review' as const, title: 'Review', icon: Check, description: 'Final review' }
   ]
 
@@ -356,9 +307,6 @@ export function WorkplanWizard({ onSuccess, onCancel }: WorkplanWizardProps) {
           <CardTitle className="flex items-center gap-2">
             {currentStep === 'foundation' && <Target className="h-5 w-5" />}
             {currentStep === 'planning' && <Calendar className="h-5 w-5" />}
-            {currentStep === 'merl' && <FileText className="h-5 w-5" />}
-            {currentStep === 'risk' && <Shield className="h-5 w-5" />}
-            {currentStep === 'learning' && <BookOpen className="h-5 w-5" />}
             {currentStep === 'review' && <Check className="h-5 w-5" />}
             {steps.find(step => step.id === currentStep)?.title}
           </CardTitle>
@@ -598,12 +546,26 @@ export function WorkplanWizard({ onSuccess, onCancel }: WorkplanWizardProps) {
                   </div>
                 </div>
               </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="public_visible" className="flex items-center gap-2">
+                  Visibility
+                </Label>
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="public_visible"
+                    checked={formData.public_visible}
+                    onCheckedChange={(checked) => handleChange('public_visible', checked)}
+                  />
+                  <Label htmlFor="public_visible">
+                    {formData.public_visible ? 'Public (Visible to all)' : 'Private (Admin only)'}
+                  </Label>
+                </div>
+              </div>
             </div>
           )}
 
-          {/* Steps 3-5 remain similar but enhanced with better placeholders and descriptions */}
-
-          {/* Step 6: Review - Enhanced with more comprehensive summary */}
+          {/* Step 3: Review */}
           {currentStep === 'review' && (
             <div className="space-y-6">
               <Card>
@@ -682,33 +644,6 @@ export function WorkplanWizard({ onSuccess, onCancel }: WorkplanWizardProps) {
                       </div>
                     </div>
                   </div>
-
-                  {/* MERL Framework Summary */}
-                  {(formData.output || formData.outcome || formData.kpi) && (
-                    <div className="space-y-3">
-                      <h4 className="font-semibold">MERL Framework</h4>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        {formData.output && (
-                          <div>
-                            <Label className="text-sm text-muted-foreground">Output</Label>
-                            <p className="text-sm mt-1">{formData.output}</p>
-                          </div>
-                        )}
-                        {formData.outcome && (
-                          <div>
-                            <Label className="text-sm text-muted-foreground">Outcome</Label>
-                            <p className="text-sm mt-1">{formData.outcome}</p>
-                          </div>
-                        )}
-                        {formData.kpi && (
-                          <div>
-                            <Label className="text-sm text-muted-foreground">KPI</Label>
-                            <p className="text-sm mt-1">{formData.kpi}</p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
                 </CardContent>
               </Card>
             </div>

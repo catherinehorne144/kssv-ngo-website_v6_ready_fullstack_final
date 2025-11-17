@@ -5,14 +5,14 @@ import { useState, useMemo, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Plus, BarChart3, Users, Calendar, Target, Download, Filter, Search, ArrowLeft, Loader2, Upload } from 'lucide-react'
+import { Plus, BarChart3, Users, Calendar, Target, Download, Filter, Search, ArrowLeft, Loader2, Upload, FileText } from 'lucide-react'
 import { WorkplanTable } from './WorkplanTable'
 import { WorkplanForm } from './WorkplanForm'
-import { WorkplanWizard } from './WorkplanWizard'
 import { WorkplanAnalytics } from './WorkplanAnalytics'
 import { ExportManager } from './ExportManager'
-import CSVImport from './CSVImport'
-import type { Workplan } from '@/lib/types/workplan'
+import { CSVImport } from './CSVImport'
+import { MERLCard } from '@/components/merl/MERLCard' // NEW: Import MERL Card
+import type { Workplan, MerlEntry } from '@/lib/types/workplan' // NEW: Import MerlEntry
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
@@ -29,6 +29,10 @@ export function WorkplanManager() {
   const [focusAreaFilter, setFocusAreaFilter] = useState<string>('all')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  
+  // NEW: MERL State Management
+  const [merlWorkplan, setMerlWorkplan] = useState<Workplan | null>(null)
+  const [isMerlCardOpen, setIsMerlCardOpen] = useState(false)
 
   // Load workplans from API
   const loadWorkplans = async () => {
@@ -181,6 +185,25 @@ export function WorkplanManager() {
   const handleViewWorkplan = (workplan: Workplan) => {
     // You can implement a detailed view modal or page here
     alert(`Viewing: ${workplan.activity_name}\nStatus: ${workplan.status}\nProgress: ${workplan.progress}%`)
+  }
+
+  // NEW: Handle MERL button click
+  const handleOpenMERL = (workplan: Workplan) => {
+    setMerlWorkplan(workplan)
+    setIsMerlCardOpen(true)
+  }
+
+  // NEW: Handle MERL save
+  const handleMerlSave = (merlData: MerlEntry) => {
+    alert(`MERL data saved successfully for "${merlWorkplan?.activity_name}"!`)
+    setIsMerlCardOpen(false)
+    setMerlWorkplan(null)
+  }
+
+  // NEW: Handle MERL card close
+  const handleMerlClose = () => {
+    setIsMerlCardOpen(false)
+    setMerlWorkplan(null)
   }
 
   // Handle CSV import completion
@@ -404,6 +427,7 @@ export function WorkplanManager() {
                     onEditWorkplan={handleEditWorkplan}
                     onViewWorkplan={handleViewWorkplan}
                     onBulkDelete={handleBulkDeleteWorkplans}
+                    onOpenMERL={handleOpenMERL} // NEW: MERL callback
                   />
                 </div>
               </CardContent>
@@ -415,7 +439,7 @@ export function WorkplanManager() {
               <CardHeader>
                 <CardTitle>Create New Workplan</CardTitle>
                 <p className="text-sm text-muted-foreground">
-                  Use the comprehensive form to create a workplan with full MERL framework
+                  Use the comprehensive form to create a workplan
                 </p>
               </CardHeader>
               <CardContent>
@@ -516,6 +540,16 @@ export function WorkplanManager() {
           )}
         </TabsContent>
       </Tabs>
+
+      {/* NEW: MERL Card Popup */}
+      {merlWorkplan && (
+        <MERLCard 
+          workplan={merlWorkplan}
+          isOpen={isMerlCardOpen}
+          onClose={handleMerlClose}
+          onSave={handleMerlSave}
+        />
+      )}
     </div>
   )
 }

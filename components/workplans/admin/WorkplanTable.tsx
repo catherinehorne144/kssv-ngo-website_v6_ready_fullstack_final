@@ -17,7 +17,8 @@ import {
   ChevronDown,
   ChevronUp,
   Filter,
-  Download
+  Download,
+  FileText
 } from 'lucide-react'
 import type { Workplan } from '@/lib/types/workplan'
 
@@ -29,6 +30,7 @@ interface WorkplanTableProps {
   onBulkDelete?: (workplanIds: string[]) => void
   onBulkExport?: (workplanIds: string[]) => void
   onStatusChange?: (workplanId: string, status: Workplan['status']) => void
+  onOpenMERL?: (workplan: Workplan) => void  // NEW: MERL callback
 }
 
 type SortField = 'activity_name' | 'focus_area' | 'quarter' | 'budget_allocated' | 'progress' | 'status' | 'timeline_text'
@@ -41,7 +43,8 @@ export function WorkplanTable({
   onViewWorkplan,
   onBulkDelete,
   onBulkExport,
-  onStatusChange
+  onStatusChange,
+  onOpenMERL  // NEW: MERL prop
 }: WorkplanTableProps) {
   const [selectedWorkplans, setSelectedWorkplans] = useState<Set<string>>(new Set())
   const [isAllSelected, setIsAllSelected] = useState(false)
@@ -88,7 +91,7 @@ export function WorkplanTable({
 
   const getFocusAreaColor = (focusArea: string) => {
     switch (focusArea) {
-      case 'Comprehensive GBV Management': return 'bg-red-100 text-red-800 border-red-200 hover:bg-red-200'
+      case 'Comprehensive Gender-based Violence GBV Management': return 'bg-red-100 text-red-800 border-red-200 hover:bg-red-200'
       case 'Survivors Livelihood Support Services': return 'bg-green-100 text-green-800 border-green-200 hover:bg-green-200'
       case 'Institutional Development and Growth': return 'bg-blue-100 text-blue-800 border-blue-200 hover:bg-blue-200'
       case 'Other Focus Area': return 'bg-purple-100 text-purple-800 border-purple-200 hover:bg-purple-200'
@@ -174,6 +177,11 @@ export function WorkplanTable({
     if (confirm(`Are you sure you want to delete "${workplan.activity_name}"?`)) {
       onDeleteWorkplan?.(workplan.id)
     }
+  }
+
+  // NEW: Handle MERL button click
+  const handleOpenMERL = (workplan: Workplan) => {
+    onOpenMERL?.(workplan)
   }
 
   const handleQuickStatusChange = (workplan: Workplan, newStatus: Workplan['status']) => {
@@ -281,7 +289,7 @@ export function WorkplanTable({
             <SortableHeader field="status">
               Status
             </SortableHeader>
-            <th className="text-left p-4 font-medium w-32">Actions</th>
+            <th className="text-left p-4 font-medium w-40">Actions</th> {/* Increased width for MERL button */}
           </tr>
         </thead>
         <tbody>
@@ -391,5 +399,112 @@ export function WorkplanTable({
                             handleQuickStatusChange(workplan, 'in-progress')
                           }}
                           className={`text-xs px-1 rounded ${
-                            workplan.status === 'in-progress' 
-                             
+                            workplan.status === 'in-progress'
+                              ? 'bg-yellow-100 text-yellow-700'
+                              : 'text-yellow-500 hover:bg-yellow-50'
+                          }`}
+                        >
+                          Start
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleQuickStatusChange(workplan, 'completed')
+                          }}
+                          className={`text-xs px-1 rounded ${
+                            workplan.status === 'completed'
+                              ? 'bg-green-100 text-green-700'
+                              : 'text-green-500 hover:bg-green-50'
+                          }`}
+                        >
+                          Complete
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </td>
+                <td className="p-4">
+                  <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleView(workplan)}
+                      className="h-8 w-8 p-0"
+                    >
+                      <Eye className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleEdit(workplan)}
+                      className="h-8 w-8 p-0"
+                    >
+                      <Edit className="h-3.5 w-3.5" />
+                    </Button>
+                    {/* NEW: MERL Button */}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleOpenMERL(workplan)}
+                      className="h-8 w-8 p-0"
+                      title="Open MERL Card"
+                    >
+                      <FileText className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleDelete(workplan)}
+                      className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                </td>
+              </tr>
+              
+              {/* Expanded row for additional details */}
+              {expandedWorkplan === workplan.id && (
+                <tr className="bg-muted/20">
+                  <td colSpan={9} className="p-4 border-b">
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <h4 className="font-medium mb-2">Activity Details</h4>
+                        <p className="text-muted-foreground whitespace-pre-wrap">
+                          {workplan.tasks_description}
+                        </p>
+                        {workplan.target && (
+                          <div className="mt-2">
+                            <span className="font-medium">Target: </span>
+                            <span>{workplan.target}</span>
+                          </div>
+                        )}
+                      </div>
+                      <div>
+                        <h4 className="font-medium mb-2">Resource Information</h4>
+                        <div className="space-y-1">
+                          <div>
+                            <span className="font-medium">Resource Person: </span>
+                            <span>{workplan.resource_person || 'Not assigned'}</span>
+                          </div>
+                          <div>
+                            <span className="font-medium">Quarter: </span>
+                            <span>{workplan.quarter || 'Not set'}</span>
+                          </div>
+                          <div>
+                            <span className="font-medium">Visibility: </span>
+                            <span>{workplan.public_visible ? 'Public' : 'Private'}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              )}
+            </>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
+}
