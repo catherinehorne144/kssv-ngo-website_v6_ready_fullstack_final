@@ -79,8 +79,6 @@ export function ExportManager({ workplans, selectedWorkplanId }: ExportManagerPr
   }
 
   const exportToPDF = () => {
-    // Simple PDF generation using window.print() for now
-    // In a real app, you might use a library like jsPDF or html2pdf
     alert('PDF export would open print dialog. For full PDF generation, implement a PDF library.')
     window.print()
   }
@@ -100,7 +98,6 @@ export function ExportManager({ workplans, selectedWorkplanId }: ExportManagerPr
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Export Settings */}
         <Card>
           <CardHeader>
             <CardTitle>Export Settings</CardTitle>
@@ -167,7 +164,6 @@ export function ExportManager({ workplans, selectedWorkplanId }: ExportManagerPr
           </CardContent>
         </Card>
 
-        {/* Export Preview */}
         <Card>
           <CardHeader>
             <CardTitle>Export Preview</CardTitle>
@@ -204,7 +200,6 @@ export function ExportManager({ workplans, selectedWorkplanId }: ExportManagerPr
         </Card>
       </div>
 
-      {/* Quick Export Buttons */}
       <Card>
         <CardHeader>
           <CardTitle>Quick Export</CardTitle>

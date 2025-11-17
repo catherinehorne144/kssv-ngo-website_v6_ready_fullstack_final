@@ -264,33 +264,33 @@
   opacity: 1;
   transform: translateY(0);
 }
------
-/* Ensure tables can scroll horizontally */
-.overflow-x-auto {
-  overflow-x: auto;
+/* Fix overlay and z-index issues */
+.fixed, .absolute {
+  z-index: 50;
 }
 
-/* Optional: Add smooth scrolling */
-.overflow-x-auto {
-  scroll-behavior: smooth;
+/* Ensure modals and popups appear above everything */
+[data-radix-portal] {
+  z-index: 9999 !important;
 }
 
-/* Optional: Style scrollbar */
-.overflow-x-auto::-webkit-scrollbar {
-  height: 8px;
+/* Fix table horizontal scrolling */
+.min-w-\[1200px\] {
+  min-width: 1200px;
 }
 
-.overflow-x-auto::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 4px;
+/* Ensure proper stacking context */
+.relative {
+  position: relative;
 }
 
-.overflow-x-auto::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
-  border-radius: 4px;
+/* Fix form overlays */
+.form-overlay {
+  z-index: 100;
+  position: relative;
 }
 
-.overflow-x-auto::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
+/* Ensure dropdowns appear above content */
+[data-state="open"] {
+  z-index: 100;
 }
-

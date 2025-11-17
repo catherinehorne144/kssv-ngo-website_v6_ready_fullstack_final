@@ -38,6 +38,7 @@ const navigation = [
   { name: "Workplans", href: "/admin/workplans", icon: Calendar }, // ← REPLACED Programs with Workplans
   { name: "Donations", href: "/admin/donations", icon: DollarSign },
   { name: "Analytics", href: "/admin/analytics", icon: BarChart3 },
+  { name: "MERL Dashboard", href: "/admin/merl", icon: BarChart3 }, // ← ADD THIS LINE
 ]
 
 const superAdminNavigation = [

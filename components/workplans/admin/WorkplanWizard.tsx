@@ -101,31 +101,6 @@ export function WorkplanWizard({ onSuccess, onCancel }: WorkplanWizardProps) {
     }))
   }
 
-  // Smart pre-filling based on activity selection
-  const handleActivityChange = (activityName: string) => {
-    handleChange('activity_name', activityName)
-    
-    // Apply template if available
-    const template = activityTemplates[activityName as keyof typeof activityTemplates]
-    if (template && showTemplateSuggestions) {
-      setFormData(prev => ({
-        ...prev,
-        tasks_description: template.tasks_description,
-      }))
-    }
-  }
-
-  // Auto-calculate progress based on status
-  const handleStatusChange = (status: string) => {
-    handleChange('status', status)
-    
-    if (status === 'completed' && !formData.progress) {
-      handleChange('progress', '100')
-    } else if (status === 'planned' && parseInt(formData.progress) > 0) {
-      handleChange('progress', '0')
-    }
-  }
-
   // Get available activities based on selected focus area
   const availableActivities = useMemo(() => {
     const activityMap = {
@@ -155,6 +130,39 @@ export function WorkplanWizard({ onSuccess, onCancel }: WorkplanWizardProps) {
     
     return activityMap[formData.focus_area as keyof typeof activityMap] || []
   }, [formData.focus_area])
+
+  // Smart pre-filling based on activity selection
+  const handleActivityChange = (activityName: string) => {
+    handleChange('activity_name', activityName)
+    
+    // Apply template if available
+    const template = activityTemplates[activityName as keyof typeof activityTemplates]
+    if (template && showTemplateSuggestions) {
+      setFormData(prev => ({
+        ...prev,
+        tasks_description: template.tasks_description,
+      }))
+    }
+  }
+
+  // Validate activity selection when focus area changes
+  const validateActivitySelection = (focusArea: string, activityName: string) => {
+    const validActivities = availableActivities
+    if (activityName && !validActivities.includes(activityName) && activityName !== 'Custom Activity') {
+      handleChange('activity_name', '')
+    }
+  }
+
+  // Auto-calculate progress based on status
+  const handleStatusChange = (status: string) => {
+    handleChange('status', status)
+    
+    if (status === 'completed' && !formData.progress) {
+      handleChange('progress', '100')
+    } else if (status === 'planned' && parseInt(formData.progress) > 0) {
+      handleChange('progress', '0')
+    }
+  }
 
   // Navigation
   const nextStep = () => {
@@ -330,10 +338,8 @@ export function WorkplanWizard({ onSuccess, onCancel }: WorkplanWizardProps) {
                     onValueChange={(value) => {
                       setSelectedFocusArea(value)
                       handleChange('focus_area', value)
-                      // Clear activity when focus area changes
-                      if (formData.activity_name && !availableActivities.includes(formData.activity_name)) {
-                        handleChange('activity_name', '')
-                      }
+                      // Validate and clear activity if needed
+                      validateActivitySelection(value, formData.activity_name)
                     }}
                     required
                   >
@@ -344,7 +350,12 @@ export function WorkplanWizard({ onSuccess, onCancel }: WorkplanWizardProps) {
                       {focusAreas.map((area) => (
                         <SelectItem key={area.id} value={area.name}>
                           <div className="flex items-center gap-2">
-                            <div className={`w-3 h-3 rounded-full bg-${area.color}-500`} />
+                            <div className={`w-3 h-3 rounded-full ${
+                              area.color === 'red' ? 'bg-red-500' :
+                              area.color === 'green' ? 'bg-green-500' :
+                              area.color === 'blue' ? 'bg-blue-500' :
+                              'bg-gray-500'
+                            }`} />
                             <div>
                               <div className="font-medium">{area.name}</div>
                               <div className="text-xs text-muted-foreground">{area.description}</div>
@@ -368,19 +379,29 @@ export function WorkplanWizard({ onSuccess, onCancel }: WorkplanWizardProps) {
                     disabled={!formData.focus_area}
                   >
                     <SelectTrigger className={!formData.activity_name ? 'border-red-300' : ''}>
-                      <SelectValue placeholder={formData.focus_area ? "Select activity" : "Select focus area first"} />
+                      <SelectValue placeholder={
+                        formData.focus_area 
+                          ? "Select activity" 
+                          : "← First select a focus area"
+                      } />
                     </SelectTrigger>
                     <SelectContent>
-                      {availableActivities.map((activity) => (
-                        <SelectItem key={activity} value={activity}>
-                          <div className="flex items-center justify-between">
-                            <span>{activity}</span>
-                            {activityTemplates.hasOwnProperty(activity) && showTemplateSuggestions && (
-                              <Lightbulb className="h-3 w-3 text-yellow-500" />
-                            )}
-                          </div>
-                        </SelectItem>
-                      ))}
+                      {availableActivities.length > 0 ? (
+                        availableActivities.map((activity) => (
+                          <SelectItem key={activity} value={activity}>
+                            <div className="flex items-center justify-between">
+                              <span>{activity}</span>
+                              {activityTemplates.hasOwnProperty(activity) && showTemplateSuggestions && (
+                                <Lightbulb className="h-3 w-3 text-yellow-500" />
+                              )}
+                            </div>
+                          </SelectItem>
+                        ))
+                      ) : (
+                        <div className="px-3 py-2 text-sm text-muted-foreground">
+                          No activities available for this focus area
+                        </div>
+                      )}
                     </SelectContent>
                   </Select>
                   <Input
@@ -425,7 +446,7 @@ export function WorkplanWizard({ onSuccess, onCancel }: WorkplanWizardProps) {
               <div className="space-y-2">
                 <Label htmlFor="tasks_description" className="flex items-center gap-2">
                   Tasks Description *
-                  {!formData.tasks_description && <AlertCircle className="h-4 w-4 text-red-500" />}
+                  {!formData.tasks_description && <AlertCircle className="h-4 w-4 text-red-500' />}
                 </Label>
                 <Textarea
                   id="tasks_description"
