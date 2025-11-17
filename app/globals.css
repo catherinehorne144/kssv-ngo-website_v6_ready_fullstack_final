@@ -264,3 +264,33 @@
   opacity: 1;
   transform: translateY(0);
 }
+-----
+/* Ensure tables can scroll horizontally */
+.overflow-x-auto {
+  overflow-x: auto;
+}
+
+/* Optional: Add smooth scrolling */
+.overflow-x-auto {
+  scroll-behavior: smooth;
+}
+
+/* Optional: Style scrollbar */
+.overflow-x-auto::-webkit-scrollbar {
+  height: 8px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+

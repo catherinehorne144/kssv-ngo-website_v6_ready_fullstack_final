@@ -45,13 +45,10 @@ export function ExportManager({ workplans, selectedWorkplanId }: ExportManagerPr
       'Budget Allocated',
       'Status',
       'Progress',
-      'Output',
-      'Outcome',
-      'KPI',
-      'Means of Verification',
-      'Risks',
-      'Mitigation Measures',
-      'Resource Person'
+      'Resource Person',
+      'Visibility',
+      'Created At',
+      'Updated At'
     ]
 
     const csvContent = [
@@ -60,19 +57,16 @@ export function ExportManager({ workplans, selectedWorkplanId }: ExportManagerPr
         `"${workplan.focus_area}"`,
         `"${workplan.activity_name}"`,
         `"${workplan.timeline_text}"`,
-        `"${workplan.quarter}"`,
+        `"${workplan.quarter || ''}"`,
         `"${workplan.tasks_description}"`,
-        `"${workplan.target}"`,
+        `"${workplan.target || ''}"`,
         workplan.budget_allocated,
         `"${workplan.status}"`,
         workplan.progress,
-        `"${workplan.output}"`,
-        `"${workplan.outcome}"`,
-        `"${workplan.kpi}"`,
-        `"${workplan.means_of_verification}"`,
-        `"${workplan.risks}"`,
-        `"${workplan.mitigation_measures}"`,
-        `"${workplan.resource_person}"`
+        `"${workplan.resource_person || ''}"`,
+        `"${workplan.public_visible ? 'Public' : 'Private'}"`,
+        `"${workplan.created_at}"`,
+        `"${workplan.updated_at}"`
       ].join(','))
     ].join('\n')
 
@@ -201,6 +195,7 @@ export function ExportManager({ workplans, selectedWorkplanId }: ExportManagerPr
                     <p><strong>Focus Area:</strong> {exportData[0].focus_area}</p>
                     <p><strong>Status:</strong> {exportData[0].status}</p>
                     <p><strong>Progress:</strong> {exportData[0].progress}%</p>
+                    <p><strong>Budget:</strong> KES {exportData[0].budget_allocated.toLocaleString()}</p>
                   </div>
                 </div>
               )}
