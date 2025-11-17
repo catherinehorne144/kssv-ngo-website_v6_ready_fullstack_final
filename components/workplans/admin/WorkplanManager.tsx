@@ -198,6 +198,7 @@ export function WorkplanManager() {
 
   // Handle focus area selection
   const handleFocusAreaSelect = (focusArea: string) => {
+    console.log('Focus area clicked:', focusArea)
     setSelectedFocusArea(focusArea)
   }
 
@@ -456,6 +457,29 @@ export function WorkplanManager() {
                         ))}
                       </SelectContent>
                     </Select>
+                  </div>
+
+                  {/* TEST BUTTON - Remove after confirming it works */}
+                  <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <p className="text-sm text-yellow-800 mb-2">
+                      <strong>Test Focus Area Navigation:</strong> Click any focus area badge below OR use this test button:
+                    </p>
+                    <div className="flex gap-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => handleFocusAreaSelect('Comprehensive Gender-based Violence GBV Management')}
+                      >
+                        Test GBV Focus Area
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => handleFocusAreaSelect('Survivors Livelihood Support Services')}
+                      >
+                        Test Livelihood Focus Area
+                      </Button>
+                    </div>
                   </div>
 
                   {/* Results count and filter actions */}

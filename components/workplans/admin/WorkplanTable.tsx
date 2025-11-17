@@ -92,11 +92,11 @@ export function WorkplanTable({
 
   const getFocusAreaColor = (focusArea: string) => {
     switch (focusArea) {
-      case 'Comprehensive Gender-based Violence GBV Management': return 'bg-red-100 text-red-800 border-red-200 hover:bg-red-200'
-      case 'Survivors Livelihood Support Services': return 'bg-green-100 text-green-800 border-green-200 hover:bg-green-200'
-      case 'Institutional Development and Growth': return 'bg-blue-100 text-blue-800 border-blue-200 hover:bg-blue-200'
-      case 'Other Focus Area': return 'bg-purple-100 text-purple-800 border-purple-200 hover:bg-purple-200'
-      default: return 'bg-gray-100 text-gray-800 border-gray-200 hover:bg-gray-200'
+      case 'Comprehensive Gender-based Violence GBV Management': return 'bg-red-100 text-red-800 border-red-200'
+      case 'Survivors Livelihood Support Services': return 'bg-green-100 text-green-800 border-green-200'
+      case 'Institutional Development and Growth': return 'bg-blue-100 text-blue-800 border-blue-200'
+      case 'Other Focus Area': return 'bg-purple-100 text-purple-800 border-purple-200'
+      default: return 'bg-gray-100 text-gray-800 border-gray-200'
     }
   }
 
@@ -332,16 +332,20 @@ export function WorkplanTable({
                   </div>
                 </td>
                 <td className="p-4">
-                  <Badge 
-                    variant="outline" 
-                    className={`text-xs font-medium ${getFocusAreaColor(workplan.focus_area)} cursor-pointer hover:opacity-80 transition-opacity`}
+                  <div 
+                    className="cursor-pointer hover:opacity-80 transition-opacity inline-block"
                     onClick={(e) => {
                       e.stopPropagation()
                       onFocusAreaSelect?.(workplan.focus_area)
                     }}
                   >
-                    {workplan.focus_area}
-                  </Badge>
+                    <Badge 
+                      variant="outline" 
+                      className={`text-xs font-medium ${getFocusAreaColor(workplan.focus_area)}`}
+                    >
+                      {workplan.focus_area}
+                    </Badge>
+                  </div>
                 </td>
                 <td className="p-4">
                   <span className="text-sm font-medium">{workplan.quarter || 'N/A'}</span>
