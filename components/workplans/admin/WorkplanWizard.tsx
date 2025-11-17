@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup, SelectLabel } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
@@ -20,7 +20,8 @@ import {
   DollarSign,
   Users,
   AlertCircle,
-  Lightbulb
+  Lightbulb,
+  Plus
 } from 'lucide-react'
 import type { Workplan } from '@/lib/types/workplan'
 
@@ -43,27 +44,68 @@ interface WorkplanFormData {
   status: string
   progress: string
   public_visible: boolean
+  is_custom_focus_area: boolean
+  custom_focus_area: string
+  is_custom_activity: boolean
 }
 
-const focusAreas = [
-  { id: 'gbv', name: 'Comprehensive GBV Management', color: 'red', description: 'Gender-based violence prevention and response activities' },
+// Common Focus Areas
+const commonFocusAreas = [
+  { id: 'gbv', name: 'Comprehensive Gender-based Violence GBV Management', color: 'red', description: 'Gender-based violence prevention and response activities' },
   { id: 'survivor', name: 'Survivors Livelihood Support Services', color: 'green', description: 'Economic empowerment and support for survivors' },
-  { id: 'institutional', name: 'Institutional Development and Growth', color: 'blue', description: 'Organizational capacity building and development' },
-  { id: 'other', name: 'Other Focus Area', color: 'gray', description: 'Other organizational activities' }
+  { id: 'institutional', name: 'Institutional Development and Growth', color: 'blue', description: 'Organizational capacity building and development' }
 ]
 
+// Common Activities by Focus Area
+const commonActivities = {
+  'Comprehensive Gender-based Violence GBV Management': [
+    'Referrals and linkages',
+    'Chief barazas',
+    'Psychological counselling',
+    'Rapid response and rescue',
+    'Temporary shelter',
+    'Partnership meetings',
+    'Violence response and prevention partners meeting'
+  ],
+  'Survivors Livelihood Support Services': [
+    'Monthly group saving and GSL meeting',
+    'Training of support groups',
+    'Business development training',
+    'Formation of support groups',
+    'Vocational skills training',
+    'Startup capital support'
+  ],
+  'Institutional Development and Growth': [
+    'Monthly member meetings',
+    'Resource mobilization training',
+    'Strategic planning sessions',
+    'Capacity building workshops',
+    'Staff development training',
+    'Organizational systems development'
+  ]
+}
+
 const activityTemplates = {
-  'Referrals & linkages': {
-    tasks_description: 'Identify survivor needs and consent, Schedule appointments with service providers, Contact referral partners, Arrange safe transportation, Record case details and documentation, Conduct follow-up visits and assessments',
+  'Referrals and linkages': {
+    tasks_description: 'Listen to case, Seek consent of client, Identify appropriate referral partner, Contact referral partner, give referral letter, accompany survivor where there is need, follow up and report',
   },
   'Chief barazas': {
-    tasks_description: 'Community consultation on available dates and venues, Develop culturally appropriate discussion topics, Arrange qualified facilitation and translation, Mobilize community participants through local leaders, Document proceedings and community feedback, Develop action plans from discussions',
+    tasks_description: 'Consulting on available date, Coming up with the topics to discuss, settle on who is going to facilitate, mobilizing personnel plus resources, Documentation and reporting',
   },
   'Psychological counselling': {
-    tasks_description: 'Schedule confidential counselling sessions, Obtain informed consent and explain process, Conduct psychological assessments and screening, Provide trauma-informed therapeutic interventions, Document session notes and progress, Conduct follow-up assessments and support',
+    tasks_description: 'Schedule counselling sessions, Obtain consent from the survivor, Conduct assessment and sessions, Provide recommendations or referrals, Document session notes, Follow-up with the survivors',
   },
   'Monthly group saving and GSL meeting': {
-    tasks_description: 'Schedule regular monthly meeting dates, Prepare and review previous meeting minutes, Set and communicate meeting agendas, Facilitate table banking and savings activities, Document financial transactions and decisions, Record member participation and contributions',
+    tasks_description: 'Meeting at the specified time, reading of the previous minutes, agendas of the day, table banking and merry go round where every member participates, documentation for reporting',
+  },
+  'Training of support groups': {
+    tasks_description: 'mobilising of resources and survivors as we prepare agendas, training session, documentation for reporting',
+  },
+  'Monthly member meetings': {
+    tasks_description: 'Meeting at the specified time, reading of the previous minutes, agendas of the day, table banking and merry go round where every member participates, documentation for reporting',
+  },
+  'Partnership meetings': {
+    tasks_description: 'Confirmed dates, Generate reports and challenges on survivors for the month, Action plans and recommendation',
   }
 }
 
@@ -72,7 +114,6 @@ const resourcePersons = ['Claris', 'Leah', 'Equator', 'Other Staff']
 export function WorkplanWizard({ onSuccess, onCancel }: WorkplanWizardProps) {
   const [currentStep, setCurrentStep] = useState<WizardStep>('foundation')
   const [isLoading, setIsLoading] = useState(false)
-  const [selectedFocusArea, setSelectedFocusArea] = useState('')
   const [showTemplateSuggestions, setShowTemplateSuggestions] = useState(true)
   
   const [formData, setFormData] = useState<WorkplanFormData>({
@@ -86,12 +127,31 @@ export function WorkplanWizard({ onSuccess, onCancel }: WorkplanWizardProps) {
     resource_person: '',
     status: 'planned',
     progress: '0',
-    public_visible: true
+    public_visible: true,
+    is_custom_focus_area: false,
+    custom_focus_area: '',
+    is_custom_activity: false
   })
+
+  // Computed values
+  const isCustomFocusArea = formData.is_custom_focus_area
+  const isCustomActivity = formData.is_custom_activity
+  const finalFocusArea = isCustomFocusArea ? formData.custom_focus_area : formData.focus_area
+
+  // Get available activities based on selected focus area
+  const availableActivities = useMemo(() => {
+    if (isCustomFocusArea) {
+      return ['Custom Activity'] // For custom focus areas, only show custom activity option
+    }
+    return commonActivities[formData.focus_area as keyof typeof commonActivities] || []
+  }, [formData.focus_area, isCustomFocusArea])
 
   // Step validation
   const isFoundationValid = () => {
-    return formData.focus_area && formData.activity_name && formData.timeline_text && formData.tasks_description
+    const hasFocusArea = isCustomFocusArea ? formData.custom_focus_area : formData.focus_area
+    const hasActivity = isCustomActivity ? formData.activity_name : formData.activity_name
+    
+    return hasFocusArea && hasActivity && formData.timeline_text && formData.tasks_description
   }
 
   const handleChange = (field: keyof WorkplanFormData, value: string | boolean) => {
@@ -101,55 +161,42 @@ export function WorkplanWizard({ onSuccess, onCancel }: WorkplanWizardProps) {
     }))
   }
 
-  // Get available activities based on selected focus area
-  const availableActivities = useMemo(() => {
-    const activityMap = {
-      'Comprehensive GBV Management': [
-        'Referrals & linkages',
-        'Chief barazas',
-        'Psychological counselling',
-        'Rapid response and rescue',
-        'Temporary shelter',
-        'GBV case managers training',
-        'Legal aid clinic'
-      ],
-      'Survivors Livelihood Support Services': [
-        'Monthly group saving and GSL meeting',
-        'Training of support groups',
-        'Business development training',
-        'Formation of support groups'
-      ],
-      'Institutional Development and Growth': [
-        'Monthly member meetings',
-        'Resource mobilization training',
-        'Developing website',
-        'Corporate branding'
-      ],
-      'Other Focus Area': ['Custom Activity']
-    }
-    
-    return activityMap[formData.focus_area as keyof typeof activityMap] || []
-  }, [formData.focus_area])
-
-  // Smart pre-filling based on activity selection
-  const handleActivityChange = (activityName: string) => {
-    handleChange('activity_name', activityName)
-    
-    // Apply template if available
-    const template = activityTemplates[activityName as keyof typeof activityTemplates]
-    if (template && showTemplateSuggestions) {
-      setFormData(prev => ({
-        ...prev,
-        tasks_description: template.tasks_description,
-      }))
+  // Handle focus area change
+  const handleFocusAreaChange = (value: string) => {
+    if (value === 'custom') {
+      handleChange('is_custom_focus_area', true)
+      handleChange('focus_area', '')
+      handleChange('activity_name', '') // Reset activity when focus area changes
+      handleChange('is_custom_activity', false)
+    } else {
+      handleChange('is_custom_focus_area', false)
+      handleChange('focus_area', value)
+      handleChange('custom_focus_area', '')
+      handleChange('activity_name', '') // Reset activity when focus area changes
+      handleChange('is_custom_activity', false)
     }
   }
 
-  // Validate activity selection when focus area changes
-  const validateActivitySelection = (focusArea: string, activityName: string) => {
-    const validActivities = availableActivities
-    if (activityName && !validActivities.includes(activityName) && activityName !== 'Custom Activity') {
+  // Handle activity change
+  const handleActivityChange = (value: string) => {
+    if (value === 'custom') {
+      handleChange('is_custom_activity', true)
       handleChange('activity_name', '')
+      if (showTemplateSuggestions) {
+        handleChange('tasks_description', '')
+      }
+    } else {
+      handleChange('is_custom_activity', false)
+      handleChange('activity_name', value)
+      
+      // Apply template if available
+      const template = activityTemplates[value as keyof typeof activityTemplates]
+      if (template && showTemplateSuggestions) {
+        setFormData(prev => ({
+          ...prev,
+          tasks_description: template.tasks_description,
+        }))
+      }
     }
   }
 
@@ -201,8 +248,15 @@ export function WorkplanWizard({ onSuccess, onCancel }: WorkplanWizardProps) {
       }
 
       const submitData = {
-        ...formData,
+        focus_area: finalFocusArea,
+        activity_name: formData.activity_name,
+        timeline_text: formData.timeline_text,
+        quarter: formData.quarter,
+        tasks_description: formData.tasks_description,
+        target: formData.target,
         budget_allocated: parseInt(formData.budget_allocated) || 0,
+        resource_person: formData.resource_person,
+        status: formData.status,
         progress: parseInt(formData.progress) || 0,
         public_visible: Boolean(formData.public_visible)
       }
@@ -328,88 +382,137 @@ export function WorkplanWizard({ onSuccess, onCancel }: WorkplanWizardProps) {
           {currentStep === 'foundation' && (
             <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Focus Area Selection */}
                 <div className="space-y-2">
                   <Label htmlFor="focus_area" className="flex items-center gap-2">
                     Focus Area *
-                    {!formData.focus_area && <AlertCircle className="h-4 w-4 text-red-500" />}
+                    {!finalFocusArea && <AlertCircle className="h-4 w-4 text-red-500" />}
                   </Label>
                   <Select 
-                    value={formData.focus_area} 
-                    onValueChange={(value) => {
-                      setSelectedFocusArea(value)
-                      handleChange('focus_area', value)
-                      // Validate and clear activity if needed
-                      validateActivitySelection(value, formData.activity_name)
-                    }}
+                    value={isCustomFocusArea ? 'custom' : formData.focus_area} 
+                    onValueChange={handleFocusAreaChange}
                     required
                   >
-                    <SelectTrigger className={!formData.focus_area ? 'border-red-300' : ''}>
+                    <SelectTrigger className={!finalFocusArea ? 'border-red-300' : ''}>
                       <SelectValue placeholder="Select focus area" />
                     </SelectTrigger>
                     <SelectContent>
-                      {focusAreas.map((area) => (
-                        <SelectItem key={area.id} value={area.name}>
-                          <div className="flex items-center gap-2">
-                            <div className={`w-3 h-3 rounded-full ${
-                              area.color === 'red' ? 'bg-red-500' :
-                              area.color === 'green' ? 'bg-green-500' :
-                              area.color === 'blue' ? 'bg-blue-500' :
-                              'bg-gray-500'
-                            }`} />
-                            <div>
-                              <div className="font-medium">{area.name}</div>
-                              <div className="text-xs text-muted-foreground">{area.description}</div>
+                      <SelectGroup>
+                        <SelectLabel>Common Focus Areas</SelectLabel>
+                        {commonFocusAreas.map((area) => (
+                          <SelectItem key={area.id} value={area.name}>
+                            <div className="flex items-center gap-2">
+                              <div className={`w-3 h-3 rounded-full ${
+                                area.color === 'red' ? 'bg-red-500' :
+                                area.color === 'green' ? 'bg-green-500' :
+                                area.color === 'blue' ? 'bg-blue-500' :
+                                'bg-gray-500'
+                              }`} />
+                              <div>
+                                <div className="font-medium">{area.name}</div>
+                                <div className="text-xs text-muted-foreground">{area.description}</div>
+                              </div>
                             </div>
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                      <SelectItem value="custom">
+                        <div className="flex items-center gap-2">
+                          <Plus className="h-4 w-4 text-green-600" />
+                          <div>
+                            <div className="font-medium">Add Custom Focus Area</div>
+                            <div className="text-xs text-muted-foreground">Create a new focus area</div>
                           </div>
-                        </SelectItem>
-                      ))}
+                        </div>
+                      </SelectItem>
                     </SelectContent>
                   </Select>
+
+                  {/* Custom Focus Area Input */}
+                  {isCustomFocusArea && (
+                    <div className="mt-2">
+                      <Input
+                        placeholder="Enter new focus area name..."
+                        value={formData.custom_focus_area}
+                        onChange={(e) => handleChange('custom_focus_area', e.target.value)}
+                        className="border-green-300 focus:border-green-500"
+                      />
+                      <p className="text-xs text-green-600 mt-1">
+                        Creating new focus area: {formData.custom_focus_area}
+                      </p>
+                    </div>
+                  )}
                 </div>
 
+                {/* Activity Selection */}
                 <div className="space-y-2">
                   <Label htmlFor="activity_name" className="flex items-center gap-2">
                     Activity Name *
                     {!formData.activity_name && <AlertCircle className="h-4 w-4 text-red-500" />}
                   </Label>
                   <Select 
-                    value={formData.activity_name} 
+                    value={isCustomActivity ? 'custom' : formData.activity_name} 
                     onValueChange={handleActivityChange}
                     required
-                    disabled={!formData.focus_area}
+                    disabled={!finalFocusArea}
                   >
                     <SelectTrigger className={!formData.activity_name ? 'border-red-300' : ''}>
                       <SelectValue placeholder={
-                        formData.focus_area 
+                        finalFocusArea 
                           ? "Select activity" 
                           : "← First select a focus area"
                       } />
                     </SelectTrigger>
                     <SelectContent>
                       {availableActivities.length > 0 ? (
-                        availableActivities.map((activity) => (
-                          <SelectItem key={activity} value={activity}>
-                            <div className="flex items-center justify-between">
-                              <span>{activity}</span>
-                              {activityTemplates.hasOwnProperty(activity) && showTemplateSuggestions && (
-                                <Lightbulb className="h-3 w-3 text-yellow-500" />
-                              )}
+                        <>
+                          <SelectGroup>
+                            <SelectLabel>Common Activities</SelectLabel>
+                            {availableActivities.map((activity) => (
+                              <SelectItem key={activity} value={activity}>
+                                <div className="flex items-center justify-between">
+                                  <span>{activity}</span>
+                                  {activityTemplates.hasOwnProperty(activity) && showTemplateSuggestions && (
+                                    <Lightbulb className="h-3 w-3 text-yellow-500" />
+                                  )}
+                                </div>
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
+                          <SelectItem value="custom">
+                            <div className="flex items-center gap-2">
+                              <Plus className="h-4 w-4 text-green-600" />
+                              <span>Custom Activity</span>
                             </div>
                           </SelectItem>
-                        ))
+                        </>
                       ) : (
-                        <div className="px-3 py-2 text-sm text-muted-foreground">
-                          No activities available for this focus area
-                        </div>
+                        <SelectItem value="custom">
+                          <div className="flex items-center gap-2">
+                            <Plus className="h-4 w-4 text-green-600" />
+                            <span>Custom Activity</span>
+                          </div>
+                        </SelectItem>
                       )}
                     </SelectContent>
                   </Select>
-                  <Input
-                    placeholder="Or type custom activity name"
-                    value={formData.activity_name}
-                    onChange={(e) => handleChange('activity_name', e.target.value)}
-                    className="mt-1"
-                  />
+
+                  {/* Custom Activity Input */}
+                  {(isCustomActivity || isCustomFocusArea) && (
+                    <div className="mt-2">
+                      <Input
+                        placeholder="Enter activity name..."
+                        value={formData.activity_name}
+                        onChange={(e) => handleChange('activity_name', e.target.value)}
+                        className="border-green-300 focus:border-green-500"
+                      />
+                      {isCustomActivity && (
+                        <p className="text-xs text-green-600 mt-1">
+                          Creating custom activity
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 <div className="space-y-2">
@@ -446,7 +549,7 @@ export function WorkplanWizard({ onSuccess, onCancel }: WorkplanWizardProps) {
               <div className="space-y-2">
                 <Label htmlFor="tasks_description" className="flex items-center gap-2">
                   Tasks Description *
-                  {!formData.tasks_description && <AlertCircle className="h-4 w-4 text-red-500' />}
+                  {!formData.tasks_description && <AlertCircle className="h-4 w-4 text-red-500" />}
                 </Label>
                 <Textarea
                   id="tasks_description"
@@ -457,6 +560,11 @@ export function WorkplanWizard({ onSuccess, onCancel }: WorkplanWizardProps) {
                   className={!formData.tasks_description ? 'border-red-300' : ''}
                   required
                 />
+                {showTemplateSuggestions && !isCustomActivity && formData.activity_name && activityTemplates[formData.activity_name as keyof typeof activityTemplates] && (
+                  <p className="text-xs text-yellow-600 mt-1">
+                    💡 Template applied. You can modify the tasks as needed.
+                  </p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -600,11 +708,21 @@ export function WorkplanWizard({ onSuccess, onCancel }: WorkplanWizardProps) {
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     <div className="space-y-2">
                       <Label className="text-sm font-medium">Focus Area</Label>
-                      <p className="text-lg font-semibold">{formData.focus_area}</p>
+                      <p className="text-lg font-semibold">{finalFocusArea}</p>
+                      {isCustomFocusArea && (
+                        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                          New Focus Area
+                        </Badge>
+                      )}
                     </div>
                     <div className="space-y-2">
                       <Label className="text-sm font-medium">Activity Name</Label>
                       <p className="text-lg font-semibold">{formData.activity_name}</p>
+                      {isCustomActivity && (
+                        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                          Custom Activity
+                        </Badge>
+                      )}
                     </div>
                     <div className="space-y-2">
                       <Label className="text-sm font-medium">Timeline</Label>
