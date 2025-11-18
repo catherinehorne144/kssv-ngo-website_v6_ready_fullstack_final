@@ -20,7 +20,8 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
-  Calendar, // ← REPLACED Target with Calendar for Workplans
+  Calendar,
+  Clipboard, // ← ADDED for Case Management
 } from "lucide-react"
 import { useEffect, useState } from "react"
 import { createServerClientInstance } from "@/lib/supabase/server"
@@ -31,14 +32,15 @@ const navigation = [
   { name: "Volunteers", href: "/admin/volunteers", icon: Users },
   { name: "Members", href: "/admin/members", icon: UserCheck },
   { name: "Partners", href: "/admin/partners", icon: Handshake },
+  { name: "Case Management", href: "/admin/case-management", icon: Clipboard }, // ← ADDED
   { name: "Contact Messages", href: "/admin/messages", icon: MessageSquare },
   { name: "Testimonials", href: "/admin/testimonials", icon: Quote },
   { name: "Blog Posts", href: "/admin/blog", icon: FileText },
   { name: "Projects", href: "/admin/projects", icon: FolderKanban },
-  { name: "Workplans", href: "/admin/workplans", icon: Calendar }, // ← REPLACED Programs with Workplans
+  { name: "Workplans", href: "/admin/workplans", icon: Calendar },
   { name: "Donations", href: "/admin/donations", icon: DollarSign },
   { name: "Analytics", href: "/admin/analytics", icon: BarChart3 },
-  { name: "MERL Dashboard", href: "/admin/merl", icon: BarChart3 }, // ← ADD THIS LINE
+  { name: "MERL Dashboard", href: "/admin/merl", icon: BarChart3 },
 ]
 
 const superAdminNavigation = [
