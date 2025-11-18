@@ -1,4 +1,5 @@
-import { supabase } from '@/lib/supabase/supabaseClient';
+import { createClient } from '@/lib/supabase/client';
+const supabase = createClient();
 import type { 
   CaseRegister, CaseRegisterInput,
   CaseAssessment, CaseAssessmentInput, 
