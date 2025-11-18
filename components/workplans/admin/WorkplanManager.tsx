@@ -40,7 +40,6 @@ import { WorkplanAnalytics } from './WorkplanAnalytics'
 import { ExportManager } from './ExportManager'
 import { CSVImport } from './CSVImport'
 import { MERLCard } from '@/components/merl/MERLCard'
-import { WorkplanForm } from './WorkplanForm'
 import type { Workplan, MerlEntry } from '@/lib/types/workplan'
 
 type ViewMode = 'workplans' | 'create-workplan' | 'edit-workplan' | 'analytics' | 'export' | 'import'
@@ -470,7 +469,7 @@ export function WorkplanManager() {
                 </TabsList>
               </div>
 
-              {/* WORKPLANS TAB CONTENT */}
+              {/* WORKPLANS TAB CONTENT - Your Beautiful Card Design */}
               <TabsContent value="workplans" className="m-0 p-8">
                 {activeView === 'workplans' && (
                   <div className="space-y-8">
@@ -595,7 +594,7 @@ export function WorkplanManager() {
                           </CardContent>
                         </Card>
 
-                        {/* Activity Cards */}
+                        {/* Activity Cards - Your Beautiful Card Design */}
                         <div className="space-y-4">
                           {filteredWorkplans.map((workplan) => {
                             const statusInfo = getStatusInfo(workplan.status)
@@ -852,7 +851,7 @@ export function WorkplanManager() {
                 )}
               </TabsContent>
 
-              {/* ANALYTICS TAB CONTENT */}
+              {/* ANALYTICS TAB CONTENT - Links to WorkplanAnalytics.tsx */}
               <TabsContent value="analytics" className="m-0 p-8">
                 <div className="space-y-6">
                   <div className="flex items-center justify-between">
@@ -880,7 +879,7 @@ export function WorkplanManager() {
                 </div>
               </TabsContent>
 
-              {/* EXPORT TAB CONTENT */}
+              {/* EXPORT TAB CONTENT - Links to ExportManager.tsx */}
               <TabsContent value="export" className="m-0 p-8">
                 <div className="space-y-6">
                   <div className="flex items-center justify-between">
@@ -908,7 +907,7 @@ export function WorkplanManager() {
                 </div>
               </TabsContent>
 
-              {/* IMPORT TAB CONTENT */}
+              {/* IMPORT TAB CONTENT - Links to CSVImport.tsx */}
               <TabsContent value="import" className="m-0 p-8">
                 <div className="space-y-6">
                   <div className="flex items-center justify-between">
@@ -933,7 +932,7 @@ export function WorkplanManager() {
                 </div>
               </TabsContent>
 
-              {/* CREATE WORKPLAN VIEW */}
+              {/* CREATE WORKPLAN VIEW - Links to WorkplanWizard.tsx */}
               <TabsContent value="create-workplan" className="m-0 p-0">
                 <WorkplanWizard 
                   onSuccess={handleWorkplanCreated}
@@ -941,7 +940,7 @@ export function WorkplanManager() {
                 />
               </TabsContent>
 
-              {/* EDIT WORKPLAN VIEW */}
+              {/* EDIT WORKPLAN VIEW - Links to WorkplanWizard for editing */}
               <TabsContent value="edit-workplan" className="m-0 p-0">
                 {selectedWorkplan && (
                   <div className="p-8">
@@ -968,7 +967,7 @@ export function WorkplanManager() {
                       </div>
                       <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl rounded-3xl">
                         <CardContent className="p-8">
-                          <WorkplanForm 
+                          <WorkplanWizard 
                             workplan={selectedWorkplan}
                             onSuccess={handleWorkplanCreated}
                             onCancel={() => setActiveView('workplans')}
