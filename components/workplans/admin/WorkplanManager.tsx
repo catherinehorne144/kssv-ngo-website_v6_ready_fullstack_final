@@ -40,6 +40,7 @@ import { WorkplanAnalytics } from './WorkplanAnalytics'
 import { ExportManager } from './ExportManager'
 import { CSVImport } from './CSVImport'
 import { MERLCard } from '@/components/merl/MERLCard'
+import { WorkplanForm } from './WorkplanForm'
 import type { Workplan, MerlEntry } from '@/lib/types/workplan'
 
 type ViewMode = 'workplans' | 'create-workplan' | 'edit-workplan' | 'analytics' | 'export' | 'import'
@@ -444,14 +445,15 @@ export function WorkplanManager() {
         {/* Beautiful Navigation Tabs */}
         <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl rounded-3xl">
           <CardContent className="p-0">
-            <Tabs value={activeView} onValueChange={(value: any) => setActiveView(value)} className="space-y-6">
+            <Tabs value={activeView} onValueChange={(value) => setActiveView(value as ViewMode)} className="space-y-6">
               <div className="px-8 pt-6">
                 <TabsList className="grid w-full grid-cols-5 bg-gradient-to-r from-blue-50 to-purple-50 p-1 rounded-2xl">
                   {[
                     { value: 'workplans', label: 'Workplans', icon: Target },
                     { value: 'analytics', label: 'Analytics', icon: BarChart3 },
                     { value: 'export', label: 'Export', icon: Download },
-                    { value: 'import', label: 'Import', icon: Upload }
+                    { value: 'import', label: 'Import', icon: Upload },
+                    { value: 'create-workplan', label: 'Create', icon: Plus }
                   ].map((tab) => {
                     const IconComponent = tab.icon
                     return (
@@ -852,60 +854,83 @@ export function WorkplanManager() {
 
               {/* ANALYTICS TAB CONTENT */}
               <TabsContent value="analytics" className="m-0 p-8">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Workplan Analytics</CardTitle>
-                    <p className="text-sm text-muted-foreground">
-                      Comprehensive analytics and reporting across all workplans
-                    </p>
-                  </CardHeader>
-                  <CardContent>
-                    <WorkplanAnalytics 
-                      workplans={workplans}
-                      selectedWorkplanId={selectedWorkplan?.id}
-                    />
-                  </CardContent>
-                </Card>
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                        Workplan Analytics
+                      </h2>
+                      <p className="text-gray-600 mt-1">
+                        Comprehensive insights and performance metrics across all workplans
+                      </p>
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      onClick={() => setActiveView('workplans')}
+                      className="rounded-xl"
+                    >
+                      <ArrowLeft className="w-4 h-4 mr-2" />
+                      Back to Workplans
+                    </Button>
+                  </div>
+                  <WorkplanAnalytics 
+                    workplans={workplans}
+                    selectedWorkplanId={selectedWorkplan?.id}
+                  />
+                </div>
               </TabsContent>
 
               {/* EXPORT TAB CONTENT */}
               <TabsContent value="export" className="m-0 p-8">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Data Export</CardTitle>
-                    <p className="text-sm text-muted-foreground">
-                      Export workplan data in various formats for reporting and analysis
-                    </p>
-                  </CardHeader>
-                  <CardContent>
-                    <ExportManager 
-                      workplans={workplans}
-                      selectedWorkplanId={selectedWorkplan?.id}
-                    />
-                  </CardContent>
-                </Card>
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h2 className="text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+                        Data Export
+                      </h2>
+                      <p className="text-gray-600 mt-1">
+                        Export workplan data in various formats for reporting and analysis
+                      </p>
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      onClick={() => setActiveView('workplans')}
+                      className="rounded-xl"
+                    >
+                      <ArrowLeft className="w-4 h-4 mr-2" />
+                      Back to Workplans
+                    </Button>
+                  </div>
+                  <ExportManager 
+                    workplans={workplans}
+                    selectedWorkplanId={selectedWorkplan?.id}
+                  />
+                </div>
               </TabsContent>
 
               {/* IMPORT TAB CONTENT */}
               <TabsContent value="import" className="m-0 p-8">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Import Workplans</CardTitle>
-                    <p className="text-sm text-muted-foreground">
-                      Bulk import workplans from CSV data
-                    </p>
-                  </CardHeader>
-                  <CardContent>
-                    <CSVImport onImportComplete={handleImportComplete} />
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h2 className="text-2xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
+                        Import Workplans
+                      </h2>
+                      <p className="text-gray-600 mt-1">
+                        Bulk import workplans from CSV data
+                      </p>
+                    </div>
                     <Button 
                       variant="outline" 
                       onClick={() => setActiveView('workplans')}
-                      className="mt-4"
+                      className="rounded-xl"
                     >
+                      <ArrowLeft className="w-4 h-4 mr-2" />
                       Back to Workplans
                     </Button>
-                  </CardContent>
-                </Card>
+                  </div>
+                  <CSVImport onImportComplete={handleImportComplete} />
+                </div>
               </TabsContent>
 
               {/* CREATE WORKPLAN VIEW */}
@@ -920,33 +945,37 @@ export function WorkplanManager() {
               <TabsContent value="edit-workplan" className="m-0 p-0">
                 {selectedWorkplan && (
                   <div className="p-8">
-                    <Card>
-                      <CardHeader>
-                        <div className="flex items-center gap-3 mb-2">
+                    <div className="space-y-6">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
                           <Button 
-                            variant="ghost" 
-                            size="icon" 
+                            variant="outline" 
                             onClick={() => setActiveView('workplans')}
-                            className="h-8 w-8"
+                            className="rounded-xl"
                           >
-                            <ArrowLeft className="h-4 w-4" />
+                            <ArrowLeft className="w-4 h-4 mr-2" />
+                            Back to Workplans
                           </Button>
                           <div>
-                            <CardTitle>Edit Workplan</CardTitle>
-                            <p className="text-sm text-muted-foreground">
+                            <h2 className="text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+                              Edit Workplan
+                            </h2>
+                            <p className="text-gray-600">
                               {selectedWorkplan.activity_name}
                             </p>
                           </div>
                         </div>
-                      </CardHeader>
-                      <CardContent>
-                        <WorkplanForm 
-                          workplan={selectedWorkplan}
-                          onSuccess={handleWorkplanCreated}
-                          onCancel={() => setActiveView('workplans')}
-                        />
-                      </CardContent>
-                    </Card>
+                      </div>
+                      <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl rounded-3xl">
+                        <CardContent className="p-8">
+                          <WorkplanForm 
+                            workplan={selectedWorkplan}
+                            onSuccess={handleWorkplanCreated}
+                            onCancel={() => setActiveView('workplans')}
+                          />
+                        </CardContent>
+                      </Card>
+                    </div>
                   </div>
                 )}
               </TabsContent>

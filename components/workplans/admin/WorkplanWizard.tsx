@@ -1,3 +1,5 @@
+[file name]: WorkplanWizard.tsx
+[file content begin]
 // [file name]: components/workplans/admin/WorkplanWizard.tsx
 'use client'
 
@@ -24,7 +26,11 @@ import {
   Plus,
   Sparkles,
   FileText,
-  ClipboardList
+  ClipboardList,
+  Shield,
+  HeartHandshake,
+  Building2,
+  Loader2
 } from 'lucide-react'
 import type { Workplan } from '@/lib/types/workplan'
 
@@ -107,11 +113,6 @@ const suggestedActivities = {
 }
 
 const resourcePersons = ['Claris', 'Leah', 'Equator', 'Other Staff']
-
-// Icon components (you might need to import these or use different ones)
-const Shield = ({ className }: { className?: string }) => <FileText className={className} />
-const HeartHandshake = ({ className }: { className?: string }) => <Users className={className} />
-const Building2 = ({ className }: { className?: string }) => <Target className={className} />
 
 export function WorkplanWizard({ onSuccess, onCancel }: WorkplanWizardProps) {
   const [currentStep, setCurrentStep] = useState<WizardStep>('foundation')
@@ -572,7 +573,7 @@ export function WorkplanWizard({ onSuccess, onCancel }: WorkplanWizardProps) {
               </div>
             )}
 
-            {/* Step 2: Planning - Same beautiful design */}
+            {/* Step 2: Planning */}
             {currentStep === 'planning' && (
               <div className="space-y-8">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -693,7 +694,7 @@ export function WorkplanWizard({ onSuccess, onCancel }: WorkplanWizardProps) {
               </div>
             )}
 
-            {/* Step 3: Review - Same beautiful design */}
+            {/* Step 3: Review */}
             {currentStep === 'review' && (
               <div className="space-y-8">
                 <Card className="bg-gradient-to-br from-blue-50 to-purple-50 border-0 shadow-lg rounded-2xl">
@@ -703,8 +704,92 @@ export function WorkplanWizard({ onSuccess, onCancel }: WorkplanWizardProps) {
                       Review all information before creating the workplan
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className="space-y-8">
-                    {/* Summary content remains the same */}
+                  <CardContent className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-4">
+                        <h3 className="font-semibold text-gray-900 flex items-center gap-2">
+                          <Target className="h-5 w-5 text-blue-600" />
+                          Basic Information
+                        </h3>
+                        <div className="space-y-3">
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Focus Area:</span>
+                            <span className="font-semibold">{finalFocusArea}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Activity Name:</span>
+                            <span className="font-semibold">{formData.activity_name}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Timeline:</span>
+                            <span className="font-semibold">{formData.timeline_text}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Quarter:</span>
+                            <span className="font-semibold">{formData.quarter}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="space-y-4">
+                        <h3 className="font-semibold text-gray-900 flex items-center gap-2">
+                          <Calendar className="h-5 w-5 text-green-600" />
+                          Planning Details
+                        </h3>
+                        <div className="space-y-3">
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Budget:</span>
+                            <span className="font-semibold">KES {parseInt(formData.budget_allocated)?.toLocaleString() || '0'}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Resource Person:</span>
+                            <span className="font-semibold">{formData.resource_person || 'Not assigned'}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Status:</span>
+                            <Badge 
+                              variant="outline" 
+                              className={
+                                formData.status === 'completed' ? 'bg-green-100 text-green-800' :
+                                formData.status === 'in-progress' ? 'bg-yellow-100 text-yellow-800' :
+                                'bg-blue-100 text-blue-800'
+                              }
+                            >
+                              {formData.status}
+                            </Badge>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Progress:</span>
+                            <span className="font-semibold">{formData.progress}%</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Tasks Description Preview */}
+                    <div className="space-y-3">
+                      <h3 className="font-semibold text-gray-900 flex items-center gap-2">
+                        <FileText className="h-5 w-5 text-purple-600" />
+                        Tasks Description
+                      </h3>
+                      <div className="bg-white border border-gray-200 rounded-xl p-4 max-h-40 overflow-y-auto">
+                        <p className="text-gray-700 whitespace-pre-wrap">{formData.tasks_description}</p>
+                      </div>
+                    </div>
+
+                    {formData.target && (
+                      <div className="flex justify-between items-center bg-amber-50 border border-amber-200 rounded-xl p-4">
+                        <span className="text-amber-800 font-medium">Target:</span>
+                        <span className="text-amber-900 font-semibold">{formData.target}</span>
+                      </div>
+                    )}
+
+                    <div className="flex justify-between items-center bg-blue-50 border border-blue-200 rounded-xl p-4">
+                      <span className="text-blue-800 font-medium">Visibility:</span>
+                      <Badge variant="outline" className={formData.public_visible ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>
+                        {formData.public_visible ? 'Public' : 'Private'}
+                      </Badge>
+                    </div>
                   </CardContent>
                 </Card>
               </div>
@@ -746,7 +831,7 @@ export function WorkplanWizard({ onSuccess, onCancel }: WorkplanWizardProps) {
                   >
                     {isLoading ? (
                       <div className="flex items-center gap-3">
-                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        <Loader2 className="w-5 h-5 animate-spin" />
                         Creating Workplan...
                       </div>
                     ) : (
@@ -777,3 +862,4 @@ export function WorkplanWizard({ onSuccess, onCancel }: WorkplanWizardProps) {
     </div>
   )
 }
+[file content end]
