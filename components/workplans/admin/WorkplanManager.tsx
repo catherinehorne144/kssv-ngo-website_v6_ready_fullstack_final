@@ -869,7 +869,7 @@ export function WorkplanManager() {
                       onClick={() => setActiveView('workplans')}
                       className="rounded-xl"
                     >
-                      <ArrowLeft className="w-4 h-4 mr-2" />
+                      <ArrowLeft className="w-4 w-4 mr-2" />
                       Back to Workplans
                     </Button>
                   </div>
@@ -897,7 +897,7 @@ export function WorkplanManager() {
                       onClick={() => setActiveView('workplans')}
                       className="rounded-xl"
                     >
-                      <ArrowLeft className="w-4 h-4 mr-2" />
+                      <ArrowLeft className="w-4 w-4 mr-2" />
                       Back to Workplans
                     </Button>
                   </div>
@@ -925,7 +925,7 @@ export function WorkplanManager() {
                       onClick={() => setActiveView('workplans')}
                       className="rounded-xl"
                     >
-                      <ArrowLeft className="w-4 h-4 mr-2" />
+                      <ArrowLeft className="w-4 w-4 mr-2" />
                       Back to Workplans
                     </Button>
                   </div>
@@ -953,7 +953,7 @@ export function WorkplanManager() {
                             onClick={() => setActiveView('workplans')}
                             className="rounded-xl"
                           >
-                            <ArrowLeft className="w-4 h-4 mr-2" />
+                            <ArrowLeft className="w-4 w-4 mr-2" />
                             Back to Workplans
                           </Button>
                           <div>
