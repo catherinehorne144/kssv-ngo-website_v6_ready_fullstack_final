@@ -1,5 +1,3 @@
-[file name]: WorkplanAnalytics.tsx
-[file content begin]
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"

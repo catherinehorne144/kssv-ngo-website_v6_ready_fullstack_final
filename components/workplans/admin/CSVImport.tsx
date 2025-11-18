@@ -1,5 +1,3 @@
-[file name]: CSVImport.tsx
-[file content begin]
 "use client"
 
 import { useState, useRef } from 'react'

@@ -1,5 +1,3 @@
-[file name]: WorkplanWizard.tsx
-[file content begin]
 // [file name]: components/workplans/admin/WorkplanWizard.tsx
 'use client'
 

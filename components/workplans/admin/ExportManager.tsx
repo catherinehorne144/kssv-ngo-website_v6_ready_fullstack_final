@@ -1,5 +1,3 @@
-[file name]: ExportManager.tsx
-[file content begin]
 "use client"
 
 import { useState } from 'react'
