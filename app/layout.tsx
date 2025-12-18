@@ -117,16 +117,48 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth" suppressHydrationWarning>
      <head>
-      <meta property="og:see_also" content="https://www.instagram.com/ssvcbo/" />
-      <meta property="og:see_also" content="https://www.facebook.com/share/19dKj3hVN6/" />
-      <meta property="og:see_also" content="https://x.com/cbo_ssv" />
-      <meta property="og:see_also" content="https://www.linkedin.com/in/karungu-ssv-cbo-71143437b" />
-    
-      <link rel="icon" href="/favicon.ico" sizes="any" />
-      <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-      <link rel="manifest" href="/manifest.json" />
-      <meta name="theme-color" content="#0FA3A3" />
-    </head>
+  <meta property="og:see_also" content="https://www.facebook.com/share/19dKj3hVN6/" />
+  <meta property="og:see_also" content="https://x.com/cbo_ssv" />
+  <meta property="og:see_also" content="https://www.instagram.com/ssvcbo" />
+  <meta property="og:see_also" content="https://www.linkedin.com/in/karungu-ssv-cbo-71143437b" />
+
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#0FA3A3" />
+
+  {/* Organization Schema */}
+  <script
+    type="application/ld+json"
+    dangerouslySetInnerHTML={{
+      __html: JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "NonprofitOrganization",
+        "name": "Karungu Survivors of Sexual Violence",
+        "alternateName": "KSSV",
+        "url": "https://karungussv.vercel.app",
+        "logo": "https://karungussv.vercel.app/og-image.png",
+        "description":
+          "Karungu Survivors of Sexual Violence (KSSV) is a community-based organization in Kenya supporting survivors of sexual and gender-based violence through legal aid, psychosocial support, advocacy, and economic empowerment.",
+        "foundingLocation": {
+          "@type": "Place",
+          "name": "Karungu, Kenya"
+        },
+        "areaServed": {
+          "@type": "Country",
+          "name": "Kenya"
+        },
+        "sameAs": [
+          "https://www.facebook.com/share/19dKj3hVN6/",
+          "https://www.instagram.com/ssvcbo",
+          "https://www.linkedin.com/in/karungu-ssv-cbo-71143437b",
+          "https://x.com/cbo_ssv"
+        ]
+      }),
+    }}
+  />
+</head>
+
 
 
       {/* ✅ suppressHydrationWarning added on body */}
