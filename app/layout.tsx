@@ -32,7 +32,7 @@ const outfit = Outfit({
 const bodyClassName = `font-sans ${playfair.variable} ${inter.variable} ${outfit.variable} antialiased`
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || "https://kssv-ngo.vercel.app"),
+  metadataBase: new URL("https://karungussv.vercel.app"),
   title: {
     default: "Karungu Survivors of Sexual Violence | Break the Silence, End the Violence",
     template: "%s | KSSV",
@@ -56,7 +56,7 @@ export const metadata: Metadata = {
     "women's rights",
     "justice",
   ],
-  authors: [{ name: "Karungu Survivors of Sexual Violence", url: "https://kssv-ngo.vercel.app" }],
+  authors: [{ name: "Karungu Survivors of Sexual Violence", url: "https://karungussv.vercel.app" }],
   creator: "Karungu Survivors of Sexual Violence",
   publisher: "KSSV",
   formatDetection: {
