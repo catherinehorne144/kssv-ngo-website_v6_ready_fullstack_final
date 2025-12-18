@@ -264,10 +264,7 @@
   opacity: 1;
   transform: translateY(0);
 }
-/* Fix overlay and z-index issues */
-.fixed, .absolute {
-  z-index: 50;
-}
+
 
 /* Ensure modals and popups appear above everything */
 [data-radix-portal] {
