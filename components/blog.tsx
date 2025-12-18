@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Calendar, Clock, Tag, ArrowRight, Search } from "lucide-react"
+import { Calendar, Clock, Tag, ArrowRight, Search, Sparkles } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { useScrollReveal } from "@/lib/scroll-reveal"
 
@@ -53,7 +53,7 @@ export function Blog() {
       author: "KSSV Team",
       date: "2025-01-15",
       readTime: "5 min read",
-      image: "/community-dialogue-meeting.jpg",
+      image: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
     },
     {
       id: "2",
@@ -79,7 +79,7 @@ export function Blog() {
       author: "Sarah Otieno",
       date: "2025-01-08",
       readTime: "6 min read",
-      image: "/vsla-success-story.jpg",
+      image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
     },
     {
       id: "3",
@@ -105,7 +105,7 @@ export function Blog() {
       author: "Legal Team",
       date: "2024-12-20",
       readTime: "7 min read",
-      image: "/legal-victory-justice.jpg",
+      image: "https://images.unsplash.com/photo-1589391886085-8b6b3acb3a8d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
     },
     {
       id: "4",
@@ -131,7 +131,7 @@ export function Blog() {
       author: "KSSV Team",
       date: "2024-11-25",
       readTime: "4 min read",
-      image: "/awareness-campaign-event.jpg",
+      image: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
     },
     {
       id: "5",
@@ -157,7 +157,7 @@ export function Blog() {
       author: "KSSV Team",
       date: "2024-11-10",
       readTime: "5 min read",
-      image: "/partnership-announcement.jpg",
+      image: "https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
     },
     {
       id: "6",
@@ -183,7 +183,7 @@ export function Blog() {
       author: "Programs Team",
       date: "2024-10-28",
       readTime: "6 min read",
-      image: "/youth-program-launch.jpg",
+      image: "https://images.unsplash.com/photo-1523580494863-6f3031224c94?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
     },
   ]
 
@@ -206,111 +206,155 @@ export function Blog() {
 
   return (
     <>
-      <section id="blog" className="py-20 lg:py-32 bg-background">
-        <div className="container mx-auto px-4 lg:px-8">
+      <section id="blog" className="py-20 lg:py-32 bg-background relative overflow-hidden">
+        {/* Background Elements */}
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-accent-purple/5 to-accent-sky/5" />
+        
+        <div className="container mx-auto px-4 lg:px-8 relative z-10">
           {/* Section Header */}
-          <div className="max-w-3xl mx-auto text-center mb-12 reveal">
-            <span className="text-primary font-accent text-sm font-semibold tracking-wider uppercase">Blog & News</span>
-            <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mt-4 mb-6 text-balance">
-              Stories, Updates & Insights
+          <div className="max-w-4xl mx-auto text-center mb-16 reveal">
+            <div className="inline-flex items-center gap-3 mb-8 px-6 py-3 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-full shadow-lg">
+              <Sparkles className="w-5 h-5 text-primary" />
+              <span className="text-primary font-accent text-sm font-semibold tracking-wider uppercase">Blog & News</span>
+              <Sparkles className="w-5 h-5 text-primary" />
+            </div>
+            <h2 className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mt-4 mb-8 text-balance leading-tight">
+              Stories That{" "}
+              <span className="bg-gradient-to-r from-accent-purple via-primary to-accent-sky bg-clip-text text-transparent">
+                Inspire Change
+              </span>
             </h2>
-            <p className="text-lg text-muted-foreground leading-relaxed text-pretty">
-              Stay informed about our work, read success stories, and learn about the issues affecting our community.
+            <p className="text-xl text-muted-foreground leading-relaxed text-pretty">
+              Discover powerful stories of transformation, resilience, and hope from the KSSV community.
             </p>
           </div>
 
           {/* Search and Filter */}
-          <div className="max-w-4xl mx-auto mb-12 space-y-6 reveal">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={20} />
-              <Input
-                type="search"
-                placeholder="Search articles by title, content, or tags..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
+          <div className="max-w-4xl mx-auto mb-16 space-y-8 reveal">
+            <div className="relative group">
+              <div className="absolute -inset-1 bg-gradient-to-r from-primary via-accent-purple to-accent-sky rounded-2xl blur opacity-25 group-hover:opacity-40 transition duration-500" />
+              <div className="relative">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" size={22} />
+                <Input
+                  type="search"
+                  placeholder="Search inspiring stories and articles..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-12 py-6 text-lg rounded-2xl border-2 border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm focus:border-primary"
+                />
+              </div>
             </div>
 
             <div className="flex flex-wrap justify-center gap-3">
-              {Array.isArray(categories) &&
-                categories.map((category) => (
-                  <Button
-                    key={category}
-                    variant={selectedCategory === category ? "default" : "outline"}
-                    onClick={() => setSelectedCategory(category)}
-                    className="font-accent font-semibold capitalize"
-                    size="sm"
-                  >
-                    {category}
-                  </Button>
-                ))}
+              {categories.map((category) => (
+                <button
+                  key={category}
+                  onClick={() => setSelectedCategory(category)}
+                  className={`px-5 py-3 rounded-xl font-accent font-semibold capitalize transition-all duration-300 transform hover:scale-105 active:scale-95 ${
+                    selectedCategory === category
+                      ? "bg-gradient-to-r from-primary to-accent-purple text-white shadow-lg shadow-primary/30"
+                      : "bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm border border-gray-200 dark:border-gray-700 text-foreground hover:border-primary/50"
+                  }`}
+                >
+                  {category === "all" ? "📚 All Stories" : category}
+                </button>
+              ))}
             </div>
           </div>
 
           {/* Blog Posts Grid */}
-          {Array.isArray(filteredPosts) && filteredPosts.length > 0 ? (
+          {filteredPosts.length > 0 ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {filteredPosts.map((post, index) => (
                 <Card
                   key={post.id}
-                  className="overflow-hidden hover:shadow-xl transition-all reveal group cursor-pointer"
+                  className="overflow-hidden hover:shadow-2xl transition-all duration-500 reveal group cursor-pointer border-0 bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 shadow-lg hover:-translate-y-2"
                   style={{ animationDelay: `${index * 100}ms` }}
                   onClick={() => setSelectedPost(post)}
                 >
-                  <div className="relative h-48 overflow-hidden">
+                  {/* Glow Effect */}
+                  <div className="absolute -inset-1 bg-gradient-to-r from-primary/10 via-accent-purple/10 to-accent-sky/10 rounded-2xl blur opacity-0 group-hover:opacity-100 transition duration-500" />
+                  
+                  <div className="relative h-56 overflow-hidden">
                     <img
                       src={post.image || "/placeholder.svg"}
                       alt={post.title}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                     />
-                    <div className="absolute top-4 left-4">
-                      <Badge className="bg-primary text-primary-foreground">{post.category}</Badge>
+                    {/* Gradient Overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                    
+                    <div className="absolute top-4 left-4 z-10">
+                      <Badge className={`shadow-lg font-semibold border-0 ${
+                        post.category === "Community Impact"
+                          ? "bg-accent-coral text-white"
+                          : post.category === "Success Stories"
+                          ? "bg-accent-sunny text-gray-900"
+                          : post.category === "Legal Aid"
+                          ? "bg-accent-purple text-white"
+                          : post.category === "Awareness"
+                          ? "bg-accent-sky text-white"
+                          : post.category === "News"
+                          ? "bg-primary text-white"
+                          : "bg-gray-700 text-white"
+                      }`}>
+                        {post.category}
+                      </Badge>
+                    </div>
+                    
+                    <div className="absolute bottom-4 right-4 z-10 bg-black/80 backdrop-blur-sm text-white px-3 py-1 rounded-full text-xs font-medium flex items-center gap-2">
+                      <Clock size={12} />
+                      {post.readTime}
                     </div>
                   </div>
 
-                  <div className="p-6">
-                    <div className="flex items-center gap-4 text-xs text-muted-foreground mb-3">
-                      <div className="flex items-center gap-1">
-                        <Calendar size={14} />
+                  <div className="p-7 relative z-10">
+                    <div className="flex items-center gap-3 text-sm text-muted-foreground mb-4">
+                      <div className="flex items-center gap-2">
+                        <Calendar size={14} className="text-primary" />
                         <span>{formatDate(post.date)}</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Clock size={14} />
-                        <span>{post.readTime}</span>
                       </div>
                     </div>
 
-                    <h3 className="font-serif text-xl font-bold text-foreground mb-3 line-clamp-2 group-hover:text-primary transition-colors">
+                    <h3 className="font-serif text-xl font-bold text-foreground mb-4 line-clamp-2 group-hover:text-primary transition-colors duration-300">
                       {post.title}
                     </h3>
 
-                    <p className="text-sm text-muted-foreground leading-relaxed mb-4 line-clamp-3">{post.excerpt}</p>
+                    <p className="text-sm text-muted-foreground leading-relaxed mb-6 line-clamp-3">{post.excerpt}</p>
 
-                    <div className="flex flex-wrap gap-2 mb-4">
+                    <div className="flex flex-wrap gap-2 mb-6">
                       {post.tags.slice(0, 2).map((tag) => (
-                        <Badge key={tag} variant="outline" className="text-xs">
+                        <Badge key={tag} variant="outline" className="text-xs bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm">
                           <Tag size={12} className="mr-1" />
                           {tag}
                         </Badge>
                       ))}
                     </div>
 
-                    <Button
-                      variant="ghost"
-                      className="w-full group-hover:text-primary transition-colors font-accent font-semibold p-0 h-auto"
-                    >
-                      Read More <ArrowRight className="ml-2 w-4 h-4" />
-                    </Button>
+                    <div className="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-800">
+                      <span className="text-sm text-muted-foreground">By {post.author}</span>
+                      <div className="flex items-center text-primary font-accent font-semibold text-sm group-hover:translate-x-2 transition-transform duration-300">
+                        Read Story
+                        <ArrowRight className="ml-2 w-4 h-4" />
+                      </div>
+                    </div>
                   </div>
+
+                  {/* Hover Effect Line */}
+                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-accent-purple to-accent-sky transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500" />
                 </Card>
               ))}
             </div>
           ) : (
             <div className="text-center py-12">
-              <p className="text-muted-foreground text-lg">No articles found matching your search.</p>
-              <Button variant="outline" onClick={() => setSearchQuery("")} className="mt-4">
-                Clear Search
+              <Search className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+              <p className="text-muted-foreground text-lg mb-4">No stories found matching your search.</p>
+              <Button 
+                onClick={() => setSearchQuery("")} 
+                className="bg-gradient-to-r from-primary to-accent-purple text-white px-8 py-3 rounded-full hover:shadow-lg hover:shadow-primary/30 transition-all"
+              >
+                Show All Stories
               </Button>
             </div>
           )}
@@ -319,60 +363,92 @@ export function Blog() {
 
       {/* Blog Post Detail Modal */}
       <Dialog open={!!selectedPost} onOpenChange={() => setSelectedPost(null)}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto p-0 border-0">
           {selectedPost && (
-            <>
-              <div className="relative h-64 -mx-6 -mt-6 mb-6 overflow-hidden">
+            <div className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800">
+              {/* Hero Image */}
+              <div className="relative h-64 md:h-80 overflow-hidden">
                 <img
                   src={selectedPost.image || "/placeholder.svg"}
                   alt={selectedPost.title}
                   className="w-full h-full object-cover"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-background/90 to-transparent" />
-                <div className="absolute bottom-4 left-6">
-                  <Badge className="bg-primary text-primary-foreground">{selectedPost.category}</Badge>
-                </div>
-              </div>
-
-              <DialogHeader>
-                <DialogTitle className="font-serif text-3xl font-bold leading-tight">{selectedPost.title}</DialogTitle>
-              </DialogHeader>
-
-              <div className="flex items-center gap-6 text-sm text-muted-foreground mb-6">
-                <div className="flex items-center gap-2">
-                  <Calendar size={16} />
-                  <span>{formatDate(selectedPost.date)}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Clock size={16} />
-                  <span>{selectedPost.readTime}</span>
-                </div>
-                <div>By {selectedPost.author}</div>
-              </div>
-
-              <div className="flex flex-wrap gap-2 mb-6">
-                {selectedPost.tags.map((tag) => (
-                  <Badge key={tag} variant="outline">
-                    <Tag size={12} className="mr-1" />
-                    {tag}
+                <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/50 to-transparent" />
+                <div className="absolute bottom-6 left-6">
+                  <Badge className={`shadow-lg font-semibold border-0 px-4 py-2 ${
+                    selectedPost.category === "Community Impact"
+                      ? "bg-accent-coral text-white"
+                      : selectedPost.category === "Success Stories"
+                      ? "bg-accent-sunny text-gray-900"
+                      : selectedPost.category === "Legal Aid"
+                      ? "bg-accent-purple text-white"
+                      : selectedPost.category === "Awareness"
+                      ? "bg-accent-sky text-white"
+                      : "bg-primary text-white"
+                  }`}>
+                    {selectedPost.category}
                   </Badge>
-                ))}
+                </div>
               </div>
 
-              <div
-                className="prose prose-lg max-w-none"
-                dangerouslySetInnerHTML={{ __html: selectedPost.content }}
-                style={{
-                  color: "hsl(var(--foreground))",
-                }}
-              />
+              <div className="p-8">
+                <DialogHeader>
+                  <DialogTitle className="font-serif text-3xl md:text-4xl font-bold text-foreground leading-tight mb-4">
+                    {selectedPost.title}
+                  </DialogTitle>
+                </DialogHeader>
 
-              <div className="mt-8 pt-6 border-t">
-                <Button onClick={() => setSelectedPost(null)} className="w-full font-accent font-semibold">
-                  Close
-                </Button>
+                <div className="flex items-center gap-6 text-sm text-muted-foreground mb-8">
+                  <div className="flex items-center gap-3 bg-gray-100 dark:bg-gray-800 px-4 py-2 rounded-full">
+                    <Calendar size={16} className="text-primary" />
+                    <span>{formatDate(selectedPost.date)}</span>
+                  </div>
+                  <div className="flex items-center gap-3 bg-gray-100 dark:bg-gray-800 px-4 py-2 rounded-full">
+                    <Clock size={16} className="text-primary" />
+                    <span>{selectedPost.readTime}</span>
+                  </div>
+                  <div className="flex items-center gap-3 bg-gray-100 dark:bg-gray-800 px-4 py-2 rounded-full">
+                    👤 By {selectedPost.author}
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap gap-3 mb-8">
+                  {selectedPost.tags.map((tag) => (
+                    <Badge key={tag} variant="outline" className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm px-4 py-2">
+                      <Tag size={14} className="mr-2" />
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
+
+                <div
+                  className="prose prose-lg max-w-none mb-8
+                    prose-headings:font-serif 
+                    prose-headings:font-bold
+                    prose-headings:text-foreground
+                    prose-h3:text-2xl prose-h3:mt-8 prose-h3:mb-4
+                    prose-p:text-lg prose-p:leading-relaxed prose-p:text-foreground/90
+                    prose-p:mb-6
+                    prose-strong:text-foreground prose-strong:font-bold
+                    prose-blockquote:border-l-4 prose-blockquote:border-primary 
+                    prose-blockquote:pl-6 prose-blockquote:py-2 prose-blockquote:my-8
+                    prose-blockquote:bg-gradient-to-r prose-blockquote:from-primary/5 prose-blockquote:to-transparent
+                    prose-blockquote:text-foreground/80"
+                  dangerouslySetInnerHTML={{ __html: selectedPost.content }}
+                />
+
+                <div className="mt-8 pt-8 border-t border-gray-200 dark:border-gray-700">
+                  <div className="flex gap-4">
+                    <Button 
+                      onClick={() => setSelectedPost(null)} 
+                      className="flex-1 bg-gradient-to-r from-primary to-accent-purple text-white hover:shadow-lg hover:shadow-primary/30 transition-all"
+                    >
+                      Close Story
+                    </Button>
+                  </div>
+                </div>
               </div>
-            </>
+            </div>
           )}
         </DialogContent>
       </Dialog>
