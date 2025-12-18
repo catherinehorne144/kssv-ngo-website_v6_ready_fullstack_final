@@ -54,7 +54,6 @@ export default async function BlogPage() {
 
   if (error) {
     console.error('Error fetching blog posts:', error)
-    // Return empty array on error
     return <BlogClientPage initialPosts={[]} />
   }
 
