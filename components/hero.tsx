@@ -4,20 +4,41 @@ import { Button } from "@/components/ui/button"
 import { smoothScrollTo } from "@/lib/scroll-reveal"
 import { ArrowDown, Sparkles } from "lucide-react"
 import { motion } from "framer-motion"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 
 const heroImages = [
   "/images/hero/14540.jpg",
-  "/images/hero/africancommunity.jpg", 
+  "/images/hero/africancommunity.jpg",
   "/images/hero/collegestudents.jpg",
   "/images/hero/mentalhealth.jpg",
 ]
 
 export function Hero() {
   const [currentSlide, setCurrentSlide] = useState(0)
+  const prefersReducedMotion = useRef(false)
+
+  // Preload images to avoid janky transitions
+  useEffect(() => {
+    heroImages.forEach((src) => {
+      const img = new Image()
+      img.src = src
+    })
+
+    // detect reduced motion preference
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)")
+    prefersReducedMotion.current = mq.matches
+    const handler = () => {
+      prefersReducedMotion.current = mq.matches
+    }
+    mq.addEventListener?.("change", handler)
+    return () => mq.removeEventListener?.("change", handler)
+  }, [])
 
   useEffect(() => {
+    if (prefersReducedMotion.current) return
+
     const interval = setInterval(() => {
+      // keep it simple and let browser composite opacity changes
       setCurrentSlide((prev) => (prev + 1) % heroImages.length)
     }, 5000) // Change image every 5 seconds
 
@@ -26,69 +47,61 @@ export function Hero() {
 
   return (
     <section id="hero" className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* Background Carousel */}
-      <div className="absolute inset-0 z-0">
-        {heroImages.map((image, index) => (
-          <div
-            key={index}
-            className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ${
-              index === currentSlide ? 'opacity-100' : 'opacity-0'
-            }`}
-            style={{
-              backgroundImage: `url('${image}')`,
-            }}
-          />
-        ))}
-        {/* Reduced opacity for clearer images */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/40 via-accent-purple/30 to-accent-coral/40" />
+      {/* Background Carousel - using <img> with object-fit for better GPU compositing */}
+      <div
+        className="absolute inset-0 z-0"
+        aria-hidden
+        style={{ transform: "translateZ(0)" }}
+      >
+        {heroImages.map((image, index) => {
+          const isActive = index === currentSlide
+          return (
+            <img
+              key={image}
+              src={image}
+              alt={`hero-${index}`}
+              // Use object-cover and full size instead of background-image; browser can optimize decoding
+              className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ease-in-out ${
+                isActive ? "opacity-100" : "opacity-0 pointer-events-none"
+              }`}
+              style={{
+                // hint to composite opacity on GPU
+                willChange: "opacity",
+                transform: "translateZ(0)",
+                WebkitTransform: "translateZ(0)",
+                // avoid extremely expensive filters on full-screen images
+                filter: isActive ? "none" : "none",
+              }}
+              decoding="async"
+              loading={index === 0 ? "eager" : "lazy"}
+            />
+          )
+        })}
+
+        {/* Soft gradient overlay for readability (no heavy filters) */}
+        <div className="absolute inset-0 pointer-events-none" style={{ background: "linear-gradient(135deg, rgba(59,130,246,0.25), rgba(139,92,246,0.18), rgba(249,115,22,0.22))" }} />
       </div>
 
-      <div className="absolute inset-0 z-5 overflow-hidden pointer-events-none">
+      {/* Decorative animated shapes — reduced complexity and respect prefers-reduced-motion */}
+      <div className="absolute inset-0 z-10 overflow-hidden pointer-events-none">
         <motion.div
-          className="absolute top-20 left-10 w-32 h-32 bg-accent-sunny/20 rounded-full blur-3xl"
-          animate={{
-            y: [0, -20, 0],
-            scale: [1, 1.1, 1],
-            opacity: [0.3, 0.5, 0.3],
-          }}
-          transition={{
-            duration: 4,
-            repeat: Number.POSITIVE_INFINITY,
-            ease: "easeInOut",
-          }}
+          className="absolute top-20 left-10 w-32 h-32 rounded-full bg-accent-sunny/20"
+          aria-hidden
+          animate={prefersReducedMotion.current ? {} : { y: [0, -12, 0], scale: [1, 1.06, 1], opacity: [0.4, 0.6, 0.4] }}
+          transition={{ duration: 4.5, repeat: prefersReducedMotion.current ? 0 : Number.POSITIVE_INFINITY, ease: "easeInOut" }}
+          style={{ filter: "blur(24px)", transform: "translateZ(0)" }}
         />
         <motion.div
-          className="absolute bottom-40 right-20 w-40 h-40 bg-accent-sky/20 rounded-full blur-3xl"
-          animate={{
-            y: [0, 20, 0],
-            scale: [1, 1.2, 1],
-            opacity: [0.3, 0.6, 0.3],
-          }}
-          transition={{
-            duration: 5,
-            repeat: Number.POSITIVE_INFINITY,
-            ease: "easeInOut",
-            delay: 1,
-          }}
-        />
-        <motion.div
-          className="absolute top-1/2 left-1/4 w-24 h-24 bg-secondary/20 rounded-full blur-2xl"
-          animate={{
-            x: [0, 15, 0],
-            y: [0, -15, 0],
-            opacity: [0.2, 0.4, 0.2],
-          }}
-          transition={{
-            duration: 6,
-            repeat: Number.POSITIVE_INFINITY,
-            ease: "easeInOut",
-            delay: 2,
-          }}
+          className="absolute bottom-40 right-20 w-40 h-40 rounded-full bg-accent-sky/20"
+          aria-hidden
+          animate={prefersReducedMotion.current ? {} : { y: [0, 12, 0], scale: [1, 1.08, 1], opacity: [0.3, 0.55, 0.3] }}
+          transition={{ duration: 5.5, repeat: prefersReducedMotion.current ? 0 : Number.POSITIVE_INFINITY, ease: "easeInOut", delay: 0.8 }}
+          style={{ filter: "blur(28px)", transform: "translateZ(0)" }}
         />
       </div>
 
       {/* Content */}
-      <div className="relative z-10 container mx-auto px-4 lg:px-8 text-center">
+      <div className="relative z-20 container mx-auto px-4 lg:px-8 text-center">
         <div className="max-w-4xl mx-auto space-y-8">
           <motion.div
             className="inline-block"
@@ -149,17 +162,13 @@ export function Hero() {
           <motion.div
             className="pt-12"
             initial={{ opacity: 0 }}
-            animate={{ opacity: 1, y: [0, 10, 0] }}
+            animate={{ opacity: 1, y: [0, 8, 0] }}
             transition={{
               opacity: { duration: 0.8, delay: 0.8 },
-              y: { duration: 1.5, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" },
+              y: { duration: 1.2, repeat: prefersReducedMotion.current ? 0 : Number.POSITIVE_INFINITY, ease: "easeInOut" },
             }}
           >
-            <button
-              onClick={() => smoothScrollTo("about")}
-              className="text-white/90 hover:text-white transition-colors"
-              aria-label="Scroll to about section"
-            >
+            <button onClick={() => smoothScrollTo("about")} className="text-white/90 hover:text-white transition-colors" aria-label="Scroll to about section">
               <ArrowDown size={32} />
             </button>
           </motion.div>
@@ -167,7 +176,7 @@ export function Hero() {
       </div>
 
       {/* Decorative Bottom Wave */}
-      <div className="absolute bottom-0 left-0 right-0 z-10">
+      <div className="absolute bottom-0 left-0 right-0 z-20">
         <svg
           viewBox="0 0 1440 120"
           fill="none"
