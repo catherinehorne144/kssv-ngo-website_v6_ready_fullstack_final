@@ -403,3 +403,4 @@ The Admin panels include upload UI with previews and progress bars.
 - Do NOT commit your `SUPABASE_SERVICE_ROLE_KEY` to public repos. Add to Vercel env vars only.
 - This package includes placeholder assets in `/public/default-assets` to make the site look complete immediately.
 - If you want automated email invites (magic links), configure SMTP in Supabase (not enabled by default).
+- 🌐 Official Website: https://karungussv.vercel.app
