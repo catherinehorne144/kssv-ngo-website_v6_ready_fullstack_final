@@ -88,7 +88,9 @@ export const metadata: Metadata = {
       "Break the Silence, End the Violence. Empowering survivors through justice, healing, and economic resilience.",
     images: ["/og-image.png"],
     creator: "@karungusurvivors",
-  },
+  },alternates: {
+  canonical: "https://karungussv.vercel.app",
+},
   robots: {
     index: true,
     follow: true,
@@ -105,6 +107,7 @@ export const metadata: Metadata = {
   },
   generator: "v0.app",
 }
+
 
 export default function RootLayout({
   children,
