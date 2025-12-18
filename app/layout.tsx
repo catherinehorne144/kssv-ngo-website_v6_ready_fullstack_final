@@ -116,16 +116,18 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="scroll-smooth" suppressHydrationWarning>
-      <head>
-        <meta property="og:see_also" content="https://facebook.com/karungusurvivors" />
-        <meta property="og:see_also" content="https://twitter.com/karungusurvivors" />
-        <meta property="og:see_also" content="https://instagram.com/karungusurvivors" />
-        <meta property="og:see_also" content="https://linkedin.com/company/karungusurvivors" />
-        <link rel="icon" href="/favicon.ico" sizes="any" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-        <link rel="manifest" href="/manifest.json" />
-        <meta name="theme-color" content="#0FA3A3" />
-      </head>
+     <head>
+      <meta property="og:see_also" content="https://www.instagram.com/ssvcbo/" />
+      <meta property="og:see_also" content="https://www.facebook.com/share/19dKj3hVN6/" />
+      <meta property="og:see_also" content="https://x.com/cbo_ssv" />
+      <meta property="og:see_also" content="https://www.linkedin.com/in/karungu-ssv-cbo-71143437b" />
+    
+      <link rel="icon" href="/favicon.ico" sizes="any" />
+      <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+      <link rel="manifest" href="/manifest.json" />
+      <meta name="theme-color" content="#0FA3A3" />
+    </head>
+
 
       {/* ✅ suppressHydrationWarning added on body */}
       <body className={bodyClassName} suppressHydrationWarning>
