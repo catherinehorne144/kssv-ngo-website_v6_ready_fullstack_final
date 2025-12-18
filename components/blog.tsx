@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Calendar, Clock, Tag, ArrowRight, Search, Sparkles } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { useScrollReveal } from "@/lib/scroll-reveal"
+import Image from "next/image"
 
 interface BlogPost {
   id: string
@@ -53,7 +54,7 @@ export function Blog() {
       author: "KSSV Team",
       date: "2025-01-15",
       readTime: "5 min read",
-      image: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+      image: "/blog-images/community-dialogue.jpg",
     },
     {
       id: "2",
@@ -79,7 +80,7 @@ export function Blog() {
       author: "Sarah Otieno",
       date: "2025-01-08",
       readTime: "6 min read",
-      image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+      image: "/blog-images/vsla-success.jpg",
     },
     {
       id: "3",
@@ -105,7 +106,7 @@ export function Blog() {
       author: "Legal Team",
       date: "2024-12-20",
       readTime: "7 min read",
-      image: "https://images.unsplash.com/photo-1589391886085-8b6b3acb3a8d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+      image: "/blog-images/legal-victory.jpg",
     },
     {
       id: "4",
@@ -131,7 +132,7 @@ export function Blog() {
       author: "KSSV Team",
       date: "2024-11-25",
       readTime: "4 min read",
-      image: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+      image: "/blog-images/awareness-day.jpg",
     },
     {
       id: "5",
@@ -157,7 +158,7 @@ export function Blog() {
       author: "KSSV Team",
       date: "2024-11-10",
       readTime: "5 min read",
-      image: "https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+      image: "/blog-images/partnership.jpg",
     },
     {
       id: "6",
@@ -183,7 +184,7 @@ export function Blog() {
       author: "Programs Team",
       date: "2024-10-28",
       readTime: "6 min read",
-      image: "https://images.unsplash.com/photo-1523580494863-6f3031224c94?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+      image: "/blog-images/youth-mentorship.jpg",
     },
   ]
 
@@ -202,6 +203,12 @@ export function Blog() {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
     return date.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })
+  }
+
+  // Helper function to get local image
+  const getLocalImage = (imagePath: string) => {
+    if (!imagePath) return "/placeholder.svg"
+    return imagePath
   }
 
   return (
@@ -277,10 +284,12 @@ export function Blog() {
                   <div className="absolute -inset-1 bg-gradient-to-r from-primary/10 via-accent-purple/10 to-accent-sky/10 rounded-2xl blur opacity-0 group-hover:opacity-100 transition duration-500" />
                   
                   <div className="relative h-56 overflow-hidden">
-                    <img
-                      src={post.image || "/placeholder.svg"}
+                    <Image
+                      src={getLocalImage(post.image)}
                       alt={post.title}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                      fill
+                      className="object-cover group-hover:scale-110 transition-transform duration-700"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                     />
                     {/* Gradient Overlay */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
@@ -368,10 +377,12 @@ export function Blog() {
             <div className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800">
               {/* Hero Image */}
               <div className="relative h-64 md:h-80 overflow-hidden">
-                <img
-                  src={selectedPost.image || "/placeholder.svg"}
+                <Image
+                  src={getLocalImage(selectedPost.image)}
                   alt={selectedPost.title}
-                  className="w-full h-full object-cover"
+                  fill
+                  className="object-cover"
+                  sizes="100vw"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/50 to-transparent" />
                 <div className="absolute bottom-6 left-6">
