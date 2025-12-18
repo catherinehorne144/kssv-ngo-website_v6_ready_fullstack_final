@@ -7,6 +7,7 @@ import Link from "next/link"
 import { notFound } from "next/navigation"
 import type { Metadata } from "next"
 import { getBlogPost, getBlogPosts } from "@/lib/blog-data"
+import Image from "next/image"
 
 export async function generateStaticParams() {
   const posts = await getBlogPosts('published')
@@ -26,6 +27,14 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
 
   const baseUrl = "https://karungussv.vercel.app"
   const postUrl = `${baseUrl}/blog/${post.id}`
+
+  // Helper function to get full image URL
+  const getFullImageUrl = (imagePath: string) => {
+    if (!imagePath) return `${baseUrl}/og-image.png`
+    if (imagePath.startsWith("http")) return imagePath
+    if (imagePath.startsWith("/")) return `${baseUrl}${imagePath}`
+    return `${baseUrl}/blog-images/${imagePath}`
+  }
 
   return {
     title: `${post.title} | KSSV Blog`,
@@ -49,7 +58,7 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
       tags: post.tags,
       images: [
         {
-          url: post.image || `${baseUrl}/og-image.png`,
+          url: getFullImageUrl(post.image || "/og-image.png"),
           width: 1200,
           height: 630,
           alt: post.title,
@@ -63,7 +72,7 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
       card: "summary_large_image",
       title: post.title,
       description: post.excerpt,
-      images: [post.image || `${baseUrl}/og-image.png`],
+      images: [getFullImageUrl(post.image || "/og-image.png")],
       creator: "@karungusurvivors",
     },
     alternates: {
@@ -95,6 +104,13 @@ export default async function BlogPostPage({ params }: { params: { id: string } 
     return date.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })
   }
 
+  // Helper function to get local image
+  const getLocalImage = (imagePath: string) => {
+    if (!imagePath) return "/placeholder.svg"
+    if (imagePath.startsWith("/")) return imagePath
+    return `/blog-images/${imagePath}`
+  }
+
   // Get related posts
   const allPosts = await getBlogPosts('published')
   const relatedPosts = allPosts
@@ -109,7 +125,7 @@ export default async function BlogPostPage({ params }: { params: { id: string } 
     description: post.excerpt,
     image: {
       "@type": "ImageObject",
-      url: post.image || "https://karungussv.vercel.app/og-image.png",
+      url: post.image ? getLocalImage(post.image) : "https://karungussv.vercel.app/og-image.png",
       width: 1200,
       height: 630,
     },
@@ -185,10 +201,13 @@ export default async function BlogPostPage({ params }: { params: { id: string } 
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent z-10" />
           <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-accent-purple/20 to-accent-sky/20 mix-blend-overlay" />
           
-          <img 
-            src={post.image || "/placeholder.svg"} 
-            alt={post.title} 
-            className="w-full h-full object-cover"
+          <Image 
+            src={getLocalImage(post.image || "/placeholder.svg")}
+            alt={post.title}
+            fill
+            className="object-cover"
+            priority
+            sizes="100vw"
           />
           
           <div className="absolute bottom-0 left-0 right-0 pb-16 z-20">
@@ -374,10 +393,12 @@ export default async function BlogPostPage({ params }: { params: { id: string } 
                     <Link key={relatedPost.id} href={`/blog/${relatedPost.id}`}>
                       <div className="group cursor-pointer bg-white dark:bg-gray-900 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2">
                         <div className="relative h-48 overflow-hidden">
-                          <img
-                            src={relatedPost.image || "/placeholder.svg"}
+                          <Image
+                            src={getLocalImage(relatedPost.image)}
                             alt={relatedPost.title}
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                            fill
+                            className="object-cover group-hover:scale-110 transition-transform duration-700"
+                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                           />
                           <div className="absolute top-4 left-4">
                             <Badge className={`shadow-lg font-semibold border-0 ${
@@ -403,7 +424,7 @@ export default async function BlogPostPage({ params }: { params: { id: string } 
                           <div className="flex items-center justify-between text-sm text-muted-foreground">
                             <span>{formatDate(relatedPost.date)}</span>
                             <span className="flex items-center gap-1">
-                              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                              <ArrowLeft className="w-4 h-4 rotate-180 group-hover:translate-x-1 transition-transform" />
                             </span>
                           </div>
                         </div>
