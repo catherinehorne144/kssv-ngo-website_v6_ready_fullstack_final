@@ -68,7 +68,7 @@ export const metadata: Metadata = {
     title: "Karungu Survivors of Sexual Violence",
     description:
       "Break the Silence, End the Violence. Empowering survivors through justice, healing, and economic resilience.",
-    url: "https://kssv-ngo.vercel.app",
+    url: "https://karungussv.vercel.app",
     siteName: "KSSV",
     images: [
       {
@@ -101,7 +101,7 @@ export const metadata: Metadata = {
     },
   },
   verification: {
-    google: "your-google-verification-code",
+    google: "X7CT1OaRpAZ2gqFaGU0pQV2a7RJV-QEIRp17I6ufNxA",
   },
   generator: "v0.app",
 }
