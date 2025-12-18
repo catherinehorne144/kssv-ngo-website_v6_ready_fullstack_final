@@ -43,11 +43,18 @@ export function Navigation() {
   return (
     <>
       <nav
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          isScrolled 
-            ? "bg-background/95 backdrop-blur-md shadow-lg border-b" 
+        // Make sure nav sits above everything and gets its own compositing layer
+        className={`fixed top-0 left-0 right-0 z-[9999] transition-all duration-300 ${
+          isScrolled
+            ? "bg-background/95 backdrop-blur-md shadow-lg border-b"
             : "bg-background/90 backdrop-blur-sm"
         }`}
+        style={{
+          transform: "translateZ(0)",
+          WebkitTransform: "translateZ(0)",
+          // small performance hint
+          willChange: "transform",
+        }}
       >
         <div className="container mx-auto px-4 lg:px-8">
           <div className="flex items-center justify-between h-20">
@@ -87,7 +94,9 @@ export function Navigation() {
             <div className="flex items-center gap-4">
               <ThemeToggle />
               <Button
-                onClick={() => (pathname === "/" ? smoothScrollTo("donate") : (window.location.href = "/#donate"))}
+                onClick={() =>
+                  pathname === "/" ? smoothScrollTo("donate") : (window.location.href = "/#donate")
+                }
                 className="font-accent font-semibold bg-gradient-to-r from-accent-coral to-accent-sunny hover:from-accent-coral/90 hover:to-accent-sunny/90 text-white shadow-lg hover:shadow-xl transition-all"
               >
                 Donate
@@ -108,7 +117,7 @@ export function Navigation() {
 
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
-        <div className="fixed inset-0 z-40 lg:hidden">
+        <div className="fixed inset-0 z-[9998] lg:hidden">
           <div className="fixed inset-0 bg-background/95 backdrop-blur-md pt-20">
             <div className="container mx-auto px-4 py-8">
               <div className="flex flex-col gap-6">
