@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Calendar, Clock, Tag, ArrowRight, Search, Sparkles, BookOpen, TrendingUp, Users } from "lucide-react"
 import Link from "next/link"
 import type { BlogPost } from "@/lib/types/database"
+import Image from "next/image"
 
 interface BlogClientPageProps {
   initialPosts: BlogPost[]
@@ -35,6 +36,15 @@ export default function BlogClientPage({ initialPosts }: BlogClientPageProps) {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
     return date.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })
+  }
+
+  // Helper function to get local image
+  const getLocalImage = (imagePath: string) => {
+    if (!imagePath) return "/placeholder.svg"
+    // If it's already a local path starting with /, use it directly
+    if (imagePath.startsWith("/")) return imagePath
+    // Otherwise, assume it's in the blog-images folder
+    return `/blog-images/${imagePath}`
   }
 
   return (
@@ -168,11 +178,12 @@ export default function BlogClientPage({ initialPosts }: BlogClientPageProps) {
                     {/* Image Container */}
                     <div className="relative h-56 overflow-hidden">
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent z-10" />
-                      <img
-                        src={post.image || "/placeholder.svg"}
+                      <Image
+                        src={getLocalImage(post.image)}
                         alt={post.title}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                        loading="lazy"
+                        fill
+                        className="object-cover group-hover:scale-110 transition-transform duration-700"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                       />
                       
                       {/* Category Badge */}
