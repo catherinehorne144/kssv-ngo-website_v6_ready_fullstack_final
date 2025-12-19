@@ -13,6 +13,7 @@ const nextConfig = {
   },
   reactStrictMode: true,
   compress: true,
+  unoptimized: true,
 }
 
 export default nextConfig
