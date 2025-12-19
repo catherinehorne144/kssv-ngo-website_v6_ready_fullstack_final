@@ -1,4 +1,3 @@
-// lib/upload.ts
 import { createClient } from "@/lib/supabase/client"
 
 export async function uploadBlogImage(file: File) {
@@ -6,18 +5,20 @@ export async function uploadBlogImage(file: File) {
 
   const ext = file.name.split(".").pop()
   const fileName = `${crypto.randomUUID()}.${ext}`
+
+  // ✅ DO NOT prefix with bucket name
   const filePath = fileName
 
   const { error } = await supabase.storage
-    .from("blog-images")
+    .from("blog-images") // bucket name ONLY
     .upload(filePath, file, {
       cacheControl: "3600",
       upsert: false,
-      contentType: file.type,
     })
 
   if (error) {
-    throw new Error(error.message)
+    console.error("Supabase upload error:", error)
+    throw error
   }
 
   const { data } = supabase.storage
