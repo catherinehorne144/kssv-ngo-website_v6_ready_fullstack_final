@@ -6,7 +6,7 @@ export async function uploadBlogImage(file: File) {
   const ext = file.name.split(".").pop()
   const fileName = `${crypto.randomUUID()}.${ext}`
   
-  // Upload path
+  // Upload to blog-images bucket
   const filePath = fileName
 
   const { error } = await supabase.storage
@@ -21,14 +21,9 @@ export async function uploadBlogImage(file: File) {
     throw error
   }
 
-  // Get public URL for preview
-  const { data } = supabase.storage
-    .from("blog-images")
-    .getPublicUrl(filePath)
-
-  // ✅ Return BOTH: database path and preview URL
+  // Return ONLY the path for database (format: /blog-images/filename.jpg)
   return {
-    path: `/blog-images/${filePath}`,  // For database
-    publicUrl: data.publicUrl,        // For preview
+    path: `/blog-images/${filePath}`,
+    publicUrl: `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/blog-images/${filePath}`
   }
 }
