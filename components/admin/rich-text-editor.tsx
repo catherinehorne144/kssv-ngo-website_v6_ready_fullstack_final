@@ -6,6 +6,8 @@ import Underline from '@tiptap/extension-underline'
 import TextAlign from '@tiptap/extension-text-align'
 import Link from '@tiptap/extension-link'
 import Image from '@tiptap/extension-image'
+import { uploadBlogImage } from "@/lib/upload"
+
 import { 
   Bold, 
   Italic, 
