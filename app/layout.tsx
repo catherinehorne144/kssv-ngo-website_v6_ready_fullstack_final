@@ -5,12 +5,12 @@ import Link from "next/link"
 
 export function Footer() {
   const quickLinks = [
-    { label: "About Us", href: "/about" },
-    { label: "Programs", href: "/programs" },
-    { label: "Projects", href: "/projects" },
-    { label: "Blog", href: "/blog" },
-    { label: "Contact", href: "/contact" },
-    { label: "KSSV Portal", href: "/login", external: true },
+    { label: "About Us", href: "/#about" },
+    { label: "Programs", href: "/#programs" },
+    { label: "Projects", href: "/#projects" },
+    { label: "Blog", href: "/#blog" },
+    { label: "Contact", href: "/#contact" },
+    { label: "KSSV Portal", href: "/login" },
   ]
 
   const socialLinks = [
@@ -53,6 +53,7 @@ export function Footer() {
                 <li key={link.href}>
                   <Link
                     href={link.href}
+                    scroll={true}
                     className="text-sm text-background/80 hover:text-background"
                   >
                     {link.label}
@@ -67,7 +68,8 @@ export function Footer() {
             <h4 className="font-serif font-bold mb-4">Contact</h4>
             <ul className="space-y-3 text-sm text-background/80">
               <li className="flex gap-2">
-                <MapPin size={16} /> Karungu, Migori County, Kenya
+                <MapPin size={16} />
+                <span>Karungu, Migori County, Kenya</span>
               </li>
               <li className="flex gap-2">
                 <Phone size={16} />
@@ -75,7 +77,9 @@ export function Footer() {
               </li>
               <li className="flex gap-2">
                 <Mail size={16} />
-                <a href="mailto:karungussvcbo@gmail.com">karungussvcbo@gmail.com</a>
+                <a href="mailto:karungussvcbo@gmail.com">
+                  karungussvcbo@gmail.com
+                </a>
               </li>
             </ul>
           </div>
