@@ -280,29 +280,33 @@ export default function BlogAdminPage() {
 
             {/* COVER IMAGE UPLOAD */}
             <Label>Cover Image</Label>
-            <div className="space-y-2">
-              {form.image && (
-                <img
-                  src={form.image}
-                  className="w-full h-48 object-cover rounded-lg"
-                />
-              )}
 
-              <label className="flex items-center gap-2 cursor-pointer text-sm">
-                <Input
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) =>
-                    e.target.files && handleCoverUpload(e.target.files[0])
-                  }
-                />
-                <Button variant="outline" disabled={uploadingCover}>
-                  <Upload size={14} className="mr-2" />
-                  {uploadingCover ? "Uploading…" : "Upload Cover Image"}
-                </Button>
-              </label>
-            </div>
+                <div className="space-y-3">
+                  {form.image && (
+                    <img
+                      src={form.image}
+                      alt="Cover preview"
+                      className="w-full h-48 object-cover rounded-lg border"
+                    />
+                  )}
+                
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    disabled={uploadingCover}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0]
+                      if (file) handleCoverUpload(file)
+                    }}
+                  />
+                
+                  {uploadingCover && (
+                    <p className="text-sm text-muted-foreground">
+                      Uploading cover image…
+                    </p>
+                  )}
+                </div>
+
 
             <Label>Tags</Label>
             <div className="flex gap-2">
