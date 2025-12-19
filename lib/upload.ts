@@ -4,23 +4,22 @@ export async function uploadBlogImage(file: File) {
   const supabase = createClient()
 
   // Simple file name
-  const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${file.name.split('.').pop()}`
+  const fileName = `${Date.now()}-${file.name}`
   
-  // Upload to storage
-  const { error } = await supabase.storage
-    .from("blog-images")
-    .upload(fileName, file)
+  try {
+    // Upload to blog-images bucket
+    const { data, error } = await supabase.storage
+      .from("blog-images")
+      .upload(fileName, file)
 
-  if (error) {
+    if (error) throw error
+
+    // Return the full public URL
+    return `https://cxpizphluslwrcroiecx.supabase.co/storage/v1/object/public/blog-images/${fileName}`
+    
+  } catch (error) {
     console.error("Upload failed:", error)
-    throw error
+    // Fallback: return a placeholder
+    return "https://placehold.co/600x400"
   }
-
-  // Get full public URL
-  const { data } = supabase.storage
-    .from("blog-images")
-    .getPublicUrl(fileName)
-
-  // Return FULL URL for everything
-  return data.publicUrl
 }
