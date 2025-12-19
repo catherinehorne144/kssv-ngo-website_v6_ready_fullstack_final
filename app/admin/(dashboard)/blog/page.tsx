@@ -129,21 +129,17 @@ export default function BlogAdminPage() {
   }
 
   async function handleCoverUpload(file: File) {
-    try {
-      setUploadingCover(true)
-      const { path, publicUrl } = await uploadBlogImage(file)
-      setForm((f) => ({ 
-        ...f, 
-        image: publicUrl,
-        imagePath: path
-      }))
-    } catch (e) {
-      console.error(e)
-      alert("Cover image upload failed")
-    } finally {
-      setUploadingCover(false)
-    }
+  try {
+    setUploadingCover(true)
+    const imageUrl = await uploadBlogImage(file)
+    setForm((f) => ({ ...f, image: imageUrl }))
+  } catch (e) {
+    console.error(e)
+    alert("Cover image upload failed")
+  } finally {
+    setUploadingCover(false)
   }
+}
 
   async function savePost() {
     if (!form.title || !form.content) {
