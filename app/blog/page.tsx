@@ -1,6 +1,9 @@
 import type { Metadata } from "next"
 import BlogClientPage from "./page.client"
-import { createServerClientInstance } from "@/lib/supabase/server"
+import { createClient } from "@supabase/supabase-js"
+
+// ✅ Force runtime rendering (prevents static build crash)
+export const dynamic = "force-dynamic"
 
 export const metadata: Metadata = {
   title: "Blog & News | KSSV - Karungu Survivors of Sexual Violence",
@@ -19,7 +22,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Blog & News | KSSV",
     description:
-      "Stories, updates, and insights from Karungu Survivors of Sexual Violence. Read about our impact and community transformation.",
+      "Stories, updates, and insights from Karungu Survivors of Sexual Violence.",
     url: "https://karungussv.vercel.app/blog",
     type: "website",
     images: [
@@ -31,31 +34,40 @@ export const metadata: Metadata = {
       },
     ],
   },
-  twitter: {
-    card: "summary_large_image",
-    title: "Blog & News | KSSV",
-    description: "Stories, updates, and insights from Karungu Survivors of Sexual Violence.",
-    images: ["/og-image.png"],
-  },
   alternates: {
     canonical: "https://karungussv.vercel.app/blog",
   },
 }
 
+// ✅ Public, anon Supabase client (NO cookies)
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
+
 export default async function BlogPage() {
-  // Fetch blog posts on the server
-  const supabase = createServerClientInstance()
-  
   const { data: posts, error } = await supabase
-    .from('blog')
-    .select('*')
-    .eq('status', 'published')
-    .order('date', { ascending: false })
+    .from("blog")
+    .select(
+      `
+        id,
+        title,
+        excerpt,
+        category,
+        tags,
+        author,
+        date,
+        read_time,
+        image
+      `
+    )
+    .eq("status", "published")
+    .order("date", { ascending: false })
 
   if (error) {
-    console.error('Error fetching blog posts:', error)
+    console.error("Error fetching blog posts:", error)
     return <BlogClientPage initialPosts={[]} />
   }
 
-  return <BlogClientPage initialPosts={posts || []} />
+  return <BlogClientPage initialPosts={posts ?? []} />
 }
