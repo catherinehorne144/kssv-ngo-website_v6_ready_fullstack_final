@@ -13,44 +13,76 @@ import { SkipToContent } from "@/components/skip-to-content"
 
 const structuredData = {
   "@context": "https://schema.org",
-  "@type": "NGO",
-  name: "Karungu Survivors of Sexual Violence",
-  alternateName: "KSSV",
-  url: "https://kssv-ngo.vercel.app",
-  logo: "https://kssv-ngo.vercel.app/icon-512.png",
-  description:
-    "Empowering survivors through justice, healing, and economic resilience. Supporting survivors of sexual violence in Karungu with legal aid, psychosocial support, and economic empowerment.",
-  foundingDate: "2021",
-  address: {
-    "@type": "PostalAddress",
-    addressLocality: "Karungu",
-    addressRegion: "Migori County",
-    addressCountry: "KE",
-  },
-  contactPoint: {
-    "@type": "ContactPoint",
-    telephone: "+254-XXX-XXXXXX",
-    contactType: "Customer Service",
-    email: "info@kssv.org",
-    availableLanguage: ["English", "Swahili"],
-  },
-  sameAs: [
-    "https://facebook.com/karungusurvivors",
-    "https://twitter.com/karungusurvivors",
-    "https://instagram.com/karungusurvivors",
-    "https://linkedin.com/company/karungusurvivors",
-  ],
-  areaServed: {
-    "@type": "Place",
-    name: "Karungu, Migori County, Kenya",
-  },
-  knowsAbout: [
-    "Gender-Based Violence",
-    "Legal Aid",
-    "Psychosocial Support",
-    "Economic Empowerment",
-    "Survivor Support",
-    "Women's Rights",
+  "@graph": [
+    {
+      "@type": "NonprofitOrganization",
+      "@id": "https://karungussv.vercel.app/#organization",
+      name: "Karungu Survivors of Sexual Violence",
+      alternateName: "KSSV",
+      url: "https://karungussv.vercel.app",
+      logo: "https://karungussv.vercel.app/og-image.png",
+      description:
+        "Empowering survivors through justice, healing, and economic resilience in Karungu, Migori County, Kenya.",
+      address: {
+        "@type": "PostalAddress",
+        addressLocality: "Karungu",
+        addressRegion: "Migori County",
+        addressCountry: "KE",
+      },
+      sameAs: [
+        "https://www.facebook.com/share/19dKj3hVN6/",
+        "https://www.instagram.com/ssvcbo",
+        "https://www.linkedin.com/in/karungu-ssv-cbo-71143437b",
+        "https://x.com/cbo_ssv",
+      ],
+    },
+
+    {
+      "@type": "WebSite",
+      "@id": "https://karungussv.vercel.app/#website",
+      url: "https://karungussv.vercel.app",
+      name: "Karungu Survivors of Sexual Violence",
+      publisher: { "@id": "https://karungussv.vercel.app/#organization" },
+    },
+
+    {
+      "@type": "WebPage",
+      "@id": "https://karungussv.vercel.app/#home",
+      url: "https://karungussv.vercel.app/",
+      name: "Home – Karungu Survivors of Sexual Violence",
+      isPartOf: { "@id": "https://karungussv.vercel.app/#website" },
+    },
+
+    {
+      "@type": "WebPage",
+      "@id": "https://karungussv.vercel.app/#about",
+      url: "https://karungussv.vercel.app/#about",
+      name: "About Us – Karungu Survivors of Sexual Violence",
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://karungussv.vercel.app/#programs",
+      url: "https://karungussv.vercel.app/#programs",
+      name: "Programs – Karungu Survivors of Sexual Violence",
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://karungussv.vercel.app/#projects",
+      url: "https://karungussv.vercel.app/#projects",
+      name: "Projects – Karungu Survivors of Sexual Violence",
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://karungussv.vercel.app/#contact",
+      url: "https://karungussv.vercel.app/#contact",
+      name: "Contact – Karungu Survivors of Sexual Violence",
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://karungussv.vercel.app/#donate",
+      url: "https://karungussv.vercel.app/#donate",
+      name: "Donate – Karungu Survivors of Sexual Violence",
+    },
   ],
 }
 
@@ -58,18 +90,22 @@ export default function Home() {
   return (
     <>
       <SkipToContent />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+
       <main id="main-content" className="relative">
         <Navigation />
         <Hero />
-        <About />
-        <Programs />
+        <section id="about"><About /></section>
+        <section id="programs"><Programs /></section>
         <Impact />
-        <Projects />
+        <section id="projects"><Projects /></section>
         <Testimonials />
         <GetInvolved />
-        <Donate />
-        <Contact />
+        <section id="donate"><Donate /></section>
+        <section id="contact"><Contact /></section>
         <Footer />
       </main>
     </>
