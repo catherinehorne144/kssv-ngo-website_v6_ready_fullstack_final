@@ -1,113 +1,143 @@
-"use client"
+import type React from "react"
+import type { Metadata } from "next"
+import { Playfair_Display, Inter, Outfit } from "next/font/google"
+import { Analytics } from "@vercel/analytics/next"
+import { SpeedInsights } from "@vercel/speed-insights/next"
+import { Suspense } from "react"
+import { ThemeProvider } from "@/components/theme-provider"
+import { PWAInstall } from "@/components/pwa-install"
+import { GoogleAnalytics } from "@/components/google-analytics"
+import "./globals.css"
 
-import { Facebook, Instagram, Linkedin, Mail, Phone, MapPin } from "lucide-react"
-import Link from "next/link"
+/* ================= FONTS ================= */
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  variable: "--font-playfair",
+  display: "swap",
+})
 
-export function Footer() {
-  const quickLinks = [
-    { label: "About Us", href: "/#about" },
-    { label: "Programs", href: "/#programs" },
-    { label: "Projects", href: "/#projects" },
-    { label: "Blog", href: "/#blog" },
-    { label: "Contact", href: "/#contact" },
-    { label: "KSSV Portal", href: "/login" },
-  ]
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+})
 
-  const socialLinks = [
-    {
-      icon: Facebook,
-      href: "https://www.facebook.com/share/19dKj3hVN6/",
-      label: "Facebook",
-    },
-    {
-      icon: Instagram,
-      href: "https://www.instagram.com/ssvcbo",
-      label: "Instagram",
-    },
-    {
-      icon: Linkedin,
-      href: "https://www.linkedin.com/in/karungu-ssv-cbo-71143437b",
-      label: "LinkedIn",
-    },
-  ]
+const outfit = Outfit({
+  subsets: ["latin"],
+  variable: "--font-outfit",
+  display: "swap",
+})
 
+const bodyClassName = `font-sans ${playfair.variable} ${inter.variable} ${outfit.variable} antialiased`
+
+/* ================= SEO METADATA ================= */
+const BASE_URL = "https://karungussv.vercel.app"
+
+export const metadata: Metadata = {
+  metadataBase: new URL(BASE_URL),
+  title: {
+    default: "Karungu Survivors of Sexual Violence | Break the Silence, End the Violence",
+    template: "%s | KSSV",
+  },
+  description:
+    "Karungu Survivors of Sexual Violence (KSSV) is a community-based organization in Kenya empowering survivors through legal aid, psychosocial support, advocacy, and economic resilience.",
+  keywords: [
+    "Karungu",
+    "KSSV",
+    "survivors of sexual violence",
+    "gender based violence",
+    "GBV Kenya",
+    "legal aid",
+    "psychosocial support",
+    "economic empowerment",
+    "women rights Kenya",
+    "community based organization",
+  ],
+  authors: [{ name: "Karungu Survivors of Sexual Violence", url: BASE_URL }],
+  creator: "Karungu Survivors of Sexual Violence",
+  publisher: "KSSV",
+  alternates: {
+    canonical: BASE_URL,
+  },
+  openGraph: {
+    title: "Karungu Survivors of Sexual Violence",
+    description:
+      "Break the Silence, End the Violence. Supporting survivors of sexual and gender-based violence in Karungu, Kenya.",
+    url: BASE_URL,
+    siteName: "KSSV",
+    images: [
+      {
+        url: `${BASE_URL}/og-image.png`,
+        width: 1200,
+        height: 630,
+        alt: "Karungu Survivors of Sexual Violence (KSSV)",
+      },
+    ],
+    locale: "en_KE",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Karungu Survivors of Sexual Violence",
+    description:
+      "Empowering survivors through justice, healing, and economic resilience in Karungu, Kenya.",
+    images: [`${BASE_URL}/og-image.png`],
+    creator: "@cbo_ssv",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+  verification: {
+    google: "X7CT1OaRpAZ2gqFaGU0pQV2a7RJV-QEIRp17I6ufNxA",
+  },
+}
+
+/* ================= ROOT LAYOUT ================= */
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
   return (
-    <footer className="bg-foreground text-background">
-      <div className="container mx-auto px-4 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+    <html lang="en" className="scroll-smooth" suppressHydrationWarning>
+      <head>
+        {/* Social identity reinforcement */}
+        <meta property="og:see_also" content="https://www.facebook.com/share/19dKj3hVN6/" />
+        <meta property="og:see_also" content="https://www.instagram.com/ssvcbo" />
+        <meta property="og:see_also" content="https://www.linkedin.com/in/karungu-ssv-cbo-71143437b" />
+        <meta property="og:see_also" content="https://x.com/cbo_ssv" />
 
-          {/* Brand */}
-          <div>
-            <h3 className="font-serif text-xl font-bold">KSSV</h3>
-            <p className="text-sm mt-2 text-background/80">
-              Karungu Survivors of Sexual Violence — empowering survivors through justice,
-              healing, and economic resilience.
-            </p>
-          </div>
+        {/* PWA */}
+        <link rel="manifest" href="/manifest.json" />
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <meta name="theme-color" content="#0FA3A3" />
+      </head>
 
-          {/* Quick Links */}
-          <div>
-            <h4 className="font-serif font-bold mb-4">Quick Links</h4>
-            <ul className="space-y-2">
-              {quickLinks.map((link) => (
-                <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    scroll={true}
-                    className="text-sm text-background/80 hover:text-background"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+      <body className={bodyClassName} suppressHydrationWarning>
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+          <Suspense fallback={<div>Loading…</div>}>{children}</Suspense>
+          <PWAInstall />
+        </ThemeProvider>
 
-          {/* Contact */}
-          <div>
-            <h4 className="font-serif font-bold mb-4">Contact</h4>
-            <ul className="space-y-3 text-sm text-background/80">
-              <li className="flex gap-2">
-                <MapPin size={16} />
-                <span>Karungu, Migori County, Kenya</span>
-              </li>
-              <li className="flex gap-2">
-                <Phone size={16} />
-                <a href="tel:+254700000000">+254 700 000 000</a>
-              </li>
-              <li className="flex gap-2">
-                <Mail size={16} />
-                <a href="mailto:karungussvcbo@gmail.com">
-                  karungussvcbo@gmail.com
-                </a>
-              </li>
-            </ul>
-          </div>
+        {/* ✅ SERVICE WORKER REGISTRATION */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ("serviceWorker" in navigator) {
+                window.addEventListener("load", () => {
+                  navigator.serviceWorker.register("/sw.js");
+                });
+              }
+            `,
+          }}
+        />
 
-          {/* Social */}
-          <div>
-            <h4 className="font-serif font-bold mb-4">Follow Us</h4>
-            <div className="flex gap-3">
-              {socialLinks.map((social) => (
-                <a
-                  key={social.label}
-                  href={social.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={social.label}
-                  className="w-10 h-10 flex items-center justify-center rounded-full bg-background/10 hover:bg-primary"
-                >
-                  <social.icon size={18} />
-                </a>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-10 pt-6 border-t border-background/20 text-sm text-background/70 text-center">
-          © 2025 Karungu Survivors of Sexual Violence (KSSV). All rights reserved.
-        </div>
-      </div>
-    </footer>
+        <GoogleAnalytics />
+        <Analytics />
+        <SpeedInsights />
+      </body>
+    </html>
   )
 }
