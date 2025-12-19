@@ -1,36 +1,30 @@
 import { createServerClientInstance } from "@/lib/supabase/server"
-import { type NextRequest, NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 
-export async function GET(request: NextRequest) {
-  try {
-    const supabase = createServerClientInstance() // Remove 'await'
-    const { searchParams } = new URL(request.url)
-    const status = searchParams.get("status") || "published"
+export async function GET(req: NextRequest) {
+  const supabase = createServerClientInstance()
+  const { searchParams } = new URL(req.url)
+  const status = searchParams.get("status") ?? "published"
 
-    let query = supabase.from("blog").select("*")
-    if (status !== "all") {
-      query = query.eq("status", status)
-    }
+  let query = supabase.from("blog").select("*")
+  if (status !== "all") query = query.eq("status", status)
 
-    const { data, error } = await query.order("date", { ascending: false })
+  const { data, error } = await query.order("date", { ascending: false })
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-    if (error) throw error
-    return NextResponse.json(data)
-  } catch (error) {
-    return NextResponse.json({ error: "Failed to fetch blog posts" }, { status: 500 })
-  }
+  return NextResponse.json(data)
 }
 
-export async function POST(request: NextRequest) {
-  try {
-    const supabase = createServerClientInstance() // Remove 'await'
-    const body = await request.json()
+export async function POST(req: NextRequest) {
+  const supabase = createServerClientInstance()
+  const body = await req.json()
 
-    const { data, error } = await supabase.from("blog").insert([body]).select()
-
-    if (error) throw error
-    return NextResponse.json(data[0], { status: 201 })
-  } catch (error) {
-    return NextResponse.json({ error: "Failed to create blog post" }, { status: 500 })
+  if (!body.title || !body.content) {
+    return NextResponse.json({ error: "Missing fields" }, { status: 400 })
   }
+
+  const { data, error } = await supabase.from("blog").insert([body]).select().single()
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  return NextResponse.json(data, { status: 201 })
 }
