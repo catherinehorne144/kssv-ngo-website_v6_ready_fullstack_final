@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import dynamic from "next/dynamic"
 import { format } from "date-fns"
-import { Plus, Calendar, Clock, Tag } from "lucide-react"
+import { Plus, Calendar, Clock, Tag, Upload } from "lucide-react"
 
 import { AdminHeader } from "@/components/admin/header"
 import { DataTable } from "@/components/admin/data-table"
@@ -28,6 +28,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { createClient } from "@/lib/supabase/client"
+import { uploadBlogImage } from "@/lib/upload"
 import type { BlogPost } from "@/lib/types/database"
 
 const RichTextEditor = dynamic(
@@ -53,6 +54,7 @@ export default function BlogAdminPage() {
   const [viewPost, setViewPost] = useState<BlogPost | null>(null)
 
   const [tagInput, setTagInput] = useState("")
+  const [uploadingCover, setUploadingCover] = useState(false)
 
   const [form, setForm] = useState({
     id: "",
@@ -132,6 +134,18 @@ export default function BlogAdminPage() {
     setOpenEditor(true)
   }
 
+  async function handleCoverUpload(file: File) {
+    try {
+      setUploadingCover(true)
+      const { publicUrl } = await uploadBlogImage(file)
+      setForm({ ...form, image: publicUrl })
+    } catch (e) {
+      alert("Cover image upload failed")
+    } finally {
+      setUploadingCover(false)
+    }
+  }
+
   async function savePost() {
     if (!form.title || !form.content) {
       alert("Title and content are required")
@@ -197,10 +211,7 @@ export default function BlogAdminPage() {
 
   return (
     <>
-      <AdminHeader
-        title="Blog"
-        description="Create, edit and manage blog posts"
-      />
+      <AdminHeader title="Blog" description="Create, edit and manage blog posts" />
 
       <div className="p-6">
         <Button onClick={openCreate} className="mb-6 gap-2">
@@ -221,57 +232,6 @@ export default function BlogAdminPage() {
         )}
       </div>
 
-      {/* VIEW */}
-      <Dialog open={!!viewPost} onOpenChange={() => setViewPost(null)}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-serif">
-              {viewPost?.title}
-            </DialogTitle>
-            <DialogDescription>
-              {viewPost?.author} •{" "}
-              {viewPost?.date &&
-                format(new Date(viewPost.date), "MMM d, yyyy")}
-            </DialogDescription>
-          </DialogHeader>
-
-          {viewPost && (
-            <article className="prose max-w-none">
-              {viewPost.image && (
-                <img
-                  src={viewPost.image}
-                  alt={viewPost.title}
-                  className="rounded-lg w-full mb-6"
-                />
-              )}
-
-              <div className="flex gap-4 text-sm text-muted-foreground mb-4">
-                <span className="flex items-center gap-1">
-                  <Calendar size={14} />{" "}
-                  {format(new Date(viewPost.date), "MMM d, yyyy")}
-                </span>
-                <span className="flex items-center gap-1">
-                  <Clock size={14} /> {viewPost.read_time}
-                </span>
-              </div>
-
-              <div
-                dangerouslySetInnerHTML={{ __html: viewPost.content }}
-              />
-
-              <div className="flex flex-wrap gap-2 mt-6">
-                {viewPost.tags?.map((tag) => (
-                  <Badge key={tag} variant="outline">
-                    <Tag size={12} className="mr-1" />
-                    {tag}
-                  </Badge>
-                ))}
-              </div>
-            </article>
-          )}
-        </DialogContent>
-      </Dialog>
-
       {/* CREATE / EDIT */}
       <Dialog open={openEditor} onOpenChange={setOpenEditor}>
         <DialogContent className="max-w-5xl max-h-[95vh] overflow-y-auto">
@@ -285,9 +245,7 @@ export default function BlogAdminPage() {
             <Label>Title</Label>
             <Input
               value={form.title}
-              onChange={(e) =>
-                setForm({ ...form, title: e.target.value })
-              }
+              onChange={(e) => setForm({ ...form, title: e.target.value })}
             />
 
             <Label>Category</Label>
@@ -311,48 +269,40 @@ export default function BlogAdminPage() {
             <Textarea
               rows={3}
               value={form.excerpt}
-              onChange={(e) =>
-                setForm({ ...form, excerpt: e.target.value })
-              }
+              onChange={(e) => setForm({ ...form, excerpt: e.target.value })}
             />
 
             <Label>Content</Label>
             <RichTextEditor
               value={form.content}
-              onChange={(html) =>
-                setForm({ ...form, content: html })
-              }
+              onChange={(html) => setForm({ ...form, content: html })}
             />
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label>Author</Label>
-                <Input
-                  value={form.author}
-                  onChange={(e) =>
-                    setForm({ ...form, author: e.target.value })
-                  }
+            {/* COVER IMAGE UPLOAD */}
+            <Label>Cover Image</Label>
+            <div className="space-y-2">
+              {form.image && (
+                <img
+                  src={form.image}
+                  className="w-full h-48 object-cover rounded-lg"
                 />
-              </div>
+              )}
 
-              <div>
-                <Label>Read Time</Label>
+              <label className="flex items-center gap-2 cursor-pointer text-sm">
                 <Input
-                  value={form.read_time}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
                   onChange={(e) =>
-                    setForm({ ...form, read_time: e.target.value })
+                    e.target.files && handleCoverUpload(e.target.files[0])
                   }
                 />
-              </div>
+                <Button variant="outline" disabled={uploadingCover}>
+                  <Upload size={14} className="mr-2" />
+                  {uploadingCover ? "Uploading…" : "Upload Cover Image"}
+                </Button>
+              </label>
             </div>
-
-            <Label>Cover Image URL</Label>
-            <Input
-              value={form.image}
-              onChange={(e) =>
-                setForm({ ...form, image: e.target.value })
-              }
-            />
 
             <Label>Tags</Label>
             <div className="flex gap-2">
@@ -388,10 +338,7 @@ export default function BlogAdminPage() {
               <Switch
                 checked={form.status === "published"}
                 onCheckedChange={(v) =>
-                  setForm({
-                    ...form,
-                    status: v ? "published" : "draft",
-                  })
+                  setForm({ ...form, status: v ? "published" : "draft" })
                 }
               />
               <Label>Publish</Label>
