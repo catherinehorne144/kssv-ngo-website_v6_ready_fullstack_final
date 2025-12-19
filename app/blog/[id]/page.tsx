@@ -2,51 +2,34 @@ import { Navigation } from "@/components/navigation"
 import { Footer } from "@/components/footer"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import {
-  Calendar,
-  Clock,
-  Tag,
-  ArrowLeft,
-  Share2,
-  Eye,
-  Heart,
-  Bookmark,
-} from "lucide-react"
+import { Calendar, Clock, Tag, ArrowLeft, Eye } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 import { notFound } from "next/navigation"
 import type { Metadata } from "next"
-import { createServerClientInstance } from "@/lib/supabase/server"
+import { createClient } from "@supabase/supabase-js"
+
+export const dynamic = "force-dynamic"
 
 const BASE_URL = "https://karungussv.vercel.app"
 
-/* ----------------------------- */
-/* Static params (SSG support)   */
-/* ----------------------------- */
-export async function generateStaticParams() {
-  const supabase = createServerClientInstance()
-
-  const { data } = await supabase
-    .from("blog")
-    .select("id")
-    .eq("status", "published")
-
-  return (data || []).map((post) => ({ id: post.id }))
-}
+// ✅ Public anon Supabase client (NO cookies)
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
 
 /* ----------------------------- */
-/* Metadata (SEO / OG / Twitter) */
+/* Metadata                      */
 /* ----------------------------- */
 export async function generateMetadata({
   params,
 }: {
   params: { id: string }
 }): Promise<Metadata> {
-  const supabase = createServerClientInstance()
-
   const { data: post } = await supabase
     .from("blog")
-    .select("*")
+    .select("title, excerpt, image, author, date")
     .eq("id", params.id)
     .eq("status", "published")
     .single()
@@ -63,15 +46,13 @@ export async function generateMetadata({
     title: `${post.title} | KSSV Blog`,
     description: post.excerpt,
     alternates: {
-      canonical: `${BASE_URL}/blog/${post.id}`,
+      canonical: `${BASE_URL}/blog/${params.id}`,
     },
     openGraph: {
       type: "article",
       title: post.title,
       description: post.excerpt,
-      url: `${BASE_URL}/blog/${post.id}`,
-      publishedTime: post.date,
-      authors: [post.author],
+      url: `${BASE_URL}/blog/${params.id}`,
       images: [
         {
           url: imageUrl,
@@ -80,19 +61,14 @@ export async function generateMetadata({
           alt: post.title,
         },
       ],
-      siteName: "Karungu Survivors of Sexual Violence",
     },
     twitter: {
       card: "summary_large_image",
       title: post.title,
       description: post.excerpt,
       images: [imageUrl],
-      creator: "@karungusurvivors",
     },
-    robots: {
-      index: true,
-      follow: true,
-    },
+    robots: { index: true, follow: true },
   }
 }
 
@@ -104,8 +80,6 @@ export default async function BlogPostPage({
 }: {
   params: { id: string }
 }) {
-  const supabase = createServerClientInstance()
-
   const { data: post } = await supabase
     .from("blog")
     .select("*")
@@ -117,7 +91,7 @@ export default async function BlogPostPage({
 
   const { data: relatedPosts } = await supabase
     .from("blog")
-    .select("*")
+    .select("id, title, excerpt, image")
     .eq("status", "published")
     .neq("id", post.id)
     .limit(3)
@@ -129,25 +103,15 @@ export default async function BlogPostPage({
       day: "numeric",
     })
 
-  /* ----------------------------- */
-  /* Structured Data (Article)    */
-  /* ----------------------------- */
   const articleSchema = {
     "@context": "https://schema.org",
     "@type": "Article",
-    "@id": `${BASE_URL}/blog/${post.id}`,
     headline: post.title,
     description: post.excerpt,
-    image: {
-      "@type": "ImageObject",
-      url: post.image
-        ? `${BASE_URL}${post.image}`
-        : `${BASE_URL}/og-image.png`,
-      width: 1200,
-      height: 630,
-    },
+    image: post.image
+      ? `${BASE_URL}${post.image}`
+      : `${BASE_URL}/og-image.png`,
     datePublished: post.date,
-    dateModified: post.updated_at || post.date,
     author: {
       "@type": "Person",
       name: post.author,
@@ -158,13 +122,7 @@ export default async function BlogPostPage({
       logo: {
         "@type": "ImageObject",
         url: `${BASE_URL}/icon-512.png`,
-        width: 512,
-        height: 512,
       },
-    },
-    mainEntityOfPage: {
-      "@type": "WebPage",
-      "@id": `${BASE_URL}/blog/${post.id}`,
     },
   }
 
@@ -178,7 +136,6 @@ export default async function BlogPostPage({
       <main className="min-h-screen">
         <Navigation />
 
-        {/* Hero */}
         <div className="relative h-[70vh] min-h-[500px] mt-20">
           <Image
             src={post.image || "/og-image.png"}
@@ -186,12 +143,10 @@ export default async function BlogPostPage({
             fill
             priority
             className="object-cover"
-            sizes="100vw"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
         </div>
 
-        {/* Content */}
         <article className="py-16">
           <div className="container mx-auto px-4 max-w-4xl">
             <Badge className="mb-4">{post.category}</Badge>
@@ -200,7 +155,7 @@ export default async function BlogPostPage({
               {post.title}
             </h1>
 
-            <div className="flex items-center gap-6 text-muted-foreground mb-10">
+            <div className="flex gap-6 text-muted-foreground mb-10">
               <span className="flex items-center gap-2">
                 <Calendar size={14} />
                 {formatDate(post.date)}
@@ -220,7 +175,6 @@ export default async function BlogPostPage({
               dangerouslySetInnerHTML={{ __html: post.content }}
             />
 
-            {/* Tags */}
             <div className="flex flex-wrap gap-3 mt-12">
               {post.tags?.map((tag: string) => (
                 <Badge key={tag} variant="outline">
@@ -241,7 +195,6 @@ export default async function BlogPostPage({
           </div>
         </article>
 
-        {/* Related */}
         {relatedPosts && relatedPosts.length > 0 && (
           <section className="py-20 bg-muted/30">
             <div className="container mx-auto px-4 max-w-6xl">
