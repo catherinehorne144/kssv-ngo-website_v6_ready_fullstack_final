@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import dynamic from "next/dynamic"
 import { format } from "date-fns"
-import { Plus, Calendar, Clock, Tag, Upload } from "lucide-react"
+import { Plus } from "lucide-react"
 
 import { AdminHeader } from "@/components/admin/header"
 import { DataTable } from "@/components/admin/data-table"
@@ -14,7 +14,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -44,7 +43,6 @@ export default function BlogAdminPage() {
 
   const [openEditor, setOpenEditor] = useState(false)
   const [editingPost, setEditingPost] = useState<BlogPost | null>(null)
-  const [viewPost, setViewPost] = useState<BlogPost | null>(null)
 
   const [tagInput, setTagInput] = useState("")
   const [uploadingCover, setUploadingCover] = useState(false)
@@ -130,8 +128,8 @@ export default function BlogAdminPage() {
   async function handleCoverUpload(file: File) {
     try {
       setUploadingCover(true)
-      const { publicUrl } = await uploadBlogImage(file)
-      setForm((f) => ({ ...f, image: publicUrl }))
+      const { path, publicUrl } = await uploadBlogImage(file)
+      setForm((f) => ({ ...f, image: path }))
     } catch (e) {
       console.error(e)
       alert("Cover image upload failed")
@@ -178,6 +176,16 @@ export default function BlogAdminPage() {
     }
   }
 
+  function getImageUrl(path: string) {
+    if (!path) return ''
+    if (path.startsWith('http')) return path
+    if (path.startsWith('/blog-images/')) {
+      const fileName = path.replace('/blog-images/', '')
+      return `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/blog-images/${fileName}`
+    }
+    return path
+  }
+
   const columns = [
     { key: "title", label: "Title" },
     {
@@ -212,14 +220,14 @@ export default function BlogAdminPage() {
           <DataTable
             data={posts}
             columns={columns}
-            onView={setViewPost}
+            onView={() => {}}
             onEdit={openEdit}
             onDelete={() => {}}
           />
         )}
       </div>
 
-      {/* CREATE / EDIT */}
+      {/* EDITOR DIALOG */}
       <Dialog open={openEditor} onOpenChange={setOpenEditor}>
         <DialogContent className="max-w-5xl max-h-[95vh] overflow-y-auto">
           <DialogHeader>
@@ -289,7 +297,7 @@ export default function BlogAdminPage() {
 
               {form.image && (
                 <img
-                  src={form.image}
+                  src={getImageUrl(form.image)}
                   alt="Cover preview"
                   className="w-full max-h-64 object-cover rounded-lg"
                 />
