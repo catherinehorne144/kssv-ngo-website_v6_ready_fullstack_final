@@ -58,6 +58,7 @@ export default function BlogAdminPage() {
     date: new Date().toISOString().split("T")[0],
     read_time: "5 min read",
     image: "",
+    imagePath: "",
     status: "draft" as "draft" | "published",
   })
 
@@ -96,6 +97,7 @@ export default function BlogAdminPage() {
       date: new Date().toISOString().split("T")[0],
       read_time: "5 min read",
       image: "",
+      imagePath: "",
       status: "draft",
     })
     setTagInput("")
@@ -119,6 +121,7 @@ export default function BlogAdminPage() {
       date: post.date.split("T")[0],
       read_time: post.read_time,
       image: post.image || "",
+      imagePath: post.image || "",
       status: post.status,
     })
     setEditingPost(post)
@@ -129,7 +132,11 @@ export default function BlogAdminPage() {
     try {
       setUploadingCover(true)
       const { path, publicUrl } = await uploadBlogImage(file)
-      setForm((f) => ({ ...f, image: path }))
+      setForm((f) => ({ 
+        ...f, 
+        image: publicUrl,
+        imagePath: path
+      }))
     } catch (e) {
       console.error(e)
       alert("Cover image upload failed")
@@ -155,7 +162,7 @@ export default function BlogAdminPage() {
       author: form.author,
       date: new Date(form.date).toISOString(),
       read_time: form.read_time,
-      image: form.image || null,
+      image: form.imagePath || form.image || null,
       status: form.status,
     }
 
@@ -174,16 +181,6 @@ export default function BlogAdminPage() {
       setForm({ ...form, tags: [...form.tags, tagInput] })
       setTagInput("")
     }
-  }
-
-  function getImageUrl(path: string) {
-    if (!path) return ''
-    if (path.startsWith('http')) return path
-    if (path.startsWith('/blog-images/')) {
-      const fileName = path.replace('/blog-images/', '')
-      return `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/blog-images/${fileName}`
-    }
-    return path
   }
 
   const columns = [
@@ -297,7 +294,7 @@ export default function BlogAdminPage() {
 
               {form.image && (
                 <img
-                  src={getImageUrl(form.image)}
+                  src={form.image}
                   alt="Cover preview"
                   className="w-full max-h-64 object-cover rounded-lg"
                 />
