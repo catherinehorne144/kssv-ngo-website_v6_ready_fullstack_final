@@ -33,14 +33,7 @@ import type { BlogPost } from "@/lib/types/database"
 
 const RichTextEditor = dynamic(
   () => import("@/components/admin/rich-text-editor"),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="h-[320px] border rounded-lg flex items-center justify-center text-muted-foreground">
-        Loading editor…
-      </div>
-    ),
-  }
+  { ssr: false }
 )
 
 export default function BlogAdminPage() {
@@ -138,8 +131,9 @@ export default function BlogAdminPage() {
     try {
       setUploadingCover(true)
       const { publicUrl } = await uploadBlogImage(file)
-      setForm({ ...form, image: publicUrl })
+      setForm((f) => ({ ...f, image: publicUrl }))
     } catch (e) {
+      console.error(e)
       alert("Cover image upload failed")
     } finally {
       setUploadingCover(false)
@@ -177,12 +171,6 @@ export default function BlogAdminPage() {
     fetchPosts()
   }
 
-  async function deletePost(post: BlogPost) {
-    if (!confirm(`Delete "${post.title}"?`)) return
-    await supabase.from("blog").delete().eq("id", post.id)
-    fetchPosts()
-  }
-
   function addTag() {
     if (tagInput && !form.tags.includes(tagInput)) {
       setForm({ ...form, tags: [...form.tags, tagInput] })
@@ -211,7 +199,7 @@ export default function BlogAdminPage() {
 
   return (
     <>
-      <AdminHeader title="Blog" description="Create, edit and manage blog posts" />
+      <AdminHeader title="Blog" description="Manage blog posts" />
 
       <div className="p-6">
         <Button onClick={openCreate} className="mb-6 gap-2">
@@ -226,8 +214,7 @@ export default function BlogAdminPage() {
             columns={columns}
             onView={setViewPost}
             onEdit={openEdit}
-            onDelete={deletePost}
-            searchPlaceholder="Search blog posts…"
+            onDelete={() => {}}
           />
         )}
       </div>
@@ -245,7 +232,9 @@ export default function BlogAdminPage() {
             <Label>Title</Label>
             <Input
               value={form.title}
-              onChange={(e) => setForm({ ...form, title: e.target.value })}
+              onChange={(e) =>
+                setForm({ ...form, title: e.target.value })
+              }
             />
 
             <Label>Category</Label>
@@ -269,44 +258,43 @@ export default function BlogAdminPage() {
             <Textarea
               rows={3}
               value={form.excerpt}
-              onChange={(e) => setForm({ ...form, excerpt: e.target.value })}
+              onChange={(e) =>
+                setForm({ ...form, excerpt: e.target.value })
+              }
             />
 
             <Label>Content</Label>
             <RichTextEditor
               value={form.content}
-              onChange={(html) => setForm({ ...form, content: html })}
+              onChange={(html) =>
+                setForm({ ...form, content: html })
+              }
             />
 
-            {/* COVER IMAGE UPLOAD */}
             <Label>Cover Image</Label>
+            <div className="space-y-2">
+              <Input
+                type="file"
+                accept="image/*"
+                onChange={(e) =>
+                  e.target.files && handleCoverUpload(e.target.files[0])
+                }
+              />
 
-                <div className="space-y-3">
-                  {form.image && (
-                    <img
-                      src={form.image}
-                      alt="Cover preview"
-                      className="w-full h-48 object-cover rounded-lg border"
-                    />
-                  )}
-                
-                  <Input
-                    type="file"
-                    accept="image/*"
-                    disabled={uploadingCover}
-                    onChange={(e) => {
-                      const file = e.target.files?.[0]
-                      if (file) handleCoverUpload(file)
-                    }}
-                  />
-                
-                  {uploadingCover && (
-                    <p className="text-sm text-muted-foreground">
-                      Uploading cover image…
-                    </p>
-                  )}
-                </div>
+              {uploadingCover && (
+                <p className="text-sm text-muted-foreground">
+                  Uploading cover image…
+                </p>
+              )}
 
+              {form.image && (
+                <img
+                  src={form.image}
+                  alt="Cover preview"
+                  className="w-full max-h-64 object-cover rounded-lg"
+                />
+              )}
+            </div>
 
             <Label>Tags</Label>
             <div className="flex gap-2">
@@ -325,7 +313,6 @@ export default function BlogAdminPage() {
                 <Badge
                   key={t}
                   variant="secondary"
-                  className="cursor-pointer"
                   onClick={() =>
                     setForm({
                       ...form,
@@ -342,7 +329,10 @@ export default function BlogAdminPage() {
               <Switch
                 checked={form.status === "published"}
                 onCheckedChange={(v) =>
-                  setForm({ ...form, status: v ? "published" : "draft" })
+                  setForm({
+                    ...form,
+                    status: v ? "published" : "draft",
+                  })
                 }
               />
               <Label>Publish</Label>
