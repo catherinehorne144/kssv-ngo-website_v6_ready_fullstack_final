@@ -4,13 +4,14 @@ export async function uploadBlogImage(file: File) {
   const supabase = createClient()
 
   const ext = file.name.split(".").pop()
-  const safeName = `${Date.now()}-${Math.random()
-    .toString(36)
-    .slice(2)}.${ext}`
+  const fileName = `${crypto.randomUUID()}.${ext}`
+  
+  // Upload path
+  const filePath = fileName
 
   const { error } = await supabase.storage
     .from("blog-images")
-    .upload(safeName, file, {
+    .upload(filePath, file, {
       cacheControl: "3600",
       upsert: false,
     })
@@ -20,12 +21,14 @@ export async function uploadBlogImage(file: File) {
     throw error
   }
 
+  // Get public URL for preview
   const { data } = supabase.storage
     .from("blog-images")
-    .getPublicUrl(safeName)
+    .getPublicUrl(filePath)
 
+  // ✅ Return BOTH: database path and preview URL
   return {
-    path: safeName,
-    publicUrl: data.publicUrl,
+    path: `/blog-images/${filePath}`,  // For database
+    publicUrl: data.publicUrl,        // For preview
   }
 }
