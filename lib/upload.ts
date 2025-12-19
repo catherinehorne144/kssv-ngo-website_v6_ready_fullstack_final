@@ -1,9 +1,28 @@
-// Placeholder helper for client-side image compression + upload to Supabase Storage.
-import { supabase } from './supabaseClient'
+// lib/upload.ts
+import { createClient } from "@/lib/supabase/client"
 
-export async function uploadImage(bucket: string, file: File, path: string) {
-  const { data, error } = await supabase.storage.from(bucket).upload(path, file, { upsert: true })
+export async function uploadBlogImage(file: File) {
+  const supabase = createClient()
+
+  const ext = file.name.split(".").pop()
+  const fileName = `${crypto.randomUUID()}.${ext}`
+  const filePath = `blog-images/${fileName}`
+
+  const { error } = await supabase.storage
+    .from("blog-images")
+    .upload(filePath, file, {
+      cacheControl: "3600",
+      upsert: false,
+    })
+
   if (error) throw error
-  const { publicUrl } = supabase.storage.from(bucket).getPublicUrl(path)
-  return publicUrl
+
+  const { data } = supabase.storage
+    .from("blog-images")
+    .getPublicUrl(filePath)
+
+  return {
+    path: filePath,          // 👉 save this in DB
+    publicUrl: data.publicUrl // 👉 use for preview
+  }
 }
