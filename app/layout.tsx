@@ -1,182 +1,109 @@
-import type React from "react"
-import type { Metadata } from "next"
-import { Playfair_Display, Inter, Outfit } from "next/font/google"
-import { Analytics } from "@vercel/analytics/next"
-import { SpeedInsights } from "@vercel/speed-insights/next"
-import { Suspense } from "react"
-import { ThemeProvider } from "@/components/theme-provider"
-import { PWAInstall } from "@/components/pwa-install"
-import { GoogleAnalytics } from "@/components/google-analytics"
-import "./globals.css"
+"use client"
 
-// ✅ Load fonts once (no dynamic changes)
-const playfair = Playfair_Display({
-  subsets: ["latin"],
-  variable: "--font-playfair",
-  display: "swap",
-})
+import { Facebook, Instagram, Linkedin, Mail, Phone, MapPin } from "lucide-react"
+import Link from "next/link"
 
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
-  display: "swap",
-})
+export function Footer() {
+  const quickLinks = [
+    { label: "About Us", href: "/about" },
+    { label: "Programs", href: "/programs" },
+    { label: "Projects", href: "/projects" },
+    { label: "Blog", href: "/blog" },
+    { label: "Contact", href: "/contact" },
+    { label: "KSSV Portal", href: "/admin/login", external: true },
+  ]
 
-const outfit = Outfit({
-  subsets: ["latin"],
-  variable: "--font-outfit",
-  display: "swap",
-})
-
-// ✅ Precomputed body class (avoids hydration mismatch)
-const bodyClassName = `font-sans ${playfair.variable} ${inter.variable} ${outfit.variable} antialiased`
-
-export const metadata: Metadata = {
-  metadataBase: new URL("https://karungussv.vercel.app"),
-  title: {
-    default: "Karungu Survivors of Sexual Violence | Break the Silence, End the Violence",
-    template: "%s | KSSV",
-  },
-  description:
-    "Empowering survivors through justice, healing, and economic resilience. Supporting survivors of sexual violence in Karungu with legal aid, psychosocial support, and economic empowerment.",
-  keywords: [
-    "KSSV",
-    "Karungu",
-    "survivors",
-    "sexual violence",
-    "GBV",
-    "gender-based violence",
-    "legal aid",
-    "empowerment",
-    "Kenya",
-    "NGO",
-    "psychosocial support",
-    "economic empowerment",
-    "survivor support",
-    "women's rights",
-    "justice",
-  ],
-  authors: [{ name: "Karungu Survivors of Sexual Violence", url: "https://karungussv.vercel.app" }],
-  creator: "Karungu Survivors of Sexual Violence",
-  publisher: "KSSV",
-  formatDetection: {
-    email: false,
-    address: false,
-    telephone: false,
-  },
-  openGraph: {
-    title: "Karungu Survivors of Sexual Violence",
-    description:
-      "Break the Silence, End the Violence. Empowering survivors through justice, healing, and economic resilience.",
-    url: "https://karungussv.vercel.app",
-    siteName: "KSSV",
-    images: [
-      {
-        url: "/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "KSSV - Karungu Survivors of Sexual Violence",
-      },
-    ],
-    locale: "en_US",
-    type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Karungu Survivors of Sexual Violence",
-    description:
-      "Break the Silence, End the Violence. Empowering survivors through justice, healing, and economic resilience.",
-    images: ["/og-image.png"],
-    creator: "@karungusurvivors",
-  },alternates: {
-  canonical: "https://karungussv.vercel.app",
-},
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      "max-video-preview": -1,
-      "max-image-preview": "large",
-      "max-snippet": -1,
+  const socialLinks = [
+    {
+      icon: Facebook,
+      href: "https://www.facebook.com/share/19dKj3hVN6/",
+      label: "Facebook",
     },
-  },
-  verification: {
-    google: "X7CT1OaRpAZ2gqFaGU0pQV2a7RJV-QEIRp17I6ufNxA",
-  },
-  generator: "v0.app",
-}
+    {
+      icon: Instagram,
+      href: "https://www.instagram.com/ssvcbo",
+      label: "Instagram",
+    },
+    {
+      icon: Linkedin,
+      href: "https://www.linkedin.com/in/karungu-ssv-cbo-71143437b",
+      label: "LinkedIn",
+    },
+  ]
 
-
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
   return (
-    <html lang="en" className="scroll-smooth" suppressHydrationWarning>
-     <head>
-  <meta property="og:see_also" content="https://www.facebook.com/share/19dKj3hVN6/" />
-  <meta property="og:see_also" content="https://x.com/cbo_ssv" />
-  <meta property="og:see_also" content="https://www.instagram.com/ssvcbo" />
-  <meta property="og:see_also" content="https://www.linkedin.com/in/karungu-ssv-cbo-71143437b" />
+    <footer className="bg-foreground text-background">
+      <div className="container mx-auto px-4 lg:px-8 py-12">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
 
-  <link rel="icon" href="/favicon.ico" sizes="any" />
-  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-  <link rel="manifest" href="/manifest.json" />
-  <meta name="theme-color" content="#0FA3A3" />
+          {/* Brand */}
+          <div>
+            <h3 className="font-serif text-xl font-bold">KSSV</h3>
+            <p className="text-sm mt-2 text-background/80">
+              Karungu Survivors of Sexual Violence — empowering survivors through justice,
+              healing, and economic resilience.
+            </p>
+          </div>
 
-  {/* Organization Schema */}
-  <script
-    type="application/ld+json"
-    dangerouslySetInnerHTML={{
-      __html: JSON.stringify({
-        "@context": "https://schema.org",
-        "@type": "NonprofitOrganization",
-        "name": "Karungu Survivors of Sexual Violence",
-        "alternateName": "KSSV",
-        "url": "https://karungussv.vercel.app",
-        "logo": "https://karungussv.vercel.app/og-image.png",
-        "description":
-          "Karungu Survivors of Sexual Violence (KSSV) is a community-based organization in Kenya supporting survivors of sexual and gender-based violence through legal aid, psychosocial support, advocacy, and economic empowerment.",
-        "foundingLocation": {
-          "@type": "Place",
-          "name": "Karungu, Kenya"
-        },
-        "areaServed": {
-          "@type": "Country",
-          "name": "Kenya"
-        },
-        "sameAs": [
-          "https://www.facebook.com/share/19dKj3hVN6/",
-          "https://www.instagram.com/ssvcbo",
-          "https://www.linkedin.com/in/karungu-ssv-cbo-71143437b",
-          "https://x.com/cbo_ssv"
-        ]
-      }),
-    }}
-  />
-</head>
+          {/* Quick Links */}
+          <div>
+            <h4 className="font-serif font-bold mb-4">Quick Links</h4>
+            <ul className="space-y-2">
+              {quickLinks.map((link) => (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    className="text-sm text-background/80 hover:text-background"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
 
+          {/* Contact */}
+          <div>
+            <h4 className="font-serif font-bold mb-4">Contact</h4>
+            <ul className="space-y-3 text-sm text-background/80">
+              <li className="flex gap-2">
+                <MapPin size={16} /> Karungu, Migori County, Kenya
+              </li>
+              <li className="flex gap-2">
+                <Phone size={16} />
+                <a href="tel:+254700000000">+254 700 000 000</a>
+              </li>
+              <li className="flex gap-2">
+                <Mail size={16} />
+                <a href="mailto:karungussvcbo@gmail.com">karungussvcbo@gmail.com</a>
+              </li>
+            </ul>
+          </div>
 
+          {/* Social */}
+          <div>
+            <h4 className="font-serif font-bold mb-4">Follow Us</h4>
+            <div className="flex gap-3">
+              {socialLinks.map((social) => (
+                <a
+                  key={social.label}
+                  href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={social.label}
+                  className="w-10 h-10 flex items-center justify-center rounded-full bg-background/10 hover:bg-primary"
+                >
+                  <social.icon size={18} />
+                </a>
+              ))}
+            </div>
+          </div>
+        </div>
 
-      {/* ✅ suppressHydrationWarning added on body */}
-      <body className={bodyClassName} suppressHydrationWarning>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="light"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <Suspense fallback={<div>Loading...</div>}>{children}</Suspense>
-          <PWAInstall />
-        </ThemeProvider>
-
-        <GoogleAnalytics />
-        <Analytics />
-        <SpeedInsights />
-      </body>
-    </html>
+        <div className="mt-10 pt-6 border-t border-background/20 text-sm text-background/70 text-center">
+          © 2025 Karungu Survivors of Sexual Violence (KSSV). All rights reserved.
+        </div>
+      </div>
+    </footer>
   )
 }
