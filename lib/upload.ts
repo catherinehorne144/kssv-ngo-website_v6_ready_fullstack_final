@@ -4,14 +4,13 @@ export async function uploadBlogImage(file: File) {
   const supabase = createClient()
 
   const ext = file.name.split(".").pop()
-  const fileName = `${crypto.randomUUID()}.${ext}`
-
-  // ✅ DO NOT prefix with bucket name
-  const filePath = fileName
+  const safeName = `${Date.now()}-${Math.random()
+    .toString(36)
+    .slice(2)}.${ext}`
 
   const { error } = await supabase.storage
-    .from("blog-images") // bucket name ONLY
-    .upload(filePath, file, {
+    .from("blog-images")
+    .upload(safeName, file, {
       cacheControl: "3600",
       upsert: false,
     })
@@ -23,10 +22,10 @@ export async function uploadBlogImage(file: File) {
 
   const { data } = supabase.storage
     .from("blog-images")
-    .getPublicUrl(filePath)
+    .getPublicUrl(safeName)
 
   return {
-    path: filePath,
+    path: safeName,
     publicUrl: data.publicUrl,
   }
 }
