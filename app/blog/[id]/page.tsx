@@ -95,7 +95,7 @@ export default async function BlogPostPage({
     const date = new Date(dateString)
     return date.toLocaleDateString("en-US", { 
       year: "numeric", 
-      month: "long", 
+      month: "short", 
       day: "numeric" 
     })
   }
@@ -105,55 +105,58 @@ export default async function BlogPostPage({
       <Navigation />
 
       {/* Article Header */}
-      <article className="pt-24 pb-12">
+      <article className="pt-20 pb-8">
         <div className="container mx-auto px-4 lg:px-6 max-w-3xl">
           {/* Back Button */}
           <Link href="/blog">
-            <Button variant="ghost" size="sm" className="mb-8 -ml-2">
-              <ArrowLeft className="mr-2 w-4 h-4" />
-              Back to Stories
+            <Button variant="ghost" size="sm" className="mb-6 -ml-2 px-2">
+              <ArrowLeft className="mr-1.5 w-3.5 h-3.5" />
+              Back
             </Button>
           </Link>
 
           {/* Category */}
-          <div className="mb-4">
-            <Badge variant="secondary" className="text-sm font-medium">
+          <div className="mb-3">
+            <Badge 
+              variant="secondary" 
+              className="text-xs font-medium bg-gradient-to-r from-primary/10 to-accent-sky/10"
+            >
               {post.category}
             </Badge>
           </div>
 
           {/* Title */}
-          <h1 className="font-serif text-3xl md:text-4xl lg:text-4.5xl font-bold text-foreground mb-6 leading-tight tracking-tight">
+          <h1 className="font-serif text-2.5xl md:text-3xl lg:text-3.5xl font-bold text-foreground mb-4 leading-tight">
             {post.title}
           </h1>
 
           {/* Meta Info */}
-          <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-8 pb-8 border-b">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 text-sm text-muted-foreground mb-6 pb-5 border-b border-border">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                <User className="w-4 h-4 text-primary" />
+              <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center">
+                <User className="w-3.5 h-3.5 text-primary" />
               </div>
               <span className="font-medium">{post.author}</span>
             </div>
-            <div className="flex items-center gap-6">
-              <span className="flex items-center gap-1.5">
-                <Calendar className="w-4 h-4" />
+            <div className="flex items-center gap-4">
+              <span className="flex items-center gap-1">
+                <Calendar className="w-3.5 h-3.5" />
                 {formatDate(post.date)}
               </span>
-              <span className="flex items-center gap-1.5">
-                <Clock className="w-4 h-4" />
+              <span className="flex items-center gap-1">
+                <Clock className="w-3.5 h-3.5" />
                 {post.read_time}
               </span>
-              <span className="flex items-center gap-1.5">
-                <Eye className="w-4 h-4" />
+              <span className="flex items-center gap-1">
+                <Eye className="w-3.5 h-3.5" />
                 {(post.views || 0).toLocaleString()} views
               </span>
             </div>
           </div>
 
           {/* Featured Image */}
-          <div className="mb-10">
-            <div className="relative h-64 md:h-80 rounded-2xl overflow-hidden shadow-lg">
+          <div className="mb-8">
+            <div className="relative h-56 md:h-64 rounded-xl overflow-hidden shadow-md">
               <Image
                 src={getImageUrl(post.image)}
                 alt={post.title}
@@ -162,21 +165,19 @@ export default async function BlogPostPage({
                 priority
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 900px"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent" />
             </div>
-            <p className="text-xs text-muted-foreground text-center mt-3">
-              Featured image for this story
-            </p>
           </div>
 
           {/* Article Content */}
-          <div className="prose prose-lg max-w-none">
+          <div className="prose prose-sm md:prose-base max-w-none">
             <div 
               className="article-content"
               dangerouslySetInnerHTML={{ __html: post.content }}
               style={{
                 fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
-                lineHeight: '1.75',
+                lineHeight: '1.7',
+                fontSize: '0.9375rem',
                 color: 'var(--foreground)'
               }}
             />
@@ -184,14 +185,14 @@ export default async function BlogPostPage({
 
           {/* Tags */}
           {post.tags && post.tags.length > 0 && (
-            <div className="mt-12 pt-8 border-t">
-              <h3 className="font-medium text-foreground mb-4 flex items-center gap-2">
-                <Tag className="w-4 h-4" />
+            <div className="mt-8 pt-6 border-t border-border">
+              <h3 className="font-medium text-foreground mb-3 flex items-center gap-1.5 text-sm">
+                <Tag className="w-3.5 h-3.5" />
                 Related Topics
               </h3>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-1.5">
                 {post.tags.map((tag) => (
-                  <Badge key={tag} variant="outline" className="text-sm">
+                  <Badge key={tag} variant="outline" className="text-xs px-2.5 py-0.5">
                     {tag}
                   </Badge>
                 ))}
@@ -200,18 +201,18 @@ export default async function BlogPostPage({
           )}
 
           {/* Share & Actions */}
-          <div className="mt-12 pt-8 border-t flex flex-col sm:flex-row gap-4 justify-between items-center">
-            <Button variant="outline" size="sm" className="w-full sm:w-auto">
-              <Share2 className="mr-2 w-4 h-4" />
-              Share Story
+          <div className="mt-8 pt-6 border-t border-border flex flex-col sm:flex-row gap-3 justify-between items-center">
+            <Button variant="outline" size="sm" className="w-full sm:w-auto text-xs h-9">
+              <Share2 className="mr-1.5 w-3.5 h-3.5" />
+              Share
             </Button>
-            <div className="flex gap-2">
-              <Button variant="ghost" size="sm">
-                <Bookmark className="mr-2 w-4 h-4" />
+            <div className="flex gap-1.5 w-full sm:w-auto">
+              <Button variant="ghost" size="sm" className="flex-1 sm:flex-none text-xs h-9">
+                <Bookmark className="mr-1.5 w-3.5 h-3.5" />
                 Save
               </Button>
-              <Link href="/blog">
-                <Button size="sm">
+              <Link href="/blog" className="flex-1">
+                <Button size="sm" className="w-full h-9 text-xs">
                   More Stories
                 </Button>
               </Link>
@@ -219,18 +220,6 @@ export default async function BlogPostPage({
           </div>
         </div>
       </article>
-
-      {/* Related Posts - If you want to add later */}
-      {/* <section className="py-12 bg-gray-50 dark:bg-gray-900/50">
-        <div className="container mx-auto px-4 lg:px-6">
-          <h2 className="font-serif text-2xl font-bold text-foreground mb-8 text-center">
-            More Stories You Might Like
-          </h2>
-          <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-            // Related posts would go here
-          </div>
-        </div>
-      </section> */}
 
       <Footer />
     </main>
