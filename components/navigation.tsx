@@ -18,6 +18,7 @@ export function Navigation() {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50)
     }
+
     window.addEventListener("scroll", handleScroll)
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
@@ -34,9 +35,7 @@ export function Navigation() {
   ]
 
   const handleNavClick = (href: string, type: string) => {
-    if (type === "scroll") {
-      smoothScrollTo(href)
-    }
+    if (type === "scroll") smoothScrollTo(href)
     setIsMobileMenuOpen(false)
   }
 
@@ -52,15 +51,16 @@ export function Navigation() {
       >
         <div className="container mx-auto px-4 lg:px-8">
           <div className="flex items-center justify-between h-20">
-            <Link href="/" className="flex items-center gap-3 group">
-              {/* LOGO — ANDROID SAFE */}
-              <div className="relative w-12 h-12 rounded-full overflow-hidden bg-background shadow-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+            {/* LOGO */}
+            <Link href="/" className="flex items-center gap-3">
+              <div className="relative w-12 h-12 rounded-full overflow-hidden bg-background shadow-lg">
                 <Image
-                  src="/brand/kssv-icon.svg"
+                  src="/brand/kssv-icon.png" // PNG OR SVG — both work
                   alt="KSSV Logo"
                   fill
+                  sizes="48px"
                   priority
-                  className="object-contain"
+                  className="object-cover"
                 />
               </div>
 
@@ -97,6 +97,7 @@ export function Navigation() {
               )}
             </div>
 
+            {/* ACTIONS */}
             <div className="flex items-center gap-4">
               <ThemeToggle />
 
@@ -124,33 +125,32 @@ export function Navigation() {
         </div>
       </nav>
 
-      {/* MOBILE MENU OVERLAY — ANDROID SAFE */}
+      {/* MOBILE MENU */}
       {isMobileMenuOpen && (
-        <div className="fixed inset-0 z-[9999] lg:hidden pointer-events-auto">
-          <div className="absolute inset-0 bg-background/95 backdrop-blur-md pt-20">
-            <div className="container mx-auto px-4 py-8">
-              <div className="flex flex-col gap-6">
-                {navLinks.map((link) =>
-                  link.type === "link" ? (
-                    <Link
-                      key={link.href}
-                      href={link.href}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="text-xl font-medium text-foreground"
-                    >
-                      {link.label}
-                    </Link>
-                  ) : (
-                    <button
-                      key={link.href}
-                      onClick={() => handleNavClick(link.href, link.type)}
-                      className="text-xl font-medium text-foreground text-left"
-                    >
-                      {link.label}
-                    </button>
-                  )
-                )}
-              </div>
+        <div className="fixed inset-0 z-[9999] lg:hidden">
+          <div className="absolute inset-0 bg-background/95 backdrop-blur-md" />
+          <div className="relative pt-24 px-6">
+            <div className="flex flex-col gap-6">
+              {navLinks.map((link) =>
+                link.type === "link" ? (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="text-xl font-medium text-foreground"
+                  >
+                    {link.label}
+                  </Link>
+                ) : (
+                  <button
+                    key={link.href}
+                    onClick={() => handleNavClick(link.href, link.type)}
+                    className="text-xl font-medium text-foreground text-left"
+                  >
+                    {link.label}
+                  </button>
+                )
+              )}
             </div>
           </div>
         </div>
