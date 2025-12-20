@@ -31,7 +31,7 @@ import {
   Upload,
   Loader2,
 } from "lucide-react"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react" // Added useRef
 import { uploadBlogImage } from "@/lib/upload"
 
 interface Props {
@@ -47,6 +47,9 @@ export default function RichTextEditor({ value, onChange }: Props) {
   const [openLink, setOpenLink] = useState(false)
   const [openImage, setOpenImage] = useState(false)
   const [imagePreview, setImagePreview] = useState<string>("")
+  
+  // ADDED: Ref to clear file input
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => setMounted(true), [])
 
@@ -102,9 +105,14 @@ export default function RichTextEditor({ value, onChange }: Props) {
       setOpenImage(false)
       setImageFile(null)
       setImagePreview("")
-    } catch (error) {
+      // CLEAR file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ""
+      }
+    } catch (error: any) {
       console.error("Failed to insert image:", error)
-      alert("Failed to upload image. Please try again.")
+      // SHOW ACTUAL ERROR MESSAGE
+      alert(`Failed to upload image: ${error.message}`)
     } finally {
       setUploading(false)
     }
@@ -133,268 +141,166 @@ export default function RichTextEditor({ value, onChange }: Props) {
 
   return (
     <div className="border-2 rounded-xl overflow-hidden shadow-lg bg-card">
-      {/* Toolbar */}
-      <div className="flex flex-wrap gap-2 p-3 border-b bg-gradient-to-r from-muted/50 to-background">
-        {/* Text Formatting */}
-        <div className="flex items-center gap-1 border-r pr-2">
-          <Button
-            size="sm"
-            variant={editor.isActive("bold") ? "default" : "outline"}
-            onClick={() => editor.chain().focus().toggleBold().run()}
-            className="h-9 w-9 p-0"
-            title="Bold"
-          >
-            <Bold size={16} />
-          </Button>
-          <Button
-            size="sm"
-            variant={editor.isActive("italic") ? "default" : "outline"}
-            onClick={() => editor.chain().focus().toggleItalic().run()}
-            className="h-9 w-9 p-0"
-            title="Italic"
-          >
-            <Italic size={16} />
-          </Button>
-          <Button
-            size="sm"
-            variant={editor.isActive("underline") ? "default" : "outline"}
-            onClick={() => editor.chain().focus().toggleUnderline().run()}
-            className="h-9 w-9 p-0"
-            title="Underline"
-          >
-            <UnderlineIcon size={16} />
-          </Button>
-        </div>
-
-        {/* Headings */}
-        <div className="flex items-center gap-1 border-r pr-2">
-          <Button
-            size="sm"
-            variant={editor.isActive("heading", { level: 1 }) ? "default" : "outline"}
-            onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-            className="h-9 w-9 p-0"
-            title="Heading 1"
-          >
-            <Heading1 size={16} />
-          </Button>
-          <Button
-            size="sm"
-            variant={editor.isActive("heading", { level: 2 }) ? "default" : "outline"}
-            onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-            className="h-9 w-9 p-0"
-            title="Heading 2"
-          >
-            <Heading2 size={16} />
-          </Button>
-          <Button
-            size="sm"
-            variant={editor.isActive("heading", { level: 3 }) ? "default" : "outline"}
-            onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-            className="h-9 w-9 p-0"
-            title="Heading 3"
-          >
-            <Heading3 size={16} />
-          </Button>
-        </div>
-
-        {/* Lists */}
-        <div className="flex items-center gap-1 border-r pr-2">
-          <Button
-            size="sm"
-            variant={editor.isActive("bulletList") ? "default" : "outline"}
-            onClick={() => editor.chain().focus().toggleBulletList().run()}
-            className="h-9 w-9 p-0"
-            title="Bullet List"
-          >
-            <List size={16} />
-          </Button>
-          <Button
-            size="sm"
-            variant={editor.isActive("orderedList") ? "default" : "outline"}
-            onClick={() => editor.chain().focus().toggleOrderedList().run()}
-            className="h-9 w-9 p-0"
-            title="Numbered List"
-          >
-            <ListOrdered size={16} />
-          </Button>
-        </div>
-
-        {/* Alignment */}
-        <div className="flex items-center gap-1 border-r pr-2">
-          <Button
-            size="sm"
-            variant={editor.isActive({ textAlign: "left" }) ? "default" : "outline"}
-            onClick={() => editor.chain().focus().setTextAlign("left").run()}
-            className="h-9 w-9 p-0"
-            title="Align Left"
-          >
-            <AlignLeft size={16} />
-          </Button>
-          <Button
-            size="sm"
-            variant={editor.isActive({ textAlign: "center" }) ? "default" : "outline"}
-            onClick={() => editor.chain().focus().setTextAlign("center").run()}
-            className="h-9 w-9 p-0"
-            title="Align Center"
-          >
-            <AlignCenter size={16} />
-          </Button>
-          <Button
-            size="sm"
-            variant={editor.isActive({ textAlign: "right" }) ? "default" : "outline"}
-            onClick={() => editor.chain().focus().setTextAlign("right").run()}
-            className="h-9 w-9 p-0"
-            title="Align Right"
-          >
-            <AlignRight size={16} />
-          </Button>
-        </div>
-
-        {/* Blockquote */}
+      {/* Toolbar - SIMPLIFIED LAYOUT */}
+      <div className="flex flex-wrap gap-1 p-2 border-b bg-muted/40">
         <Button
           size="sm"
-          variant={editor.isActive("blockquote") ? "default" : "outline"}
-          onClick={() => editor.chain().focus().toggleBlockquote().run()}
-          className="h-9 w-9 p-0"
-          title="Quote"
+          variant={editor.isActive("bold") ? "default" : "ghost"}
+          onClick={() => editor.chain().focus().toggleBold().run()}
+          className="h-8 w-8 p-0"
         >
-          <Quote size={16} />
+          <Bold size={16} />
+        </Button>
+        
+        <Button
+          size="sm"
+          variant={editor.isActive("italic") ? "default" : "ghost"}
+          onClick={() => editor.chain().focus().toggleItalic().run()}
+          className="h-8 w-8 p-0"
+        >
+          <Italic size={16} />
+        </Button>
+        
+        <Button
+          size="sm"
+          variant={editor.isActive("underline") ? "default" : "ghost"}
+          onClick={() => editor.chain().focus().toggleUnderline().run()}
+          className="h-8 w-8 p-0"
+        >
+          <UnderlineIcon size={16} />
         </Button>
 
-        {/* Link Dialog */}
+        <Button
+          size="sm"
+          variant={editor.isActive("heading", { level: 1 }) ? "default" : "ghost"}
+          onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+          className="h-8 w-8 p-0"
+        >
+          <Heading1 size={16} />
+        </Button>
+        
+        <Button
+          size="sm"
+          variant={editor.isActive("heading", { level: 2 }) ? "default" : "ghost"}
+          onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+          className="h-8 w-8 p-0"
+        >
+          <Heading2 size={16} />
+        </Button>
+
+        <Button
+          size="sm"
+          variant={editor.isActive("bulletList") ? "default" : "ghost"}
+          onClick={() => editor.chain().focus().toggleBulletList().run()}
+          className="h-8 w-8 p-0"
+        >
+          <List size={16} />
+        </Button>
+        
+        <Button
+          size="sm"
+          variant={editor.isActive("orderedList") ? "default" : "ghost"}
+          onClick={() => editor.chain().focus().toggleOrderedList().run()}
+          className="h-8 w-8 p-0"
+        >
+          <ListOrdered size={16} />
+        </Button>
+
+        {/* Link Button */}
         <Dialog open={openLink} onOpenChange={setOpenLink}>
           <DialogTrigger asChild>
-            <Button
-              size="sm"
-              variant="outline"
-              className="h-9 w-9 p-0"
-              title="Insert Link"
-            >
+            <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
               <LinkIcon size={16} />
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-md">
+          <DialogContent>
             <DialogHeader>
-              <DialogTitle className="font-serif text-2xl">Insert Link</DialogTitle>
+              <DialogTitle>Insert Link</DialogTitle>
             </DialogHeader>
-            <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="link-url">URL</Label>
-                <Input
-                  id="link-url"
-                  placeholder="https://example.com"
-                  value={linkUrl}
-                  onChange={(e) => setLinkUrl(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && setLink()}
-                />
-              </div>
-              <div className="flex gap-2 justify-end">
-                <Button variant="outline" onClick={() => setOpenLink(false)}>
-                  Cancel
-                </Button>
-                <Button onClick={setLink} disabled={!linkUrl}>
-                  Insert Link
-                </Button>
-              </div>
+            <div className="space-y-4">
+              <Label>URL</Label>
+              <Input
+                value={linkUrl}
+                onChange={(e) => setLinkUrl(e.target.value)}
+                placeholder="https://example.com"
+              />
+              <Button onClick={setLink} className="w-full">
+                Insert Link
+              </Button>
             </div>
           </DialogContent>
         </Dialog>
 
-        {/* Image Dialog */}
+        {/* Image Button - FIXED */}
         <Dialog open={openImage} onOpenChange={setOpenImage}>
           <DialogTrigger asChild>
-            <Button
-              size="sm"
-              variant="outline"
-              className="h-9 w-9 p-0"
-              title="Insert Image"
-            >
+            <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
               <ImageIcon size={16} />
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-md">
+          <DialogContent>
             <DialogHeader>
-              <DialogTitle className="font-serif text-2xl">Upload Image</DialogTitle>
+              <DialogTitle>Upload Image</DialogTitle>
             </DialogHeader>
-            <div className="space-y-4 py-4">
-              <div className="space-y-4">
-                <Input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileSelect}
-                  className="cursor-pointer"
-                />
-                
-                {imagePreview && (
-                  <div className="mt-4">
-                    <Label>Preview</Label>
-                    <div className="mt-2 border rounded-lg overflow-hidden">
-                      <img
-                        src={imagePreview}
-                        alt="Preview"
-                        className="w-full h-48 object-cover"
-                      />
-                    </div>
-                  </div>
-                )}
-
-                <div className="flex gap-2 justify-end pt-4">
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      setOpenImage(false)
-                      setImageFile(null)
-                      setImagePreview("")
-                    }}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    onClick={insertImage}
-                    disabled={!imageFile || uploading}
-                    className="gap-2"
-                  >
-                    {uploading ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        Uploading...
-                      </>
-                    ) : (
-                      <>
-                        <Upload size={16} />
-                        Insert Image
-                      </>
-                    )}
-                  </Button>
+            <div className="space-y-4">
+              {/* ADDED ref to file input */}
+              <Input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleFileSelect}
+              />
+              
+              {imagePreview && (
+                <div className="mt-2">
+                  <img
+                    src={imagePreview}
+                    alt="Preview"
+                    className="w-full h-40 object-contain rounded border"
+                  />
                 </div>
-              </div>
+              )}
+
+              <Button
+                onClick={insertImage}
+                disabled={!imageFile || uploading}
+                className="w-full gap-2"
+              >
+                {uploading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Uploading...
+                  </>
+                ) : (
+                  <>
+                    <Upload size={16} />
+                    Insert Image
+                  </>
+                )}
+              </Button>
             </div>
           </DialogContent>
         </Dialog>
 
-        {/* Undo/Redo */}
-        <div className="flex items-center gap-1">
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => editor.chain().focus().undo().run()}
-            disabled={!editor.can().undo()}
-            className="h-9 w-9 p-0"
-            title="Undo"
-          >
-            <Undo size={16} />
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => editor.chain().focus().redo().run()}
-            disabled={!editor.can().redo()}
-            className="h-9 w-9 p-0"
-            title="Redo"
-          >
-            <Redo size={16} />
-          </Button>
-        </div>
+        <Button
+          size="sm"
+          variant="ghost"
+          onClick={() => editor.chain().focus().undo().run()}
+          disabled={!editor.can().undo()}
+          className="h-8 w-8 p-0"
+        >
+          <Undo size={16} />
+        </Button>
+        
+        <Button
+          size="sm"
+          variant="ghost"
+          onClick={() => editor.chain().focus().redo().run()}
+          disabled={!editor.can().redo()}
+          className="h-8 w-8 p-0"
+        >
+          <Redo size={16} />
+        </Button>
       </div>
 
       {/* Editor Content */}
