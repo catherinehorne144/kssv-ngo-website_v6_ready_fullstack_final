@@ -58,15 +58,17 @@ export function Navigation() {
         <div className="container mx-auto px-4 lg:px-8">
           <div className="flex items-center justify-between h-20">
             <Link href="/" className="flex items-center gap-3 group">
-              <div className="w-12 h-12 rounded-full bg-background flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+              {/* LOGO */}
+              <div className="w-12 h-12 rounded-full overflow-hidden bg-background shadow-lg flex items-center justify-center group-hover:scale-110 transition-transform">
                 <Image
                   src="/brand/kssv-icon.svg"
                   alt="KSSV Logo"
-                  width={32}
-                  height={32}
+                  fill
                   priority
+                  className="object-contain"
                 />
               </div>
+
               <div className="hidden md:block">
                 <div className="font-serif text-lg font-bold text-foreground leading-tight">
                   KSSV
@@ -104,7 +106,9 @@ export function Navigation() {
               <ThemeToggle />
               <Button
                 onClick={() =>
-                  pathname === "/" ? smoothScrollTo("donate") : (window.location.href = "/#donate")
+                  pathname === "/"
+                    ? smoothScrollTo("donate")
+                    : (window.location.href = "/#donate")
                 }
                 className="font-accent font-semibold bg-gradient-to-r from-accent-coral to-accent-sunny hover:from-accent-coral/90 hover:to-accent-sunny/90 text-white shadow-lg hover:shadow-xl transition-all"
               >
