@@ -12,7 +12,7 @@ export function Footer() {
     { label: "Projects", href: "projects" },
     { label: "Blog", href: "blog" },
     { label: "Contact", href: "contact" },
-    { label: "KSSV Portal", href: "/admin/login", isExternal: true },
+    { label: "KSSV Portal", href: "/login", isExternal: true },
   ]
 
   const socialLinks = [
