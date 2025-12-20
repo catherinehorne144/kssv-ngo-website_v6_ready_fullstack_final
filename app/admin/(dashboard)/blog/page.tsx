@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from "react"
 import dynamic from "next/dynamic"
 import { format } from "date-fns"
-import { Plus, Upload, X } from "lucide-react"
+import { Plus, Upload, X, Eye, Trash2, Pencil } from "lucide-react"
 
 import { AdminHeader } from "@/components/admin/header"
 import { DataTable } from "@/components/admin/data-table"
@@ -14,7 +14,18 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from "@/components/ui/dialog"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
@@ -27,8 +38,9 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { createClient } from "@/lib/supabase/client"
-import { uploadBlogImage } from "@/lib/upload"
+import { uploadBlogImage, deleteBlogImage } from "@/lib/upload"
 import type { BlogPost } from "@/lib/types/database"
+import Link from "next/link"
 
 const RichTextEditor = dynamic(
   () => import("@/components/admin/rich-text-editor"),
@@ -42,6 +54,8 @@ export default function BlogAdminPage() {
   const [loading, setLoading] = useState(true)
 
   const [openEditor, setOpenEditor] = useState(false)
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false)
+  const [postToDelete, setPostToDelete] = useState<BlogPost | null>(null)
   const [editingPost, setEditingPost] = useState<BlogPost | null>(null)
 
   const [tagInput, setTagInput] = useState("")
@@ -81,11 +95,17 @@ export default function BlogAdminPage() {
 
   async function fetchPosts() {
     setLoading(true)
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("blog")
       .select("*")
       .order("date", { ascending: false })
-    setPosts(data || [])
+    
+    if (error) {
+      console.error("Error fetching posts:", error)
+      alert("Failed to load blog posts")
+    } else {
+      setPosts(data || [])
+    }
     setLoading(false)
   }
 
@@ -141,7 +161,47 @@ export default function BlogAdminPage() {
     setOpenEditor(true)
   }
 
-  // Handle file selection - JUST SELECT, don't upload yet
+  function openDelete(post: BlogPost) {
+    setPostToDelete(post)
+    setOpenDeleteDialog(true)
+  }
+
+  async function handleDelete() {
+    if (!postToDelete) return
+
+    try {
+      const { error } = await supabase
+        .from("blog")
+        .delete()
+        .eq("id", postToDelete.id)
+
+      if (error) throw error
+
+      // Remove image from storage if exists
+      if (postToDelete.image) {
+        try {
+          const fileName = postToDelete.image.split('/').pop()
+          if (fileName) {
+            await deleteBlogImage(fileName)
+          }
+        } catch (imgError) {
+          console.warn("Failed to delete image file:", imgError)
+        }
+      }
+
+      setPosts(posts.filter(p => p.id !== postToDelete.id))
+      setOpenDeleteDialog(false)
+      setPostToDelete(null)
+    } catch (error: any) {
+      alert(`Failed to delete post: ${error.message}`)
+    }
+  }
+
+  function viewPost(post: BlogPost) {
+    window.open(`/blog/${post.id}`, '_blank')
+  }
+
+  // Handle file selection
   function handleCoverFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
@@ -167,7 +227,7 @@ export default function BlogAdminPage() {
     reader.readAsDataURL(file)
   }
 
-  // Upload cover image - USER MUST CLICK TO UPLOAD
+  // Upload cover image
   async function uploadCoverImage() {
     if (!selectedCoverFile) {
       alert('Please select an image first')
@@ -177,9 +237,7 @@ export default function BlogAdminPage() {
     setUploadingCover(true)
     
     try {
-      console.log('Starting cover image upload...')
       const imageUrl = await uploadBlogImage(selectedCoverFile)
-      console.log('Cover image uploaded successfully:', imageUrl)
       
       setForm(f => ({ 
         ...f, 
@@ -187,10 +245,8 @@ export default function BlogAdminPage() {
         imagePath: imageUrl
       }))
       
-      // Keep the preview
       setCoverPreview(imageUrl)
       
-      // Clear file input but keep the file reference
       if (fileInputRef.current) {
         fileInputRef.current.value = ""
       }
@@ -199,7 +255,6 @@ export default function BlogAdminPage() {
       console.error('Cover image upload failed:', error)
       alert(`Failed to upload cover image: ${error.message}`)
       
-      // Clear on error
       setSelectedCoverFile(null)
       setCoverPreview("")
       if (fileInputRef.current) {
@@ -214,6 +269,7 @@ export default function BlogAdminPage() {
   function removeCoverImage() {
     setSelectedCoverFile(null)
     setCoverPreview("")
+    setForm(f => ({ ...f, image: "", imagePath: "" }))
     if (fileInputRef.current) {
       fileInputRef.current.value = ""
     }
@@ -225,17 +281,9 @@ export default function BlogAdminPage() {
       return
     }
 
-    // Warn if no cover image but allow save
-    if (!form.image && !selectedCoverFile) {
-      const confirm = window.confirm("No cover image selected. Save without cover image?")
-      if (!confirm) return
-    }
-
     const payload = {
       title: form.title,
-      excerpt:
-        form.excerpt ||
-        form.content.replace(/<[^>]*>/g, "").slice(0, 160),
+      excerpt: form.excerpt || form.content.replace(/<[^>]*>/g, "").slice(0, 160),
       content: form.content,
       category: form.category,
       tags: form.tags,
@@ -244,17 +292,28 @@ export default function BlogAdminPage() {
       read_time: form.read_time,
       image: form.image || null,
       status: form.status,
+      updated_at: new Date().toISOString(),
     }
 
     try {
       if (editingPost) {
-        await supabase.from("blog").update(payload).eq("id", editingPost.id)
+        const { error } = await supabase
+          .from("blog")
+          .update(payload)
+          .eq("id", editingPost.id)
+
+        if (error) throw error
       } else {
-        await supabase.from("blog").insert([payload])
+        const { error } = await supabase
+          .from("blog")
+          .insert([{ ...payload, created_at: new Date().toISOString() }])
+
+        if (error) throw error
       }
 
       setOpenEditor(false)
       fetchPosts()
+      resetForm()
     } catch (error: any) {
       alert(`Failed to save post: ${error.message}`)
     }
@@ -296,14 +355,21 @@ export default function BlogAdminPage() {
         </Button>
 
         {loading ? (
-          <p className="text-muted-foreground">Loading…</p>
+          <div className="flex justify-center py-12">
+            <p className="text-muted-foreground">Loading blog posts...</p>
+          </div>
+        ) : posts.length === 0 ? (
+          <div className="text-center py-12 border rounded-lg">
+            <p className="text-muted-foreground mb-4">No blog posts yet</p>
+            <Button onClick={openCreate}>Create your first post</Button>
+          </div>
         ) : (
           <DataTable
             data={posts}
             columns={columns}
-            onView={() => {}}
+            onView={viewPost}
             onEdit={openEdit}
-            onDelete={() => {}}
+            onDelete={openDelete}
           />
         )}
       </div>
@@ -319,12 +385,13 @@ export default function BlogAdminPage() {
 
           <div className="space-y-6">
             <div>
-              <Label>Title</Label>
+              <Label>Title *</Label>
               <Input
                 value={form.title}
                 onChange={(e) =>
                   setForm({ ...form, title: e.target.value })
                 }
+                placeholder="Enter blog post title"
               />
             </div>
 
@@ -355,11 +422,12 @@ export default function BlogAdminPage() {
                 onChange={(e) =>
                   setForm({ ...form, excerpt: e.target.value })
                 }
+                placeholder="Brief summary of your post (optional)"
               />
             </div>
 
             <div>
-              <Label>Content</Label>
+              <Label>Content *</Label>
               <RichTextEditor
                 value={form.content}
                 onChange={(html) =>
@@ -430,7 +498,7 @@ export default function BlogAdminPage() {
                       />
                     </div>
                     <p className="text-xs text-muted-foreground mt-2">
-                      {selectedCoverFile ? `Selected: ${selectedCoverFile.name} (${(selectedCoverFile.size / 1024).toFixed(2)} KB)` : 'Existing cover image'}
+                      {selectedCoverFile ? `Selected: ${selectedCoverFile.name}` : 'Existing cover image - click X to remove'}
                     </p>
                   </div>
                 )}
@@ -480,6 +548,33 @@ export default function BlogAdminPage() {
               )}
             </div>
 
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <Label>Author</Label>
+                <Input
+                  value={form.author}
+                  onChange={(e) => setForm({ ...form, author: e.target.value })}
+                  placeholder="Author name"
+                />
+              </div>
+              <div>
+                <Label>Date</Label>
+                <Input
+                  type="date"
+                  value={form.date}
+                  onChange={(e) => setForm({ ...form, date: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label>Read Time</Label>
+                <Input
+                  value={form.read_time}
+                  onChange={(e) => setForm({ ...form, read_time: e.target.value })}
+                  placeholder="e.g., 5 min read"
+                />
+              </div>
+            </div>
+
             <div className="flex items-center gap-2">
               <Switch
                 checked={form.status === "published"}
@@ -497,14 +592,17 @@ export default function BlogAdminPage() {
               <Button 
                 onClick={savePost} 
                 className="flex-1"
-                disabled={uploadingCover}
+                disabled={uploadingCover || !form.title || !form.content}
               >
-                Save Blog Post
+                {editingPost ? "Update Post" : "Create Post"}
               </Button>
               <Button
                 variant="outline"
                 className="flex-1"
-                onClick={() => setOpenEditor(false)}
+                onClick={() => {
+                  setOpenEditor(false)
+                  resetForm()
+                }}
               >
                 Cancel
               </Button>
@@ -512,6 +610,28 @@ export default function BlogAdminPage() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* DELETE CONFIRMATION DIALOG */}
+      <AlertDialog open={openDeleteDialog} onOpenChange={setOpenDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Blog Post</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete "{postToDelete?.title}"? This action cannot be undone.
+              {postToDelete?.image && " The cover image will also be removed from storage."}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   )
 }
