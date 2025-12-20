@@ -31,7 +31,7 @@ import {
   Upload,
   Loader2,
 } from "lucide-react"
-import { useEffect, useState, useRef } from "react" // Added useRef
+import { useEffect, useState, useRef } from "react"
 import { uploadBlogImage } from "@/lib/upload"
 
 interface Props {
@@ -47,8 +47,6 @@ export default function RichTextEditor({ value, onChange }: Props) {
   const [openLink, setOpenLink] = useState(false)
   const [openImage, setOpenImage] = useState(false)
   const [imagePreview, setImagePreview] = useState<string>("")
-  
-  // ADDED: Ref to clear file input
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => setMounted(true), [])
@@ -68,8 +66,8 @@ export default function RichTextEditor({ value, onChange }: Props) {
       Image.configure({
         HTMLAttributes: { 
           class: "rounded-lg my-6 max-w-full h-auto shadow-md",
-          style: "max-height: 500px; object-fit: contain;"
         },
+        allowBase64: false,
       }),
     ],
     content: value,
@@ -79,9 +77,34 @@ export default function RichTextEditor({ value, onChange }: Props) {
         class:
           "prose prose-lg max-w-none min-h-[400px] p-4 focus:outline-none bg-background",
       },
+      handlePaste: (view, event) => {
+        // Handle image paste - upload to Supabase
+        const items = Array.from(event.clipboardData?.items || [])
+        const file = items.find(item => item.type.startsWith('image/'))?.getAsFile()
+        
+        if (file) {
+          event.preventDefault()
+          uploadImageFile(file)
+          return true
+        }
+        return false
+      },
     },
     immediatelyRender: false,
   })
+
+  const uploadImageFile = async (file: File) => {
+    if (!editor) return
+    setUploading(true)
+    try {
+      const publicUrl = await uploadBlogImage(file)
+      editor.chain().focus().setImage({ src: publicUrl }).run()
+    } catch (error: any) {
+      alert(`Failed to upload image: ${error.message}`)
+    } finally {
+      setUploading(false)
+    }
+  }
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -98,23 +121,12 @@ export default function RichTextEditor({ value, onChange }: Props) {
 
   const insertImage = async () => {
     if (!editor || !imageFile) return
-    setUploading(true)
-    try {
-      const publicUrl = await uploadBlogImage(imageFile)
-      editor.chain().focus().setImage({ src: publicUrl }).run()
-      setOpenImage(false)
-      setImageFile(null)
-      setImagePreview("")
-      // CLEAR file input
-      if (fileInputRef.current) {
-        fileInputRef.current.value = ""
-      }
-    } catch (error: any) {
-      console.error("Failed to insert image:", error)
-      // SHOW ACTUAL ERROR MESSAGE
-      alert(`Failed to upload image: ${error.message}`)
-    } finally {
-      setUploading(false)
+    await uploadImageFile(imageFile)
+    setOpenImage(false)
+    setImageFile(null)
+    setImagePreview("")
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ""
     }
   }
 
@@ -141,7 +153,6 @@ export default function RichTextEditor({ value, onChange }: Props) {
 
   return (
     <div className="border-2 rounded-xl overflow-hidden shadow-lg bg-card">
-      {/* Toolbar - SIMPLIFIED LAYOUT */}
       <div className="flex flex-wrap gap-1 p-2 border-b bg-muted/40">
         <Button
           size="sm"
@@ -206,7 +217,6 @@ export default function RichTextEditor({ value, onChange }: Props) {
           <ListOrdered size={16} />
         </Button>
 
-        {/* Link Button */}
         <Dialog open={openLink} onOpenChange={setOpenLink}>
           <DialogTrigger asChild>
             <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
@@ -231,7 +241,6 @@ export default function RichTextEditor({ value, onChange }: Props) {
           </DialogContent>
         </Dialog>
 
-        {/* Image Button - FIXED */}
         <Dialog open={openImage} onOpenChange={setOpenImage}>
           <DialogTrigger asChild>
             <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
@@ -243,7 +252,6 @@ export default function RichTextEditor({ value, onChange }: Props) {
               <DialogTitle>Upload Image</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
-              {/* ADDED ref to file input */}
               <Input
                 ref={fileInputRef}
                 type="file"
@@ -303,7 +311,6 @@ export default function RichTextEditor({ value, onChange }: Props) {
         </Button>
       </div>
 
-      {/* Editor Content */}
       <EditorContent editor={editor} />
     </div>
   )
