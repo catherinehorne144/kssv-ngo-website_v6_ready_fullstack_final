@@ -7,6 +7,7 @@ import { smoothScrollTo } from "@/lib/scroll-reveal"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { ThemeToggle } from "@/components/theme-toggle"
+import Image from "next/image"
 
 export function Navigation() {
   const [isScrolled, setIsScrolled] = useState(false)
@@ -43,7 +44,6 @@ export function Navigation() {
   return (
     <>
       <nav
-        // Make sure nav sits above everything and gets its own compositing layer
         className={`fixed top-0 left-0 right-0 z-[9999] transition-all duration-300 ${
           isScrolled
             ? "bg-background/95 backdrop-blur-md shadow-lg border-b"
@@ -52,19 +52,28 @@ export function Navigation() {
         style={{
           transform: "translateZ(0)",
           WebkitTransform: "translateZ(0)",
-          // small performance hint
           willChange: "transform",
         }}
       >
         <div className="container mx-auto px-4 lg:px-8">
           <div className="flex items-center justify-between h-20">
             <Link href="/" className="flex items-center gap-3 group">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-accent-purple flex items-center justify-center text-white font-serif text-xl font-bold group-hover:scale-110 transition-transform shadow-lg">
-                K
+              <div className="w-12 h-12 rounded-full bg-background flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                <Image
+                  src="/brand/kssv-icon.svg"
+                  alt="KSSV Logo"
+                  width={32}
+                  height={32}
+                  priority
+                />
               </div>
               <div className="hidden md:block">
-                <div className="font-serif text-lg font-bold text-foreground leading-tight">KSSV</div>
-                <div className="text-xs text-muted-foreground">Karungu Survivors</div>
+                <div className="font-serif text-lg font-bold text-foreground leading-tight">
+                  KSSV
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  Karungu Survivors
+                </div>
               </div>
             </Link>
 
@@ -87,7 +96,7 @@ export function Navigation() {
                   >
                     {link.label}
                   </button>
-                ),
+                )
               )}
             </div>
 
@@ -139,7 +148,7 @@ export function Navigation() {
                     >
                       {link.label}
                     </button>
-                  ),
+                  )
                 )}
               </div>
             </div>
