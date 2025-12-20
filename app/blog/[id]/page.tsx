@@ -25,7 +25,6 @@ const getImageUrl = (imagePath: string | null) => {
   return `/blog-images/${imagePath}`
 }
 
-/* ---------------- Metadata ---------------- */
 export async function generateMetadata({
   params,
 }: {
@@ -78,7 +77,6 @@ export async function generateMetadata({
   }
 }
 
-/* ---------------- Page ---------------- */
 export default async function BlogPostPage({
   params,
 }: {
@@ -92,6 +90,28 @@ export default async function BlogPostPage({
     .single()
 
   if (!post) notFound()
+
+  // Parse content and fix image URLs
+  const processContentImages = (html: string) => {
+    // This ensures images in content are displayed properly
+    return html.replace(
+      /<img([^>]+)src="([^"]+)"/g,
+      (match, attrs, src) => {
+        // If src is base64, keep it
+        if (src.startsWith('data:')) {
+          return `<img${attrs}src="${src}"`
+        }
+        // If src is a full URL, use it
+        if (src.startsWith('http')) {
+          return `<img${attrs}src="${src}"`
+        }
+        // Otherwise, assume it's from Supabase storage
+        return `<img${attrs}src="${src}" class="rounded-lg max-w-full h-auto my-6 shadow-md" loading="lazy"`
+      }
+    )
+  }
+
+  const processedContent = processContentImages(post.content)
 
   return (
     <main className="min-h-screen">
@@ -130,12 +150,13 @@ export default async function BlogPostPage({
             fill
             className="object-cover"
             priority
+            sizes="100vw"
           />
         </div>
       </div>
 
       <article className="container mx-auto px-4 max-w-4xl prose prose-lg">
-        <div dangerouslySetInnerHTML={{ __html: post.content }} />
+        <div dangerouslySetInnerHTML={{ __html: processedContent }} />
       </article>
 
       <Footer />
