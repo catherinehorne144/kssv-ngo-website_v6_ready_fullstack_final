@@ -1,13 +1,13 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Navigation } from "@/components/navigation"
 import { Footer } from "@/components/footer"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
-import { Calendar, Clock, Tag, ArrowRight, Search, Sparkles, BookOpen, TrendingUp, Users, Filter } from "lucide-react"
+import { Calendar, Clock, Tag, ArrowRight, Search, Sparkles, Filter } from "lucide-react"
 import Link from "next/link"
 import type { BlogPost } from "@/lib/types/database"
 import Image from "next/image"
@@ -21,6 +21,16 @@ export default function BlogClientPage({ initialPosts }: BlogClientPageProps) {
   const [searchQuery, setSearchQuery] = useState("")
   const [showFilters, setShowFilters] = useState(false)
   const [blogPosts] = useState<BlogPost[]>(initialPosts)
+  const [isScrolled, setIsScrolled] = useState(false)
+
+  // Handle scroll for navigation
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 10)
+    }
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
   const categories = ["all", "Community Impact", "Success Stories", "Legal Aid", "Awareness", "News", "Programs"]
 
@@ -58,9 +68,73 @@ export default function BlogClientPage({ initialPosts }: BlogClientPageProps) {
     return colors[category as keyof typeof colors] || "from-primary to-accent-purple"
   }
 
+  // Custom Navigation Component for Blog Page
+  const BlogNavigation = () => {
+    return (
+      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        isScrolled 
+          ? 'bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-sm' 
+          : 'bg-transparent'
+      }`}>
+        <div className="container mx-auto px-4 lg:px-6">
+          <div className="flex items-center justify-between h-16">
+            {/* Logo */}
+            <Link 
+              href="/" 
+              className="flex items-center gap-2 font-serif text-xl font-bold text-foreground hover:text-primary transition-colors"
+            >
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent-purple flex items-center justify-center">
+                <span className="text-white font-bold text-sm">KS</span>
+              </div>
+              <span>KSSV</span>
+            </Link>
+
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center gap-1">
+              <NavLink href="/" label="Home" />
+              <NavLink href="/about" label="About" />
+              <NavLink href="/blog" label="Stories" active />
+              <NavLink href="/services" label="Services" />
+              <NavLink href="/get-involved" label="Get Involved" />
+              <Button 
+                size="sm" 
+                className="ml-2 bg-gradient-to-r from-primary to-accent-purple text-white hover:opacity-90"
+              >
+                Donate
+              </Button>
+            </div>
+
+            {/* Mobile Menu Button */}
+            <button className="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+              <div className="w-5 h-5 flex flex-col justify-center gap-1">
+                <span className="w-full h-0.5 bg-foreground rounded-full"></span>
+                <span className="w-full h-0.5 bg-foreground rounded-full"></span>
+                <span className="w-full h-0.5 bg-foreground rounded-full"></span>
+              </div>
+            </button>
+          </div>
+        </div>
+      </nav>
+    )
+  }
+
+  const NavLink = ({ href, label, active = false }: { href: string; label: string; active?: boolean }) => (
+    <Link
+      href={href}
+      className={`px-3 py-2 rounded-lg font-medium text-sm transition-all ${
+        active
+          ? 'text-primary bg-primary/10'
+          : 'text-foreground hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-800'
+      }`}
+    >
+      {label}
+    </Link>
+  )
+
   return (
     <main className="min-h-screen">
-      <Navigation />
+      {/* Use custom navigation for blog page */}
+      <BlogNavigation />
 
       {/* Hero Section - More Compact */}
       <section className="pt-24 pb-8 relative overflow-hidden">
@@ -157,7 +231,7 @@ export default function BlogClientPage({ initialPosts }: BlogClientPageProps) {
           {filteredPosts.length > 0 ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 max-w-7xl mx-auto">
               {filteredPosts.map((post) => (
-                <Link key={post.id} href={`/blog/${post.id}`}>
+                <Link key={post.id} href={`/blog/${post.id}`} className="block">
                   <Card className="group relative overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer h-full border border-border bg-card hover:-translate-y-0.5">
                     {/* Image Container */}
                     <div className="relative h-44 overflow-hidden">
