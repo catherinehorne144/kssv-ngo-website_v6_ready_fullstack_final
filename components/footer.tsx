@@ -15,10 +15,10 @@ export function Footer() {
   ]
 
   const socialLinks = [
-    { icon: Facebook, href: "https://facebook.com/karungusurvivors", label: "Facebook" },
-    { icon: Twitter, href: "https://twitter.com/karungusurvivors", label: "Twitter" },
-    { icon: Instagram, href: "https://instagram.com/karungusurvivors", label: "Instagram" },
-    { icon: Linkedin, href: "https://linkedin.com/company/karungusurvivors", label: "LinkedIn" },
+    { icon: Facebook, href: "https://www.facebook.com/share/19dKj3hVN6/", label: "Facebook" },
+    { icon: Twitter, href: "https://x.com/cbo_ssv?t=6jHOXKYINRjBxeeMYKablA&s=09", label: "Twitter" },
+    { icon: Instagram, href: "https://www.instagram.com/ssvcbo?igsh=YzljYTk1ODg3Zg==", label: "Instagram" },
+    { icon: Linkedin, href: "https://www.linkedin.com/in/karungu-ssv-cbo-71143437b?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app", label: "LinkedIn" },
   ]
 
   return (
