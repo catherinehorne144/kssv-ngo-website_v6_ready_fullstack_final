@@ -368,7 +368,7 @@ export default function BlogAdminPage() {
             data={posts}
             columns={columns}
             onView={viewPost}
-            onEdit={openEdit}
+            onCustomAction={openEdit}
             onDelete={openDelete}
           />
         )}
