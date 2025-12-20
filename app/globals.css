@@ -291,3 +291,47 @@
 [data-state="open"] {
   z-index: 100;
 }
+/* Add to your existing globals.css */
+.article-content {
+  @apply text-foreground;
+}
+
+.article-content h2 {
+  @apply font-serif text-2xl font-bold mt-10 mb-4 text-foreground;
+}
+
+.article-content h3 {
+  @apply font-sans text-xl font-semibold mt-8 mb-3 text-foreground;
+}
+
+.article-content p {
+  @apply my-4 leading-relaxed text-muted-foreground;
+}
+
+.article-content ul, .article-content ol {
+  @apply my-4 pl-6 space-y-2;
+}
+
+.article-content li {
+  @apply text-muted-foreground leading-relaxed;
+}
+
+.article-content a {
+  @apply text-primary underline hover:text-primary/80 transition-colors;
+}
+
+.article-content blockquote {
+  @apply border-l-4 border-primary pl-4 py-2 my-6 italic text-muted-foreground;
+}
+
+.article-content img {
+  @apply rounded-xl my-8 max-w-full h-auto shadow-md;
+}
+
+.article-content code {
+  @apply bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded text-sm font-mono;
+}
+
+.article-content pre {
+  @apply bg-gray-100 dark:bg-gray-800 p-4 rounded-lg my-6 overflow-x-auto;
+}
