@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Search, Eye, Trash2, CheckCircle, XCircle, Mail, Download, Plus } from "lucide-react"
+import { Search, Eye, Trash2, CheckCircle, XCircle, Mail, Download, Plus, Pencil } from "lucide-react"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { format } from "date-fns"
 
@@ -460,10 +460,10 @@ export function DataTable({
                                   onClick={() => onCustomAction(row)}
                                   className="text-purple-600 hover:text-purple-700 hover:bg-purple-50"
                                 >
-                                  <Plus size={16} />
+                                  <Pencil size={16} />
                                 </Button>
                               </TooltipTrigger>
-                              <TooltipContent>Custom Action</TooltipContent>
+                              <TooltipContent>Edit</TooltipContent>
                             </Tooltip>
                           )}
                           {onDelete && (
