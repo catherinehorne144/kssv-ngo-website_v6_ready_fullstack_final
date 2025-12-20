@@ -38,24 +38,23 @@ export default function BlogClientPage({ initialPosts }: BlogClientPageProps) {
     return date.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })
   }
 
-  // Helper function to get local image
- // CORRECT function for Supabase URLs
-const getImageUrl = (imagePath: string) => {
-  if (!imagePath) return "/placeholder.svg"
-  
-  // If it's already a full URL (starts with http), use it directly
-  if (imagePath.startsWith('http')) {
-    return imagePath
+  // FIXED: Proper image URL handling for Supabase
+  const getImageUrl = (imagePath: string) => {
+    if (!imagePath) return "/placeholder.svg"
+    
+    // If it's a full URL from Supabase (starts with http/https), use it directly
+    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+      return imagePath
+    }
+    
+    // If it's a local path starting with /, use it directly
+    if (imagePath.startsWith('/')) {
+      return imagePath
+    }
+    
+    // For backward compatibility with old local images
+    return `/blog-images/${imagePath}`
   }
-  
-  // If it's a local path starting with /, use it directly
-  if (imagePath.startsWith('/')) {
-    return imagePath
-  }
-  
-  // For old local blog-images, keep the path
-  return `/blog-images/${imagePath}`
-}
 
   return (
     <main className="min-h-screen">
@@ -189,7 +188,7 @@ const getImageUrl = (imagePath: string) => {
                     <div className="relative h-56 overflow-hidden">
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent z-10" />
                       <Image
-                        src={getLocalImage(post.image)}
+                        src={getImageUrl(post.image)}  {/* FIXED: Use getImageUrl */}
                         alt={post.title}
                         fill
                         className="object-cover group-hover:scale-110 transition-transform duration-700"
