@@ -210,7 +210,7 @@ export default async function BlogPostPage({
         <div className="container mx-auto px-4 lg:px-8 max-w-5xl -mt-10 relative z-20">
           <div className="relative h-[400px] md:h-[500px] rounded-2xl overflow-hidden shadow-2xl border-4 border-white dark:border-gray-800">
             <Image
-              src={getImageUrl(post.image)}  {/* FIXED: Use getImageUrl */}
+              src={getImageUrl(post.image)}
               alt={post.title}
               fill
               priority
@@ -325,7 +325,7 @@ export default async function BlogPostPage({
                     <div className="group bg-background rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden hover:-translate-y-2 cursor-pointer border border-gray-200 dark:border-gray-800">
                       <div className="relative h-48 overflow-hidden">
                         <Image
-                          src={getImageUrl(rp.image)}  {/* FIXED: Use getImageUrl */}
+                          src={getImageUrl(rp.image)}
                           alt={rp.title}
                           fill
                           className="object-cover group-hover:scale-110 transition-transform duration-700"
