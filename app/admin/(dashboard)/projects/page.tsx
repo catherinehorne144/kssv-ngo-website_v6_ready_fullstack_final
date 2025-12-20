@@ -1,8 +1,8 @@
-// app/admin/projects/page.tsx
 "use client"
-// ADD AT TOP with other imports
-import { createClient } from "@/lib/supabase/client"
-import { useEffect, useState } from "react"
+
+import { useEffect, useState, useRef } from "react"
+import { format } from "date-fns"
+import { Plus, Upload, X, Image as ImageIcon, Trash2, Pencil, Eye } from "lucide-react"
 import { AdminHeader } from "@/components/admin/header"
 import { DataTable } from "@/components/admin/data-table"
 import { Badge } from "@/components/ui/badge"
@@ -12,10 +12,9 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { createServerClientInstance } from "@/lib/supabase/server"
+import { createClient } from "@/lib/supabase/client"
+import { uploadProjectImage, deleteProjectImage } from "@/lib/upload"
 import type { Project } from "@/lib/types/database"
-import { Plus, Upload, X, Image as ImageIcon } from "lucide-react"
-import { format } from "date-fns"
 
 export default function ProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([])
@@ -24,7 +23,11 @@ export default function ProjectsPage() {
   const [isCreating, setIsCreating] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [imagePreview, setImagePreview] = useState<string>("")
+  const [uploadingImage, setUploadingImage] = useState(false)
   const supabase = createClient()
+
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null)
 
   const [formData, setFormData] = useState({
     title: "",
@@ -79,6 +82,7 @@ export default function ProjectsPage() {
       outcomes: [],
     })
     setImagePreview("")
+    setSelectedImageFile(null)
     setObjectiveInput("")
     setOutcomeInput("")
     setIsCreating(true)
@@ -101,12 +105,13 @@ export default function ProjectsPage() {
       outcomes: project.outcomes || [],
     })
     setImagePreview(project.image_url || "")
+    setSelectedImageFile(null)
     setSelectedProject(project)
     setIsEditing(true)
   }
 
-  // Handle local file upload
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  // Handle image file selection
+  const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (!file) return
 
@@ -122,28 +127,62 @@ export default function ProjectsPage() {
       return
     }
 
+    setSelectedImageFile(file)
+    
     // Create preview
-    const previewUrl = URL.createObjectURL(file)
-    setImagePreview(previewUrl)
-    
-    // For local development, we'll use the file name as the path
-    // In production, you'd upload this to your server
-    const fileName = `project-${Date.now()}-${file.name}`
-    const publicPath = `/images/projects/${fileName}`
-    
-    setFormData(prev => ({ ...prev, image_url: publicPath }))
+    const reader = new FileReader()
+    reader.onloadend = () => {
+      setImagePreview(reader.result as string)
+    }
+    reader.readAsDataURL(file)
   }
 
-  // Handle URL input
-  const handleUrlChange = (url: string) => {
-    setFormData(prev => ({ ...prev, image_url: url }))
-    setImagePreview(url)
+  // Upload image to Supabase
+  const uploadProjectImageHandler = async () => {
+    if (!selectedImageFile) {
+      alert('Please select an image first')
+      return
+    }
+
+    setUploadingImage(true)
+    
+    try {
+      const imageUrl = await uploadProjectImage(selectedImageFile)
+      
+      setFormData(prev => ({ 
+        ...prev, 
+        image_url: imageUrl
+      }))
+      
+      setImagePreview(imageUrl)
+      
+      // Clear file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ""
+      }
+      
+    } catch (error: any) {
+      console.error('Project image upload failed:', error)
+      alert(`Failed to upload image: ${error.message}`)
+      
+      setSelectedImageFile(null)
+      setImagePreview("")
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ""
+      }
+    } finally {
+      setUploadingImage(false)
+    }
   }
 
-  // Remove image
+  // Remove selected image
   const handleRemoveImage = () => {
-    setFormData(prev => ({ ...prev, image_url: "" }))
+    setSelectedImageFile(null)
     setImagePreview("")
+    setFormData(prev => ({ ...prev, image_url: "" }))
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ""
+    }
   }
 
   const addObjective = () => {
@@ -186,30 +225,60 @@ export default function ProjectsPage() {
       return
     }
 
+    // Upload image if new file is selected
+    let finalImageUrl = formData.image_url
+    
+    if (selectedImageFile && !uploadingImage) {
+      try {
+        setUploadingImage(true)
+        const uploadedUrl = await uploadProjectImage(selectedImageFile)
+        finalImageUrl = uploadedUrl
+      } catch (error: any) {
+        alert(`Failed to upload image: ${error.message}`)
+        setUploadingImage(false)
+        return
+      } finally {
+        setUploadingImage(false)
+      }
+    }
+
+    const projectData = {
+      title: formData.title,
+      description: formData.description,
+      full_description: formData.full_description || "",
+      category: formData.category,
+      status: formData.status,
+      progress: formData.progress,
+      location: formData.location || "",
+      beneficiaries: formData.beneficiaries,
+      start_date: formData.start_date || new Date().toISOString().split('T')[0],
+      end_date: formData.end_date || null,
+      image_url: finalImageUrl || "",
+      objectives: formData.objectives || [],
+      outcomes: formData.outcomes || [],
+    }
+
     try {
       if (isCreating) {
-        const { error } = await supabase.from("projects").insert({
-          ...formData,
-          date: new Date().toISOString(),
-        })
-
+        const { error } = await supabase.from("projects").insert(projectData)
         if (error) throw error
         fetchProjects()
         setIsCreating(false)
+        alert('Project created successfully!')
       } else if (isEditing && selectedProject) {
         const { error } = await supabase
           .from("projects")
-          .update(formData)
+          .update(projectData)
           .eq("id", selectedProject.id)
-
         if (error) throw error
         fetchProjects()
         setIsEditing(false)
         setSelectedProject(null)
+        alert('Project updated successfully!')
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error saving project:", error)
-      alert("Failed to save project")
+      alert(`Failed to save project: ${error.message}`)
     }
   }
 
@@ -222,10 +291,15 @@ export default function ProjectsPage() {
 
       if (!error) {
         fetchProjects()
+        alert('Project deleted successfully!')
       } else {
         alert("Failed to delete project")
       }
     }
+  }
+
+  const viewProject = (project: Project) => {
+    window.open(`/projects/${project.id}`, '_blank')
   }
 
   const columns = [
@@ -280,8 +354,8 @@ export default function ProjectsPage() {
           <DataTable
             data={projects}
             columns={columns}
-            onView={(project) => setSelectedProject(project)}
-            onEdit={handleEdit}
+            onView={viewProject}
+            onCustomAction={handleEdit}
             onDelete={handleDelete}
             searchPlaceholder="Search projects..."
           />
@@ -395,6 +469,7 @@ export default function ProjectsPage() {
           setIsEditing(false)
           setSelectedProject(null)
           setImagePreview("")
+          setSelectedImageFile(null)
         }}
       >
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
@@ -529,7 +604,7 @@ export default function ProjectsPage() {
               />
             </div>
 
-            {/* Enhanced Image Upload Section */}
+            {/* Project Image Upload */}
             <div className="space-y-4">
               <Label className="text-base font-medium">Project Image</Label>
               
@@ -553,58 +628,56 @@ export default function ProjectsPage() {
                     src={imagePreview || formData.image_url}
                     alt="Project preview"
                     className="w-full h-48 object-cover rounded-lg"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = "/placeholder.svg"
-                    }}
                   />
                 </div>
               )}
 
-              {/* Upload Options */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Local File Upload */}
-                <div className="space-y-2">
-                  <Label htmlFor="image-upload" className="flex items-center gap-2">
-                    <Upload size={16} />
-                    Upload from your device
-                  </Label>
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors">
-                    <Input
-                      id="image-upload"
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageUpload}
-                      className="hidden"
-                    />
-                    <Label 
-                      htmlFor="image-upload" 
-                      className="cursor-pointer flex flex-col items-center gap-2"
+              {/* Upload Section */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <Input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageSelect}
+                    className="flex-1"
+                  />
+                  
+                  {selectedImageFile && (
+                    <Button
+                      type="button"
+                      onClick={uploadProjectImageHandler}
+                      disabled={uploadingImage}
+                      className="gap-2"
                     >
-                      <ImageIcon size={24} className="text-muted-foreground" />
-                      <span className="text-sm font-medium">Click to upload</span>
-                      <span className="text-xs text-muted-foreground">
-                        PNG, JPG, GIF up to 5MB
-                      </span>
-                    </Label>
-                  </div>
+                      {uploadingImage ? (
+                        <>
+                          <span className="animate-spin">⟳</span>
+                          Uploading...
+                        </>
+                      ) : (
+                        <>
+                          <Upload size={16} />
+                          Upload
+                        </>
+                      )}
+                    </Button>
+                  )}
                 </div>
 
-                {/* URL Input */}
-                <div className="space-y-2">
-                  <Label htmlFor="image_url" className="flex items-center gap-2">
-                    <ImageIcon size={16} />
-                    Or use image URL
-                  </Label>
-                  <Input
-                    id="image_url"
-                    value={formData.image_url}
-                    onChange={(e) => handleUrlChange(e.target.value)}
-                    placeholder="https://example.com/image.jpg or /images/projects/photo.jpg"
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Enter full URL or path to image in public folder
+                {uploadingImage && (
+                  <p className="text-sm text-muted-foreground">
+                    Uploading project image...
                   </p>
-                </div>
+                )}
+
+                {!imagePreview && !formData.image_url && selectedImageFile && (
+                  <div className="p-4 border rounded-lg bg-yellow-50">
+                    <p className="text-sm text-yellow-800">
+                      Image selected but not uploaded yet. Click "Upload" to upload it.
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -669,8 +742,12 @@ export default function ProjectsPage() {
             </div>
 
             <div className="flex gap-2 pt-4 border-t">
-              <Button onClick={handleSave} className="flex-1">
-                {isCreating ? "Create Project" : "Save Changes"}
+              <Button 
+                onClick={handleSave} 
+                className="flex-1"
+                disabled={uploadingImage || !formData.title || !formData.description}
+              >
+                {uploadingImage ? "Uploading..." : (isCreating ? "Create Project" : "Save Changes")}
               </Button>
               <Button
                 onClick={() => {
@@ -678,6 +755,7 @@ export default function ProjectsPage() {
                   setIsEditing(false)
                   setSelectedProject(null)
                   setImagePreview("")
+                  setSelectedImageFile(null)
                 }}
                 variant="outline"
                 className="flex-1"
