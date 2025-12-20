@@ -18,7 +18,6 @@ export function Navigation() {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50)
     }
-
     window.addEventListener("scroll", handleScroll)
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
@@ -43,23 +42,19 @@ export function Navigation() {
 
   return (
     <>
+      {/* NAV BAR */}
       <nav
-        className={`fixed top-0 left-0 right-0 z-[9999] transition-all duration-300 ${
+        className={`fixed top-0 left-0 right-0 z-[10000] transition-all duration-300 ${
           isScrolled
             ? "bg-background/95 backdrop-blur-md shadow-lg border-b"
             : "bg-background/90 backdrop-blur-sm"
         }`}
-        style={{
-          transform: "translateZ(0)",
-          WebkitTransform: "translateZ(0)",
-          willChange: "transform",
-        }}
       >
         <div className="container mx-auto px-4 lg:px-8">
           <div className="flex items-center justify-between h-20">
             <Link href="/" className="flex items-center gap-3 group">
-              {/* LOGO */}
-              <div className="w-12 h-12 rounded-full overflow-hidden bg-background shadow-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+              {/* LOGO — ANDROID SAFE */}
+              <div className="relative w-12 h-12 rounded-full overflow-hidden bg-background shadow-lg flex items-center justify-center group-hover:scale-110 transition-transform">
                 <Image
                   src="/brand/kssv-icon.svg"
                   alt="KSSV Logo"
@@ -79,7 +74,7 @@ export function Navigation() {
               </div>
             </Link>
 
-            {/* Desktop Navigation */}
+            {/* DESKTOP NAV */}
             <div className="hidden lg:flex items-center gap-8">
               {navLinks.map((link) =>
                 link.type === "link" ? (
@@ -104,21 +99,22 @@ export function Navigation() {
 
             <div className="flex items-center gap-4">
               <ThemeToggle />
+
               <Button
                 onClick={() =>
                   pathname === "/"
                     ? smoothScrollTo("donate")
                     : (window.location.href = "/#donate")
                 }
-                className="font-accent font-semibold bg-gradient-to-r from-accent-coral to-accent-sunny hover:from-accent-coral/90 hover:to-accent-sunny/90 text-white shadow-lg hover:shadow-xl transition-all"
+                className="font-accent font-semibold bg-gradient-to-r from-accent-coral to-accent-sunny text-white shadow-lg"
               >
                 Donate
               </Button>
 
-              {/* Mobile Menu Toggle */}
+              {/* MOBILE TOGGLE */}
               <button
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="lg:hidden p-2 text-foreground hover:text-primary transition-colors"
+                onClick={() => setIsMobileMenuOpen((v) => !v)}
+                className="lg:hidden p-2 text-foreground"
                 aria-label="Toggle menu"
               >
                 {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -128,10 +124,10 @@ export function Navigation() {
         </div>
       </nav>
 
-      {/* Mobile Menu */}
+      {/* MOBILE MENU OVERLAY — ANDROID SAFE */}
       {isMobileMenuOpen && (
-        <div className="fixed inset-0 z-[9998] lg:hidden">
-          <div className="fixed inset-0 bg-background/95 backdrop-blur-md pt-20">
+        <div className="fixed inset-0 z-[9999] lg:hidden pointer-events-auto">
+          <div className="absolute inset-0 bg-background/95 backdrop-blur-md pt-20">
             <div className="container mx-auto px-4 py-8">
               <div className="flex flex-col gap-6">
                 {navLinks.map((link) =>
@@ -140,7 +136,7 @@ export function Navigation() {
                       key={link.href}
                       href={link.href}
                       onClick={() => setIsMobileMenuOpen(false)}
-                      className="text-xl font-medium text-foreground hover:text-primary transition-colors text-left"
+                      className="text-xl font-medium text-foreground"
                     >
                       {link.label}
                     </Link>
@@ -148,7 +144,7 @@ export function Navigation() {
                     <button
                       key={link.href}
                       onClick={() => handleNavClick(link.href, link.type)}
-                      className="text-xl font-medium text-foreground hover:text-primary transition-colors text-left"
+                      className="text-xl font-medium text-foreground text-left"
                     >
                       {link.label}
                     </button>
