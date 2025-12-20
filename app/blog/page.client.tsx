@@ -188,7 +188,7 @@ export default function BlogClientPage({ initialPosts }: BlogClientPageProps) {
                     <div className="relative h-56 overflow-hidden">
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent z-10" />
                       <Image
-                        src={getImageUrl(post.image)}  {/* FIXED: Use getImageUrl */}
+                        src={getImageUrl(post.image)}
                         alt={post.title}
                         fill
                         className="object-cover group-hover:scale-110 transition-transform duration-700"
