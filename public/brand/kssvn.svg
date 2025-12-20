@@ -1,1 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg
+  width="512"
+  height="512"
+  viewBox="0 0 512 512"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+  role="img"
+  aria-label="KSSV icon"
+>
+  <!-- Gradient definition -->
+  <defs>
+    <linearGradient id="kssvGradient" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#6B4EFF"/>
+      <stop offset="100%" stop-color="#FF8A3D"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Hand symbol (abstract, non-generic, non-sports) -->
+  <path
+    d="M256 72
+       C230 72 212 92 212 118
+       V258
+       L182 230
+       C166 214 140 214 124 230
+       C108 246 108 272 124 288
+       L206 370
+       C226 390 254 404 284 404
+       H320
+       C368 404 408 364 408 316
+       V154
+       C408 130 390 112 366 112
+       C352 112 340 118 332 128
+       C326 104 304 88 280 88
+       C262 88 246 98 238 112
+       C232 90 216 72 256 72
+       Z"
+    fill="url(#kssvGradient)"
+  />
+
+  <!-- Inner palm highlight (subtle identity detail) -->
+  <path
+    d="M260 150
+       C244 150 234 166 234 182
+       V256
+       C234 272 244 288 260 288
+       C276 288 286 272 286 256
+       V182
+       C286 166 276 150 260 150
+       Z"
+    fill="white"
+    opacity="0.12"
+  />
+</svg>
 
