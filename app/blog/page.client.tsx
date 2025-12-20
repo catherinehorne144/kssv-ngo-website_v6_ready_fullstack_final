@@ -39,13 +39,23 @@ export default function BlogClientPage({ initialPosts }: BlogClientPageProps) {
   }
 
   // Helper function to get local image
-  const getLocalImage = (imagePath: string) => {
-    if (!imagePath) return "/placeholder.svg"
-    // If it's already a local path starting with /, use it directly
-    if (imagePath.startsWith("/")) return imagePath
-    // Otherwise, assume it's in the blog-images folder
-    return `/blog-images/${imagePath}`
+ // CORRECT function for Supabase URLs
+const getImageUrl = (imagePath: string) => {
+  if (!imagePath) return "/placeholder.svg"
+  
+  // If it's already a full URL (starts with http), use it directly
+  if (imagePath.startsWith('http')) {
+    return imagePath
   }
+  
+  // If it's a local path starting with /, use it directly
+  if (imagePath.startsWith('/')) {
+    return imagePath
+  }
+  
+  // For old local blog-images, keep the path
+  return `/blog-images/${imagePath}`
+}
 
   return (
     <main className="min-h-screen">
