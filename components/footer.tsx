@@ -3,6 +3,7 @@
 import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MapPin } from "lucide-react"
 import { smoothScrollTo } from "@/lib/scroll-reveal"
 import Link from "next/link"
+import Image from "next/image"
 
 export function Footer() {
   const quickLinks = [
@@ -25,11 +26,17 @@ export function Footer() {
     <footer className="bg-foreground text-background">
       <div className="container mx-auto px-4 lg:px-8 py-12 lg:py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
-          {/* Brand */}
+          {/* Brand - Updated with SVG Logo */}
           <div className="space-y-4">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-serif text-xl font-bold">
-                K
+              <div className="w-12 h-12 relative">
+                <Image
+                  src="/brand/kssv-icon.svg"
+                  alt="KSSV Logo"
+                  fill
+                  className="object-contain"
+                  priority
+                />
               </div>
               <div>
                 <div className="font-serif text-lg font-bold">KSSV</div>
