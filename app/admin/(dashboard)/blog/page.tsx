@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import dynamic from "next/dynamic"
 import { format } from "date-fns"
 import { Plus } from "lucide-react"
@@ -46,6 +46,9 @@ export default function BlogAdminPage() {
 
   const [tagInput, setTagInput] = useState("")
   const [uploadingCover, setUploadingCover] = useState(false)
+
+  // Add ref for file input to clear it
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [form, setForm] = useState({
     id: "",
@@ -101,6 +104,10 @@ export default function BlogAdminPage() {
       status: "draft",
     })
     setTagInput("")
+    // Clear file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ""
+    }
   }
 
   function openCreate() {
@@ -128,18 +135,31 @@ export default function BlogAdminPage() {
     setOpenEditor(true)
   }
 
+  // FIXED: Now sets both image and imagePath
   async function handleCoverUpload(file: File) {
-  try {
-    setUploadingCover(true)
-    const imageUrl = await uploadBlogImage(file)
-    setForm((f) => ({ ...f, image: imageUrl }))
-  } catch (e) {
-    console.error(e)
-    alert("Cover image upload failed")
-  } finally {
-    setUploadingCover(false)
+    try {
+      setUploadingCover(true)
+      const imageUrl = await uploadBlogImage(file)
+      
+      // Set BOTH image and imagePath for consistency
+      setForm((f) => ({ 
+        ...f, 
+        image: imageUrl,
+        imagePath: imageUrl
+      }))
+      
+      // Clear file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ""
+      }
+    } catch (e: any) {
+      console.error(e)
+      // Show actual error message
+      alert(`Cover image upload failed: ${e.message}`)
+    } finally {
+      setUploadingCover(false)
+    }
   }
-}
 
   async function savePost() {
     if (!form.title || !form.content) {
@@ -147,6 +167,7 @@ export default function BlogAdminPage() {
       return
     }
 
+    // FIXED: Use form.image directly (since we set both fields)
     const payload = {
       title: form.title,
       excerpt:
@@ -158,7 +179,7 @@ export default function BlogAdminPage() {
       author: form.author,
       date: new Date(form.date).toISOString(),
       read_time: form.read_time,
-      image: form.imagePath || form.image || null,
+      image: form.image || null, // Use form.image directly
       status: form.status,
     }
 
@@ -274,12 +295,17 @@ export default function BlogAdminPage() {
 
             <Label>Cover Image</Label>
             <div className="space-y-2">
+              {/* Add ref to file input */}
               <Input
+                ref={fileInputRef}
                 type="file"
                 accept="image/*"
-                onChange={(e) =>
-                  e.target.files && handleCoverUpload(e.target.files[0])
-                }
+                onChange={(e) => {
+                  const file = e.target.files?.[0]
+                  if (file) {
+                    handleCoverUpload(file)
+                  }
+                }}
               />
 
               {uploadingCover && (
