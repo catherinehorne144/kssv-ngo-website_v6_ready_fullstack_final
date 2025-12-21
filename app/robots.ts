@@ -7,10 +7,10 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: "*",
-        allow: "/",
-        disallow: ["/api/", "/admin/"],
+        allow: "/", // allow public pages
+        disallow: ["/api/", "/admin/", "/login", "/dashboard"], // block private/admin pages
       },
     ],
-    sitemap: `${baseUrl}/sitemap.xml`,
+    sitemap: `${baseUrl}/sitemap.xml`, // ensure this file lists all pages & blog posts
   }
 }
