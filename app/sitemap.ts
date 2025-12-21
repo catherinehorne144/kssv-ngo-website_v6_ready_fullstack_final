@@ -24,15 +24,63 @@ export default function sitemap(): MetadataRoute.Sitemap {
     // Blog overview
     { url: `${baseUrl}/blog`, lastModified: now, changeFrequency: "daily", priority: 0.8 },
 
-    // Blog posts
-    { url: `${baseUrl}/blog/survivor-dignity-and-empowerment`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
-    { url: `${baseUrl}/blog/why-volunteer-and-donation-engagement-matters-for-community-change`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
-    { url: `${baseUrl}/blog/myths-and-facts-about-sexual-violence-in-rural-kenya`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
-    { url: `${baseUrl}/blog/gbv-gender-based-violence-what-it-is-and-why-we-must-talk-about-it`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
-    { url: `${baseUrl}/blog/mental-health-in-kenya-understanding-support-and-hope`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
-    { url: `${baseUrl}/blog/healing-and-justice-supporting-survivors-of-sexual-violence-in-karungu`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
-    { url: `${baseUrl}/blog/from-survivor-to-entrepreneur-marys-journey`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
-    { url: `${baseUrl}/blog/community-dialogues-bring-positive-change`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
+    // Blog posts with featured images
+    {
+      url: `${baseUrl}/blog/survivor-dignity-and-empowerment`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.6,
+      images: [{ url: `${baseUrl}/blog-images/survivor-dignity.jpg`, caption: "Survivor Dignity and Empowerment" }],
+    },
+    {
+      url: `${baseUrl}/blog/why-volunteer-and-donation-engagement-matters-for-community-change`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.6,
+      images: [{ url: `${baseUrl}/blog-images/volunteer-donation.jpg`, caption: "Volunteer & Donation Engagement" }],
+    },
+    {
+      url: `${baseUrl}/blog/myths-and-facts-about-sexual-violence-in-rural-kenya`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.6,
+      images: [{ url: `${baseUrl}/blog-images/myths-facts-sexual-violence.jpg`, caption: "Myths and Facts About Sexual Violence" }],
+    },
+    {
+      url: `${baseUrl}/blog/gbv-gender-based-violence-what-it-is-and-why-we-must-talk-about-it`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.6,
+      images: [{ url: `${baseUrl}/blog-images/gbv-explained.jpg`, caption: "Gender-Based Violence Explained" }],
+    },
+    {
+      url: `${baseUrl}/blog/mental-health-in-kenya-understanding-support-and-hope`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.6,
+      images: [{ url: `${baseUrl}/blog-images/mental-health-kenya.jpg`, caption: "Mental Health in Kenya" }],
+    },
+    {
+      url: `${baseUrl}/blog/healing-and-justice-supporting-survivors-of-sexual-violence-in-karungu`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.6,
+      images: [{ url: `${baseUrl}/blog-images/healing-justice-karungu.jpg`, caption: "Healing and Justice" }],
+    },
+    {
+      url: `${baseUrl}/blog/from-survivor-to-entrepreneur-marys-journey`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.6,
+      images: [{ url: `${baseUrl}/blog-images/marys-journey.jpg`, caption: "Mary's Journey" }],
+    },
+    {
+      url: `${baseUrl}/blog/community-dialogues-bring-positive-change`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.6,
+      images: [{ url: `${baseUrl}/blog-images/community-dialogues.jpg`, caption: "Community Dialogues" }],
+    },
 
     // Policy pages
     { url: `${baseUrl}/privacy-policy`, lastModified: now, changeFrequency: "yearly", priority: 0.5 },
