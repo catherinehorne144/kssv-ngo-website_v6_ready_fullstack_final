@@ -16,6 +16,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${baseUrl}/donate`, lastModified: now, changeFrequency: "yearly", priority: 0.7 },
     { url: `${baseUrl}/get-involved`, lastModified: now, changeFrequency: "yearly", priority: 0.7 },
 
+    // Get Involved subpages
+    { url: `${baseUrl}/get-involved/volunteer`, lastModified: now, changeFrequency: "yearly", priority: 0.6 },
+    { url: `${baseUrl}/get-involved/become-member`, lastModified: now, changeFrequency: "yearly", priority: 0.6 },
+    { url: `${baseUrl}/get-involved/partner`, lastModified: now, changeFrequency: "yearly", priority: 0.6 },
+
     // Blog overview
     { url: `${baseUrl}/blog`, lastModified: now, changeFrequency: "daily", priority: 0.8 },
 
@@ -28,5 +33,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${baseUrl}/blog/healing-and-justice-supporting-survivors-of-sexual-violence-in-karungu`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
     { url: `${baseUrl}/blog/from-survivor-to-entrepreneur-marys-journey`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
     { url: `${baseUrl}/blog/community-dialogues-bring-positive-change`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
+
+    // Policy pages
+    { url: `${baseUrl}/privacy-policy`, lastModified: now, changeFrequency: "yearly", priority: 0.5 },
+    { url: `${baseUrl}/terms-of-service`, lastModified: now, changeFrequency: "yearly", priority: 0.5 },
   ]
 }
